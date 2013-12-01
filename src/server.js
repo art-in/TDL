@@ -14,7 +14,6 @@ http.createServer(function(request, response) {
     console.log("Request for: " + request.url);
 
     var requestPath = url.parse(request.url).pathname;
-    var requestQuery = url.parse(request.url).query;
 
     // Request routing.
     switch(requestPath)

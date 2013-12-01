@@ -1,0 +1,62 @@
+body {
+    font-family: monospace;
+}
+
+.main {
+    border: 1px solid lightgray;
+    width: 900px;
+    margin: 0 auto;
+    padding: 5px;
+}
+
+.new-task {
+    border: 1px solid #ffb6c1;
+    margin-bottom: 5px;
+}
+
+.new-task-input {
+    border: 1px solid red;
+    padding: 5px;
+    margin-bottom: 5px;
+    font-size: 22px;
+}
+
+.add-new-task-button {
+    border: 1px solid blue;
+    float: right;
+    width: 100px;
+    text-align: center;
+}
+
+.clearfix:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+.task-list {
+    border: 1px solid lightgreen;
+}
+
+.task {
+    border: 1px solid blue;
+}
+
+.task-description {
+    border: 1px solid lightblue;
+    float: left;
+    width: 85%;
+    font-size: 22px;
+}
+
+.task-remove {
+    border: 1px solid gray;
+    float: right;
+    width: 100px;
+    text-align: center;
+}
+
+.task + .task {
+    /* Little space between task containers in the list. */
+    margin-top: 5px;
+}
