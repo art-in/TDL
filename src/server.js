@@ -5,15 +5,19 @@ var http = require('http');
 var url = require("url");
 var path = require('path');
 var fs = require('fs');
+var qs = require('./lib/node_modules/qs');
+
+var service = require('./business/BusinessService.js');
 
 var port = '80';
 
 var address = '127.0.0.1';
 
 http.createServer(function(request, response) {
-    console.log("Request for: " + request.url);
+    console.log("==> " + request.url);
 
     var requestPath = url.parse(request.url).pathname;
+    var requestQuery = url.parse(request.url).query;
 
     // Request routing.
     switch(requestPath)
@@ -26,12 +30,14 @@ http.createServer(function(request, response) {
             break;
 
         case '/styles.css':
+            // TODO: Send ContentType info in response.
             fs.readFile(path.join(__dirname, 'presentation/styles/styles.css'),
                 function(err, data){ response.end(data);}
             );
             break;
 
         case '/client.js':
+            // TODO: Send ContentType info in response.
             fs.readFile(path.join(__dirname, 'presentation/scripts/client.js'),
                 function(err, data){ response.end(data);}
             );
@@ -40,6 +46,26 @@ http.createServer(function(request, response) {
         // TODO: Add favicon.ico to static response.
 
         // -------------------- API ---------------------
+        case '/api/addTask':
+            //noinspection JSUnresolvedVariable
+            var description = qs.parse(requestQuery).description;
+
+            service.addTask(description);
+            response.end();
+            break;
+
+        case '/api/deleteTask':
+            //noinspection JSUnresolvedVariable
+            var taskId = qs.parse(requestQuery).taskId;
+
+            service.deleteTask(taskId);
+            response.end();
+            break;
+
+        case '/api/getTasks':
+            var tasks = service.getTasks();
+            response.end(JSON.stringify(tasks));
+            break;
 
         default:
             response.end("NO HANDLER.");
