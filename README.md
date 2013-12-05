@@ -11,6 +11,7 @@ ToDo List (TDL)
 * support task reordering.
 * support ability to set custom color marker for each task, for visual differentiating of task kind.
 * support subtasking.
+* support task progress. Since you want to indicate that something still going on for the task.
 * support projects. TDL not only set of hanging tasks to do today or tomorrow, but also set of your long term internal projects for months, years, your entire live purposes (like, sport, js skills, music, etc.).
 * support ability to set estimation time for the task and actual time required to perform it.
 * support history of completed tasks.
