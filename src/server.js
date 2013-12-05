@@ -13,33 +13,38 @@ var port = '80';
 
 var address = '127.0.0.1';
 
-http.createServer(function(request, response) {
+http.createServer(function (request, response) {
     console.log("==> " + request.url);
 
     var requestPath = url.parse(request.url).pathname;
     var requestQuery = url.parse(request.url).query;
 
     // Request routing.
-    switch(requestPath)
-    {
+    switch (requestPath) {
         // -------------------- STATIC ---------------------
         case '/':
             fs.readFile(path.join(__dirname, 'presentation/views/index.html'),
-                function(err, data){ response.end(data);}
+                function (err, data) {
+                    response.end(data);
+                }
             );
             break;
 
         case '/styles.css':
             // TODO: Send ContentType info in response.
             fs.readFile(path.join(__dirname, 'presentation/styles/styles.css'),
-                function(err, data){ response.end(data);}
+                function (err, data) {
+                    response.end(data);
+                }
             );
             break;
 
         case '/client.js':
             // TODO: Send ContentType info in response.
             fs.readFile(path.join(__dirname, 'presentation/scripts/client.js'),
-                function(err, data){ response.end(data);}
+                function (err, data) {
+                    response.end(data);
+                }
             );
             break;
 
@@ -50,21 +55,26 @@ http.createServer(function(request, response) {
             //noinspection JSUnresolvedVariable
             var description = qs.parse(requestQuery).description;
 
-            service.addTask(description);
-            response.end();
+            service.addTask(description, function () {
+                response.end();
+            });
             break;
 
         case '/api/deleteTask':
             //noinspection JSUnresolvedVariable
             var taskId = qs.parse(requestQuery).taskId;
 
-            service.deleteTask(taskId);
-            response.end();
+            service.deleteTask(taskId, function () {
+                response.end();
+            });
+
             break;
 
         case '/api/getTasks':
-            var tasks = service.getTasks();
-            response.end(JSON.stringify(tasks));
+            service.getTasks(function (tasks) {
+                response.end(JSON.stringify(tasks));
+            });
+
             break;
 
         default:

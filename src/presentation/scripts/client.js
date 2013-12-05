@@ -32,9 +32,6 @@ function btnAddNewTask_OnClick() {
 function btnRemoveTask_OnClick(taskId) {
     deleteTask(taskId);
 }
-
-// TODO: remove button handler.
-
 // ---------------------  FUNCTIONS -------------------------------------------
 function addNewTask(description) {
     logFunctionCall();
@@ -69,7 +66,7 @@ function refreshTaskList() {
         var tasks = JSON.parse(data);
         for (var i = 0; i < tasks.length; i++) {
             var taskInstance = TaskTemplate.cloneNode(true);
-            taskInstance.id = "task_" + tasks[i].Id;
+            taskInstance.id = "task_" + tasks[i]._id;
 
             var taskDescription = taskInstance.getElementsByClassName('task-description')[0];
             taskDescription.innerHTML = tasks[i].Description;
@@ -77,7 +74,7 @@ function refreshTaskList() {
             var removeButton = taskInstance.getElementsByClassName('task-remove')[0];
             // Set handler argument through closure.
             removeButton.onclick = (function () {
-                var taskId = tasks[i].Id;
+                var taskId = tasks[i]._id;
                 return function () {
                     btnRemoveTask_OnClick(taskId);
                 }

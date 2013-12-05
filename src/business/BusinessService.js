@@ -3,20 +3,20 @@ var taskManager = require('./TaskManager.js');
 //----------------------------------------------------
 // Returns list of task currently exist in the system.
 //----------------------------------------------------
-exports.getTasks = function () {
-    return taskManager.getTasks();
+exports.getTasks = function (callback) {
+    return taskManager.getTasks(callback);
 }
 
 //----------------------------------------------------
 // Adds new task to the system.
 //----------------------------------------------------
-exports.addTask = function (description) {
-    taskManager.addTask(description);
+exports.addTask = function (description, callback) {
+    taskManager.addTask(description, callback);
 }
 
 //----------------------------------------------------
 // Deletes task from the system.
 //----------------------------------------------------
-exports.deleteTask = function (taskId) {
-    taskManager.deleteTask(taskId);
+exports.deleteTask = function (taskId, callback) {
+    taskManager.deleteTask(taskId, callback);
 }

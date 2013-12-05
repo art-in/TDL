@@ -1,4 +1,3 @@
-exports.Task = function Task(id, description) {
-    this.Id = id;
+exports.Task = function Task(description) {
     this.Description = description;
 }
