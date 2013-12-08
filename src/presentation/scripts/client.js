@@ -183,7 +183,7 @@ function callServerAPI(apiMethod, parameters, callback) {
     if (parameters) {
         datasourceAddress += "?";
         for (var i = 0; i < parameters.length; i++) {
-            datasourceAddress += parameters[i].key + "=" + parameters[i].value;
+            datasourceAddress += parameters[i].key + "=" + encodeURIComponent(parameters[i].value);
 
             if (i != parameters.length - 1) {
                 datasourceAddress += "&";
