@@ -8,6 +8,7 @@ ToDo List (TDL)
 **ToDo for TDL:**
 
 * support mobile devices. TDL should go very fast on android devices.
+* support task editing. In case you want to correct something in the description.
 * support task reordering.
 * support ability to set custom color marker for each task, for visual differentiating of task kind.
 * support subtasking.
