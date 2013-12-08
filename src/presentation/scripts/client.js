@@ -21,24 +21,40 @@ function installControlHandlers() {
     NewTaskTextBox = document.getElementById("tbNewTask");
     TaskTemplate = document.getElementById("tmpTask");
     TaskListContainer = document.getElementById("cntTaskList");
+
+    NewTaskTextBox.onkeydown = NewTaskTextBox_KeyDown;
 }
 
 // ---------------------  HANDLERS  -------------------------------------------
 function btnAddNewTask_OnClick() {
     var description = NewTaskTextBox.innerHTML;
     addNewTask(description);
+    refreshNewTaskField();
 }
 
 function btnRemoveTask_OnClick(taskId) {
     deleteTask(taskId);
+}
+
+function NewTaskTextBox_KeyDown(e) {
+
+    // 'Return' key handler.
+    if (e.keyCode == 13 && !e.ctrlKey) {
+        // Behave the same as on 'add' button click.
+        btnAddNewTask_OnClick();
+    }
+
+    // 'Return + CTRL' keys handler.
+    if (e.keyCode == 13 && e.ctrlKey) {
+        addNewLine(NewTaskTextBox);
+    }
 }
 // ---------------------  FUNCTIONS -------------------------------------------
 function addNewTask(description) {
     logFunctionCall();
 
     // Validate new task.
-    if (!description)
-    {
+    if (!description) {
         alert("Description is empty.");
         return;
     }
@@ -48,7 +64,6 @@ function addNewTask(description) {
         {key: 'description', value: description}
     ];
     callServerAPI(API_ADD_TASK, parameters, function () {
-        refreshNewTaskField();
         refreshTaskList();
     });
 }
@@ -94,7 +109,7 @@ function refreshTaskList() {
     });
 }
 
-function refreshNewTaskField(){
+function refreshNewTaskField() {
     logFunctionCall();
     NewTaskTextBox.innerHTML = '';
 }
@@ -132,6 +147,33 @@ function clearNode(node) {
     }
 }
 
+function addNewLine(node) {
+    // Adding two br-tags, in chrome it works like:
+    // first intended to finish current line, second - to initiate new line.
+    // When start typing, second br-tag will be replaced with entered text.
+    node.innerHTML += "<br><br>";
+    placeCaretAtEnd(node);
+}
+
+function placeCaretAtEnd(el) {
+    // Solution for content editable divs from here:
+    // http://stackoverflow.com/questions/4233265/contenteditable-set-caret-at-the-end-of-the-text-cross-browser
+    el.focus();
+    if (typeof window.getSelection != "undefined"
+        && typeof document.createRange != "undefined") {
+        var range = document.createRange();
+        range.selectNodeContents(el);
+        range.collapse(false);
+        var sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+    } else if (typeof document.body.createTextRange != "undefined") {
+        var textRange = document.body.createTextRange();
+        textRange.moveToElementText(el);
+        textRange.collapse(false);
+        textRange.select();
+    }
+}
 // ---------------------  TRANSPORT  -------------------------------------------
 function callServerAPI(apiMethod, parameters, callback) {
     logFunctionCall();
