@@ -40,7 +40,8 @@ function addNewTask(description) {
         {key: 'description', value: description}
     ];
     callServerAPI(API_ADD_TASK, parameters, function () {
-        refreshTaskList()
+        refreshNewTaskField();
+        refreshTaskList();
     });
 }
 
@@ -83,6 +84,11 @@ function refreshTaskList() {
             TaskListContainer.appendChild(taskInstance);
         }
     });
+}
+
+function refreshNewTaskField(){
+    logFunctionCall();
+    NewTaskTextBox.innerHTML = '';
 }
 // ---------------------  HELPERS -------------------------------------------
 function logFunctionCall() {
