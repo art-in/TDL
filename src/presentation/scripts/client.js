@@ -36,6 +36,14 @@ function btnRemoveTask_OnClick(taskId) {
 function addNewTask(description) {
     logFunctionCall();
 
+    // Validate new task.
+    if (!description)
+    {
+        alert("Description is empty.");
+        return;
+    }
+
+    // Pass to server.
     var parameters = [
         {key: 'description', value: description}
     ];
