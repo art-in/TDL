@@ -2,7 +2,24 @@
 <html>
 <head>
     <title>TDL</title>
-    <link rel="stylesheet" type="text/css" href="styles.css">
+
+    <!-- CSS media queries -->
+    <!-- First rule in each link defines target device, second - desktop in different sizing. -->
+
+    <!-- Smartphone styles: -->
+    <link rel="stylesheet" media="(max-device-width: 900px),
+                                  (min-device-width: 1000px) and (max-width: 900px)"
+          type="text/css" href="styles-smart.css">
+
+    <!-- Tablet styles: -->
+    <link rel="stylesheet" media="(min-device-width: 900px) and (max-device-width: 1000px),
+                                  (min-device-width: 1000px) and (min-width: 900px) and (max-width: 1000px)"
+          type="text/css" href="styles-tablet.css">
+
+    <!-- Desktop styles: -->
+    <link rel="stylesheet" media="(min-device-width: 1000px) and (min-width: 1000px)"
+          type="text/css" href="styles.css">
+
     <script language="javascript" type="text/javascript" src="client.js"></script>
 </head>
 <body>
@@ -16,7 +33,7 @@
 
     <div id="cntTaskList" class="task-list">
         <div style="display: none">
-            <div id="tmpTask" class="task clearfix"> <!-- This container is going to be a task template. -->
+            <div id="tmpTask" class="task clearfix"> <!-- Task container template. -->
                 <div class="task-description">
                     <!--task description-->
                 </div>
@@ -28,5 +45,7 @@
     </div>
 
 </div>
+
+<div class="screen-type"></div>
 </body>
 </html>
