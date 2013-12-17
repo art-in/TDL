@@ -1,17 +1,34 @@
+* {
+    box-sizing: border-box;
+}
+
 body {
     font-family: monospace;
+    display: flex;
+    justify-content: center;
 }
+
+.screen-type:before {
+     position: fixed;
+     right: 0;
+     top: 0;
+     color: red;
+     content: 'D'; /* Desktop */
+ }
 
 .main {
     border: 1px solid lightgray;
     width: 900px;
-    margin: 0 auto;
     padding: 5px;
+    display: flex;
+    flex-direction: column;
 }
 
 .new-task {
     border: 1px solid #ffb6c1;
     margin-bottom: 5px;
+    display: flex;
+    flex-direction: column;
 }
 
 .new-task-input {
@@ -23,40 +40,34 @@ body {
 
 .add-new-task-button {
     border: 1px solid blue;
-    float: right;
     width: 100px;
     text-align: center;
-}
-
-.clearfix:after {
-    content: "";
-    display: table;
-    clear: both;
+    align-self: flex-end;
 }
 
 .task-list {
     border: 1px solid lightgreen;
+    display: flex;
+    flex-direction: column;
 }
 
 .task {
     border: 1px solid blue;
+    margin-top: 5px;
+    display: flex;
+    flex-direction: row;
 }
 
 .task-description {
     border: 1px solid lightblue;
-    float: left;
-    width: 85%;
     font-size: 22px;
+    flex: 8;
 }
 
 .task-remove {
     border: 1px solid gray;
-    float: right;
-    width: 100px;
-    text-align: center;
-}
-
-.task + .task {
-    /* Little space between task containers in the list. */
-    margin-top: 5px;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
