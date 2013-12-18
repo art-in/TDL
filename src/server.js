@@ -39,6 +39,24 @@ http.createServer(function (request, response) {
             );
             break;
 
+        case '/styles-tablet.css':
+            // TODO: Send ContentType info in response.
+            fs.readFile(path.join(__dirname, 'presentation/styles/styles-tablet.css'),
+                function (err, data) {
+                    response.end(data);
+                }
+            );
+            break;
+
+        case '/styles-smart.css':
+            // TODO: Send ContentType info in response.
+            fs.readFile(path.join(__dirname, 'presentation/styles/styles-smart.css'),
+                function (err, data) {
+                    response.end(data);
+                }
+            );
+            break;
+
         case '/client.js':
             // TODO: Send ContentType info in response.
             fs.readFile(path.join(__dirname, 'presentation/scripts/client.js'),

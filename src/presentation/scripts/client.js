@@ -95,7 +95,7 @@ function refreshTaskList() {
             var taskDescription = taskInstance.getElementsByClassName('task-description')[0];
             taskDescription.innerHTML = tasks[i].Description;
 
-            var removeButton = taskInstance.getElementsByClassName('task-remove')[0];
+            var removeButton = taskInstance.getElementsByClassName('task-remove-button')[0];
             // Set handler argument through closure.
             removeButton.onclick = (function () {
                 var taskId = tasks[i]._id;
