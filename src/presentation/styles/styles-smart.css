@@ -6,20 +6,20 @@ body {
     font-family: monospace;
     display: flex;
     justify-content: center;
+    flex-direction: column;
+    align-items: stretch;
 }
 
 .screen-type:before {
-     position: fixed;
-     right: 0;
-     top: 0;
-     color: red;
-     content: 'D'; /* Desktop */
- }
+    position: fixed;
+    right: 0;
+    top: 0;
+    color: red;
+    content: 'S'; /* Smartphone */
+}
 
 .main {
     border: 1px solid lightgray;
-    width: 900px;
-    padding: 5px;
     display: flex;
     flex-direction: column;
 }
@@ -28,23 +28,28 @@ body {
     border: 1px solid #ffb6c1;
     margin-bottom: 5px;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
 }
 
 .new-task-input {
     border: 1px solid red;
-    padding: 5px;
-    font-size: 22px;
+    padding: 15px;
+    font-size: 35px;
+    flex: 8;
 }
 
 .add-new-task-button {
     border: 1px solid blue;
     width: 100px;
-    text-align: center;
-    align-self: flex-end;
     display: flex;
-    flex-direction: row;
     align-items: center;
+    justify-content: center;
+    flex: 1;
+    min-width: 80px;
+}
+
+.add-new-task-button-label {
+    display: none;
 }
 
 .add-new-task-button-image {
@@ -52,12 +57,7 @@ body {
     background-image: url("/images/add.png");
     width: 26px;
     height: 26px;
-    max-width: 26px;
-    flex: 1;
-}
-
-.add-new-task-button-label {
-    flex: 1;
+    max-width: inherit;
 }
 
 .task-list {
@@ -71,12 +71,16 @@ body {
     margin-top: 5px;
     display: flex;
     flex-direction: row;
+    min-height: 100px;
 }
 
 .task-description {
     border: 1px solid lightblue;
-    font-size: 22px;
+    font-size: 35px;
+    padding: 15px;
     flex: 8;
+    display: flex;
+    align-items: center;
 }
 
 .task-remove-button {
@@ -84,7 +88,12 @@ body {
     flex: 1;
     display: flex;
     align-items: center;
-    text-align: center;
+    justify-content: center;
+    min-width: 80px;
+}
+
+.task-remove-button-label {
+    display: none;
 }
 
 .task-remove-button-image {
@@ -92,10 +101,39 @@ body {
     background-image: url("/images/remove.png");
     width: 26px;
     height: 26px;
-    max-width: 26px;
-    flex: 1;
+    max-width: inherit;
 }
 
-.task-remove-button-label {
-    flex: 1;
+@media (orientation:portrait) {
+    .screen-type:before {
+        content: 'SP'; /* Smartphone Portrait */
+    }
+
+    .main{
+        width: 960px;
+    }
+
+    .new-task {
+        min-height: 100px;
+    }
+
+    .new-task-input {
+        font-size: 55px;
+    }
+
+    .task {
+        min-height: 200px;
+    }
+
+    .task-description {
+        font-size: 55px;
+    }
+
+    .add-new-task-button {
+        min-width: 150px;
+    }
+
+    .task-remove-button {
+        min-width: 150px;
+    }
 }

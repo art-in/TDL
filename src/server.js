@@ -23,12 +23,12 @@ http.createServer(function (request, response) {
     switch (requestPath) {
         // -------------------- STATIC ---------------------
         case '/':
-            fs.readFile(path.join(__dirname, 'presentation/views/index.html'),
-                function (err, data) {
-                    response.end(data);
-                }
-            );
-            break;
+        fs.readFile(path.join(__dirname, 'presentation/views/index.html'),
+            function (err, data) {
+                response.end(data);
+            }
+        );
+        break;
 
         case '/styles.css':
             // TODO: Send ContentType info in response.
@@ -60,6 +60,24 @@ http.createServer(function (request, response) {
         case '/client.js':
             // TODO: Send ContentType info in response.
             fs.readFile(path.join(__dirname, 'presentation/scripts/client.js'),
+                function (err, data) {
+                    response.end(data);
+                }
+            );
+            break;
+
+        case '/images/remove.png':
+            // TODO: Send ContentType info in response.
+            fs.readFile(path.join(__dirname, 'presentation/images/remove.png'),
+                function (err, data) {
+                    response.end(data);
+                }
+            );
+            break;
+
+        case '/images/add.png':
+            // TODO: Send ContentType info in response.
+            fs.readFile(path.join(__dirname, 'presentation/images/add.png'),
                 function (err, data) {
                     response.end(data);
                 }

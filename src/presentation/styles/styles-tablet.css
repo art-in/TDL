@@ -35,7 +35,7 @@ body {
     border: 1px solid red;
     padding: 5px;
     font-size: 24px;
-    flex: 8;
+    flex: 6;
 }
 
 .add-new-task-button {
@@ -43,10 +43,24 @@ body {
     width: 100px;
     display: flex;
     align-items: center;
-    justify-content: center;
+    flex: 1;
+    min-width: 120px;
+    text-align: center;
+}
+
+.add-new-task-button-image {
+    border: 1px solid #d3d3d3;
+    background-image: url("/images/add.png");
+    width: 26px;
+    height: 26px;
+    max-width: 26px;
+    margin: 0 5px;
+    flex: 1;
+}
+
+.add-new-task-button-label {
     flex: 1;
     font-size: 22px;
-    min-width: 80px;
 }
 
 .task-list {
@@ -67,7 +81,7 @@ body {
     border: 1px solid lightblue;
     font-size: 24px;
     padding: 5px;
-    flex: 8;
+    flex: 6;
     display: flex;
     align-items: center;
 }
@@ -78,6 +92,22 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    min-width: 120px;
+    flex-direction: row;
+    text-align: center;
+}
+
+.task-remove-button-image {
+    border: 1px solid #d3d3d3;
+    background-image: url("/images/remove.png");
+    width: 26px;
+    height: 26px;
+    max-width: 26px;
+    margin: 0 5px;
+    flex: 1;
+}
+
+.task-remove-button-label {
+    flex: 1;
     font-size: 22px;
-    min-width: 80px;
 }
