@@ -34,13 +34,13 @@ body {
 .new-task-input {
     border: 1px solid red;
     padding: 15px;
-    font-size: 35px;
+    font-size: 25px;
     flex: 8;
 }
 
 .add-new-task-button {
     border: 1px solid blue;
-    width: 100px;
+    width: 70px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -71,13 +71,13 @@ body {
     margin-top: 5px;
     display: flex;
     flex-direction: row;
-    min-height: 100px;
+    min-height: 70px;
 }
 
 .task-description {
     border: 1px solid lightblue;
-    font-size: 35px;
-    padding: 15px;
+    font-size: 25px;
+    padding: 5px;
     flex: 8;
     display: flex;
     align-items: center;
@@ -102,38 +102,4 @@ body {
     width: 26px;
     height: 26px;
     max-width: inherit;
-}
-
-@media (orientation:portrait) {
-    .screen-type:before {
-        content: 'SP'; /* Smartphone Portrait */
-    }
-
-    .main{
-        width: 960px;
-    }
-
-    .new-task {
-        min-height: 100px;
-    }
-
-    .new-task-input {
-        font-size: 55px;
-    }
-
-    .task {
-        min-height: 200px;
-    }
-
-    .task-description {
-        font-size: 55px;
-    }
-
-    .add-new-task-button {
-        min-width: 150px;
-    }
-
-    .task-remove-button {
-        min-width: 150px;
-    }
 }
