@@ -31,7 +31,7 @@ exports.getTasks = function (callback) {
         if (err) throw err;
         console.log("connected to database");
 
-        db.collection(TASKS_COLLECTION).find().toArray(function (err, tasks) {
+        db.collection(TASKS_COLLECTION).find().sort({"_id" : -1}).toArray(function (err, tasks) {
             if (err) throw err;
             console.log("Returning tasks number: " + tasks.length)
             callback(tasks);
