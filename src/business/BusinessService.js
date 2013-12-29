@@ -1,3 +1,5 @@
+// Represents interface to business layer.
+
 var taskManager = require('./TaskManager.js');
 
 //----------------------------------------------------
@@ -19,4 +21,11 @@ exports.addTask = function (description, callback) {
 //----------------------------------------------------
 exports.deleteTask = function (taskId, callback) {
     taskManager.deleteTask(taskId, callback);
+}
+
+//----------------------------------------------------
+// Moves task to new position.
+//----------------------------------------------------
+exports.moveTask = function (taskId, newPosition, callback) {
+    taskManager.moveTask(taskId, newPosition, callback);
 }

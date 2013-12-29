@@ -39,17 +39,14 @@ body {
 }
 
 .add-new-task-button {
-    border: 1px solid blue;
-    width: 100px;
+    border: 1px solid lightgrey;
     display: flex;
     align-items: center;
-    flex: 1;
-    min-width: 120px;
+    width: 140px;
     text-align: center;
 }
 
 .add-new-task-button-image {
-    border: 1px solid #d3d3d3;
     background-image: url("/images/add.png");
     width: 26px;
     height: 26px;
@@ -64,14 +61,14 @@ body {
 }
 
 .task-list {
-    border: 1px solid lightgreen;
+    border: 1px solid lightgrey;
     display: flex;
     flex-direction: column;
 }
 
 .task {
     border: 1px solid blue;
-    margin-top: 5px;
+    margin-top: 10px;
     display: flex;
     flex-direction: row;
     min-height: 45px;
@@ -81,24 +78,31 @@ body {
     border: 1px solid lightblue;
     font-size: 24px;
     padding: 5px;
-    flex: 6;
+    flex: 5;
     display: flex;
     align-items: center;
 }
 
+.task-buttons {
+    border: 1px solid #d3d3d3;
+    flex-direction: row;
+    display: flex;
+    flex: 3;
+    min-width: 170px;
+    max-width: 230px;
+}
+
 .task-remove-button {
-    border: 1px solid gray;
-    flex: 1;
+    border: 1px solid lightgrey;
     display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 120px;
+    width: 140px;
     flex-direction: row;
     text-align: center;
 }
 
 .task-remove-button-image {
-    border: 1px solid #d3d3d3;
     background-image: url("/images/remove.png");
     width: 26px;
     height: 26px;
@@ -110,4 +114,28 @@ body {
 .task-remove-button-label {
     flex: 1;
     font-size: 22px;
+}
+
+.task-drag-handle {
+    border: 1px solid lightgrey;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 45px;
+}
+
+.task-drag-handle-image{
+    background-image: url("/images/drag.png");
+    width: 15px;
+    height: 13px;
+    max-width: 15px;
+}
+
+.task-drag-ghost {
+    border: 2px solid red;
+}
+
+.task-shift {
+    display: none;
 }

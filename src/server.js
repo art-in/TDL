@@ -7,7 +7,7 @@ var path = require('path');
 var fs = require('fs');
 var qs = require('./lib/node_modules/qs');
 
-var service = require('./business/BusinessService.js');
+var businessService = require('./business/BusinessService.js');
 
 var port = '80';
 
@@ -20,15 +20,16 @@ http.createServer(function (request, response) {
     var requestQuery = url.parse(request.url).query;
 
     // Request routing.
+    //noinspection JSUnresolvedVariable,JSUnresolvedVariable
     switch (requestPath) {
         // -------------------- STATIC ---------------------
         case '/':
-        fs.readFile(path.join(__dirname, 'presentation/views/index.html'),
-            function (err, data) {
-                response.end(data);
-            }
-        );
-        break;
+            fs.readFile(path.join(__dirname, 'presentation/views/index.html'),
+                function (err, data) {
+                    response.end(data);
+                }
+            );
+            break;
 
         case '/styles.css':
             // TODO: Send ContentType info in response.
@@ -57,9 +58,18 @@ http.createServer(function (request, response) {
             );
             break;
 
-        case '/client.js':
+        case '/scripts/client.js':
             // TODO: Send ContentType info in response.
             fs.readFile(path.join(__dirname, 'presentation/scripts/client.js'),
+                function (err, data) {
+                    response.end(data);
+                }
+            );
+            break;
+
+        case '/scripts/Sortable.min.js':
+            // TODO: Send ContentType info in response.
+            fs.readFile(path.join(__dirname, 'presentation/scripts/Sortable.min.js'),
                 function (err, data) {
                     response.end(data);
                 }
@@ -84,6 +94,33 @@ http.createServer(function (request, response) {
             );
             break;
 
+        case '/images/drag.png':
+            // TODO: Send ContentType info in response.
+            fs.readFile(path.join(__dirname, 'presentation/images/drag.png'),
+                function (err, data) {
+                    response.end(data);
+                }
+            );
+            break;
+
+        case '/images/up.png':
+            // TODO: Send ContentType info in response.
+            fs.readFile(path.join(__dirname, 'presentation/images/up.png'),
+                function (err, data) {
+                    response.end(data);
+                }
+            );
+            break;
+
+        case '/images/down.png':
+            // TODO: Send ContentType info in response.
+            fs.readFile(path.join(__dirname, 'presentation/images/down.png'),
+                function (err, data) {
+                    response.end(data);
+                }
+            );
+            break;
+
         // TODO: Add favicon.ico to static response.
 
         // -------------------- API ---------------------
@@ -91,25 +128,36 @@ http.createServer(function (request, response) {
             //noinspection JSUnresolvedVariable
             var description = qs.parse(requestQuery).description;
 
-            service.addTask(description, function () {
+            businessService.addTask(description, function () {
                 response.end();
             });
             break;
 
         case '/api/deleteTask':
             //noinspection JSUnresolvedVariable
-            var taskId = qs.parse(requestQuery).taskId;
-
-            service.deleteTask(taskId, function () {
-                response.end();
-            });
+            businessService.deleteTask(
+                qs.parse(requestQuery).taskId,
+                function () {
+                    response.end();
+                });
 
             break;
 
         case '/api/getTasks':
-            service.getTasks(function (tasks) {
+            businessService.getTasks(function (tasks) {
                 response.end(JSON.stringify(tasks));
             });
+
+            break;
+
+        case '/api/moveTask':
+            //noinspection JSUnresolvedVariable
+            businessService.moveTask(
+                qs.parse(requestQuery).taskId,
+                +qs.parse(requestQuery).position,
+                function () {
+                    response.end();
+                });
 
             break;
 

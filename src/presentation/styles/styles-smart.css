@@ -39,13 +39,13 @@ body {
 }
 
 .add-new-task-button {
-    border: 1px solid blue;
+    border: 1px solid lightgrey;
     width: 70px;
     display: flex;
     align-items: center;
     justify-content: center;
     flex: 1;
-    min-width: 80px;
+    min-width: 50px;
 }
 
 .add-new-task-button-label {
@@ -53,7 +53,6 @@ body {
 }
 
 .add-new-task-button-image {
-    border: 1px solid #d3d3d3;
     background-image: url("/images/add.png");
     width: 26px;
     height: 26px;
@@ -61,21 +60,21 @@ body {
 }
 
 .task-list {
-    border: 1px solid lightgreen;
+    border: 1px solid lightgrey;
     display: flex;
     flex-direction: column;
 }
 
 .task {
-    border: 1px solid blue;
+    border: 1px solid lightgrey;
     margin-top: 5px;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     min-height: 70px;
 }
 
 .task-description {
-    border: 1px solid lightblue;
+    border: 1px solid blue;
     font-size: 25px;
     padding: 5px;
     flex: 8;
@@ -83,13 +82,19 @@ body {
     align-items: center;
 }
 
+.task-buttons {
+    border: 1px solid lightgrey;
+    flex-direction: row;
+    display: flex;
+    justify-content: flex-end;
+}
+
 .task-remove-button {
-    border: 1px solid gray;
-    flex: 1;
+    border: 1px solid lightgrey;
     display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 80px;
+    min-width: 50px;
 }
 
 .task-remove-button-label {
@@ -97,9 +102,47 @@ body {
 }
 
 .task-remove-button-image {
-    border: 1px solid #d3d3d3;
     background-image: url("/images/remove.png");
     width: 26px;
     height: 26px;
     max-width: inherit;
+}
+
+.task-drag-handle {
+    display: none;
+}
+
+.task-shift {
+    border: 1px solid lightgrey;
+    min-width: 50px;
+    display: flex;
+    flex-direction: column;
+}
+
+.task-shift-up-button {
+    border: 1px solid lightgrey;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.task-shift-up-button-image {
+    background-image: url("/images/up.png");
+    width: 26px;
+    height: 18px;
+}
+
+.task-shift-down-button {
+    border: 1px solid lightgrey;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.task-shift-down-button-image {
+    background-image: url("/images/down.png");
+    width: 26px;
+    height: 18px;
 }

@@ -2,6 +2,17 @@
 var API_ADD_TASK = "/api/addTask";
 var API_DELETE_TASK = "/api/deleteTask"
 var API_GET_TASKS = "/api/getTasks";
+var API_MOVE_TASK = "/api/moveTask";
+
+var TASK_ID_ATTRIBUTE = "data-task-id";
+
+var TASK_CSS_CLASS = "task";
+var TASK_DESCRIPTION_CSS_CLASS = "task-description";
+var TASK_REMOVE_BUTTON_CSS_CLASS = "task-remove-button";
+
+var TASK_DRAG_HANDLE_CSS_CLASS = "task-drag-handle";
+var TASK_SHIFT_UP_BUTTON_CSS_CLASS = "task-shift-up-button";
+var TASK_SHIFT_DOWN_BUTTON_CSS_CLASS = "task-shift-down-button";
 // --------------------- VARIABLES ---------------------------------------------
 var NewTaskTextBox;
 var TaskTemplate;
@@ -12,6 +23,7 @@ var XHR;
 window.onload = function () {
     installControlHandlers();
     refreshTaskList();
+    makeTaskListSortable();
 };
 
 function installControlHandlers() {
@@ -25,6 +37,16 @@ function installControlHandlers() {
     NewTaskTextBox.onkeydown = NewTaskTextBox_KeyDown;
 }
 
+function makeTaskListSortable() {
+    new Sortable(TaskListContainer, {
+        group: "tasks",
+        handle: "." + TASK_DRAG_HANDLE_CSS_CLASS,     // Restricts sort start click/touch to the specified element
+        draggable: "." + TASK_CSS_CLASS,   // Specifies which items inside the element should be sortable
+        onUpdate: TaskList_ItemMoved,
+        ghostClass: "task-drag-ghost"
+    });
+}
+
 // ---------------------  HANDLERS  -------------------------------------------
 function btnAddNewTask_OnClick() {
     var description = NewTaskTextBox.innerHTML;
@@ -32,12 +54,14 @@ function btnAddNewTask_OnClick() {
     refreshNewTaskField();
 }
 
-function btnRemoveTask_OnClick(taskId) {
+function btnRemoveTask_OnClick(e) {
+    var taskNode = getFirstParentByClass(e.target, TASK_CSS_CLASS);
+    var taskId = taskNode.getAttribute(TASK_ID_ATTRIBUTE);
+
     deleteTask(taskId);
 }
 
 function NewTaskTextBox_KeyDown(e) {
-
     // 'Return' key handler.
     if (e.keyCode == 13 && !e.ctrlKey) {
         // Behave the same as on 'add' button click.
@@ -48,6 +72,35 @@ function NewTaskTextBox_KeyDown(e) {
     if (e.keyCode == 13 && e.ctrlKey) {
         addNewLine(NewTaskTextBox);
     }
+}
+
+function btnShiftTaskUp_Click(e) {
+    var taskNode = getFirstParentByClass(e.target, TASK_CSS_CLASS);
+    var taskId = taskNode.getAttribute(TASK_ID_ATTRIBUTE);
+
+    if (shiftTaskNode(taskNode, false)) {
+        var taskPosition = Array.prototype.indexOf.call(TaskListContainer.childNodes, taskNode);
+        moveTask(taskId, taskPosition);
+    }
+}
+
+function btnShiftTaskDown_Click(e) {
+    var taskNode = getFirstParentByClass(e.target, TASK_CSS_CLASS);
+    var taskId = taskNode.getAttribute(TASK_ID_ATTRIBUTE);
+
+    if (shiftTaskNode(taskNode, true)) {
+        var taskPosition = Array.prototype.indexOf.call(TaskListContainer.childNodes, taskNode);
+        moveTask(taskId, taskPosition);
+    }
+}
+
+function TaskList_ItemMoved(e) {
+    var taskNode = e.detail;
+
+    var taskId = taskNode.getAttribute(TASK_ID_ATTRIBUTE);
+    var taskPosition = Array.prototype.indexOf.call(TaskListContainer.childNodes, taskNode);
+
+    moveTask(taskId, taskPosition);
 }
 // ---------------------  FUNCTIONS -------------------------------------------
 function addNewTask(description) {
@@ -79,6 +132,32 @@ function deleteTask(taskId) {
     });
 }
 
+function shiftTaskNode(taskNode, isDown) {
+    // Swap two close nodes.
+    var nearTaskNode = isDown ? taskNode.nextSibling : taskNode.previousSibling;
+    if (nearTaskNode) {
+        taskNode.parentNode.insertBefore(
+            isDown ? nearTaskNode : taskNode,
+            isDown ? taskNode : nearTaskNode);
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
+function moveTask(taskId, newPosition) {
+    logFunctionCall();
+
+    var parameters = [
+        {key: 'taskId', value: taskId},
+        {key: 'position', value: newPosition}
+    ];
+
+    callServerAPI(API_MOVE_TASK, parameters, function () {
+    });
+}
+
 function refreshTaskList() {
     logFunctionCall();
 
@@ -90,19 +169,20 @@ function refreshTaskList() {
         var tasks = JSON.parse(data);
         for (var i = 0; i < tasks.length; i++) {
             var taskInstance = TaskTemplate.cloneNode(true);
-            taskInstance.id = "task_" + tasks[i]._id;
+            taskInstance.id = "task_" + i;
+            taskInstance.setAttribute(TASK_ID_ATTRIBUTE, tasks[i]._id);
 
-            var taskDescription = taskInstance.getElementsByClassName('task-description')[0];
+            var taskDescription = taskInstance.getElementsByClassName(TASK_DESCRIPTION_CSS_CLASS)[0];
             taskDescription.innerHTML = tasks[i].Description;
 
-            var removeButton = taskInstance.getElementsByClassName('task-remove-button')[0];
-            // Set handler argument through closure.
-            removeButton.onclick = (function () {
-                var taskId = tasks[i]._id;
-                return function () {
-                    btnRemoveTask_OnClick(taskId);
-                }
-            })();
+            var removeButton = taskInstance.getElementsByClassName(TASK_REMOVE_BUTTON_CSS_CLASS)[0];
+            removeButton.onclick = btnRemoveTask_OnClick;
+
+            var taskShiftUpButton = taskInstance.getElementsByClassName(TASK_SHIFT_UP_BUTTON_CSS_CLASS)[0];
+            var taskShiftDownButton = taskInstance.getElementsByClassName(TASK_SHIFT_DOWN_BUTTON_CSS_CLASS)[0];
+
+            taskShiftUpButton.onclick = btnShiftTaskUp_Click;
+            taskShiftDownButton.onclick = btnShiftTaskDown_Click;
 
             TaskListContainer.appendChild(taskInstance);
         }
@@ -174,6 +254,22 @@ function placeCaretAtEnd(el) {
         textRange.select();
     }
 }
+
+
+// Gets first (closest) parent by CSS class.
+// Returns: HTML node, or null if no parent with such class.
+function getFirstParentByClass(element, className) {
+    var p = element.parentNode;
+    while (p != null) {
+        if (p.classList.contains(className)) {
+            return p;
+        }
+        else {
+            p = p.parentNode;
+        }
+    }
+}
+
 // ---------------------  TRANSPORT  -------------------------------------------
 function callServerAPI(apiMethod, parameters, callback) {
     logFunctionCall();
