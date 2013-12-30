@@ -154,7 +154,18 @@ http.createServer(function (request, response) {
             //noinspection JSUnresolvedVariable
             businessService.moveTask(
                 qs.parse(requestQuery).taskId,
-                +qs.parse(requestQuery).position,
+                parseInt(qs.parse(requestQuery).position),
+                function () {
+                    response.end();
+                });
+
+            break;
+
+        case '/api/setTaskProgress':
+            //noinspection JSUnresolvedVariable
+            businessService.setTaskProgress(
+                qs.parse(requestQuery).taskId,
+                parseFloat(qs.parse(requestQuery).progress),
                 function () {
                     response.end();
                 });

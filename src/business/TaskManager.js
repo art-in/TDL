@@ -16,6 +16,7 @@ exports.getTasks = function (callback) {
 exports.addTask = function (description, callback) {
     var newTask = new Task(description);
     newTask.Position = 0;
+    newTask.Progress = 0;
 
     // Shift all existing tasks to one position down.
     DbContext.shiftTaskPositions(null, null, 1, function () {
@@ -67,5 +68,17 @@ exports.moveTask = function (taskId, newPosition, callback) {
                             callback();
                         })
                 });
+        });
+}
+
+//----------------------------------------------------
+// Sets task progress.
+//----------------------------------------------------
+exports.setTaskProgress = function (taskId, progress, callback) {
+    DbContext.setTaskProgress(
+        taskId,
+        progress,
+        function () {
+              callback();
         });
 }

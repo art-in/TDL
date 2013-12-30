@@ -3,6 +3,7 @@ var API_ADD_TASK = "/api/addTask";
 var API_DELETE_TASK = "/api/deleteTask"
 var API_GET_TASKS = "/api/getTasks";
 var API_MOVE_TASK = "/api/moveTask";
+var API_SET_TASK_PROGRESS = "/api/setTaskProgress";
 
 var TASK_ID_ATTRIBUTE = "data-task-id";
 
@@ -13,6 +14,10 @@ var TASK_REMOVE_BUTTON_CSS_CLASS = "task-remove-button";
 var TASK_DRAG_HANDLE_CSS_CLASS = "task-drag-handle";
 var TASK_SHIFT_UP_BUTTON_CSS_CLASS = "task-shift-up-button";
 var TASK_SHIFT_DOWN_BUTTON_CSS_CLASS = "task-shift-down-button";
+
+var TASK_PROGRESS_CSS_CLASS = "task-progress";
+var TASK_PROGRESS_CHECKBOX_CSS_CLASS = "task-progress-checkbox";
+var TASK_PROGRESS_CHECKBOX_CHECKED_CSS_CLASS = "task-progress-checkbox-checked";
 // --------------------- VARIABLES ---------------------------------------------
 var NewTaskTextBox;
 var TaskTemplate;
@@ -102,6 +107,22 @@ function TaskList_ItemMoved(e) {
 
     moveTask(taskId, taskPosition);
 }
+
+function chbTaskProgress_Change(e) {
+    var taskNode = getFirstParentByClass(e.target, TASK_CSS_CLASS);
+    var taskId = taskNode.getAttribute(TASK_ID_ATTRIBUTE);
+    var taskChecked = e.target.checked;
+
+    // Set background color for progress container.
+    var taskProgressContainer = getFirstParentByClass(e.target, TASK_PROGRESS_CSS_CLASS);
+    if (taskChecked) {
+        taskProgressContainer.classList.add(TASK_PROGRESS_CHECKBOX_CHECKED_CSS_CLASS);
+    } else {
+        taskProgressContainer.classList.remove(TASK_PROGRESS_CHECKBOX_CHECKED_CSS_CLASS);
+    }
+
+    setTaskProgress(taskId, taskChecked ? 1 : 0);
+}
 // ---------------------  FUNCTIONS -------------------------------------------
 function addNewTask(description) {
     logFunctionCall();
@@ -158,6 +179,18 @@ function moveTask(taskId, newPosition) {
     });
 }
 
+function setTaskProgress(taskId, progress) {
+    logFunctionCall();
+
+    var parameters = [
+        {key: 'taskId', value: taskId},
+        {key: 'progress', value: progress}
+    ];
+
+    callServerAPI(API_SET_TASK_PROGRESS, parameters, function () {
+    });
+}
+
 function refreshTaskList() {
     logFunctionCall();
 
@@ -169,20 +202,36 @@ function refreshTaskList() {
         var tasks = JSON.parse(data);
         for (var i = 0; i < tasks.length; i++) {
             var taskInstance = TaskTemplate.cloneNode(true);
+
+            // Initialize elements in new task node.
             taskInstance.id = "task_" + i;
             taskInstance.setAttribute(TASK_ID_ATTRIBUTE, tasks[i]._id);
 
+            // Description.
             var taskDescription = taskInstance.getElementsByClassName(TASK_DESCRIPTION_CSS_CLASS)[0];
             taskDescription.innerHTML = tasks[i].Description;
 
+            // Remove button.
             var removeButton = taskInstance.getElementsByClassName(TASK_REMOVE_BUTTON_CSS_CLASS)[0];
             removeButton.onclick = btnRemoveTask_OnClick;
 
+            // Shift buttons.
             var taskShiftUpButton = taskInstance.getElementsByClassName(TASK_SHIFT_UP_BUTTON_CSS_CLASS)[0];
             var taskShiftDownButton = taskInstance.getElementsByClassName(TASK_SHIFT_DOWN_BUTTON_CSS_CLASS)[0];
 
             taskShiftUpButton.onclick = btnShiftTaskUp_Click;
             taskShiftDownButton.onclick = btnShiftTaskDown_Click;
+
+            // Progress indicator.
+            var taskProgressContainer = taskInstance.getElementsByClassName(TASK_PROGRESS_CSS_CLASS)[0];
+            var taskProgressCheckbox = taskInstance.getElementsByClassName(TASK_PROGRESS_CHECKBOX_CSS_CLASS)[0];
+
+            if (tasks[i].Progress) {
+                taskProgressCheckbox.checked = true;
+                taskProgressContainer.classList.add(TASK_PROGRESS_CHECKBOX_CHECKED_CSS_CLASS);
+            }
+
+            taskProgressCheckbox.onchange = chbTaskProgress_Change;
 
             TaskListContainer.appendChild(taskInstance);
         }

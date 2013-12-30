@@ -25,14 +25,14 @@ body {
 }
 
 .new-task {
-    border: 1px solid #ffb6c1;
+    border: 1px solid lightpink;
     margin-bottom: 5px;
     display: flex;
     flex-direction: row;
 }
 
 .new-task-input {
-    border: 1px solid red;
+    border: 1px solid deeppink;
     padding: 5px;
     font-size: 24px;
     flex: 6;
@@ -72,6 +72,18 @@ body {
     display: flex;
     flex-direction: row;
     min-height: 45px;
+}
+
+.task-progress {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: lightpink;
+    width: 45px;
+}
+
+.task-progress-checkbox-checked {
+    background-color: lightgreen;
 }
 
 .task-description {

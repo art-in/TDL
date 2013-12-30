@@ -25,14 +25,14 @@ body {
 }
 
 .new-task {
-    border: 1px solid #ffb6c1;
+    border: 1px solid lightpink;
     margin-bottom: 5px;
     display: flex;
     flex-direction: column;
 }
 
 .new-task-input {
-    border: 1px solid red;
+    border: 1px solid deeppink;
     padding: 5px;
     font-size: 22px;
 }
@@ -72,10 +72,25 @@ body {
     flex-direction: row;
 }
 
+.task-progress {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: lightpink;
+    width: 30px;
+}
+
+.task-progress-checkbox-checked {
+    background-color: lightgreen;
+}
+
 .task-description {
     border: 1px solid lightblue;
     font-size: 22px;
+    padding: 0 5px;
     flex: 4;
+    display: flex;
+    align-items: center;
 }
 
 .task-buttons {

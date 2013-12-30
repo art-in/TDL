@@ -126,3 +126,24 @@ exports.shiftTaskPositions = function (startPosition, endPosition, shift, callba
             });
     });
 }
+
+//----------------------------------------------------
+// Sets progress for existing task.
+//----------------------------------------------------
+exports.setTaskProgress = function (taskId, progress, callback) {
+    MongoClient.connect(CONNECTION_STRING, function (err, db) {
+        if (err) throw err;
+        console.log("connected to database");
+
+        db.collection(TASKS_COLLECTION).update(
+            {_id: ObjectID(taskId)},
+            {$set: {Progress: progress}},
+            function(err) {
+                if (err) throw err;
+                console.log("Set task progress (" + taskId + "): " + progress);
+                callback();
+                db.close();
+            }
+        )
+    });
+}

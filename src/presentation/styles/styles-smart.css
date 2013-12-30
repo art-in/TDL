@@ -25,14 +25,14 @@ body {
 }
 
 .new-task {
-    border: 1px solid #ffb6c1;
+    border: 1px solid lightpink;
     margin-bottom: 5px;
     display: flex;
     flex-direction: row;
 }
 
 .new-task-input {
-    border: 1px solid red;
+    border: 1px solid deeppink;
     padding: 15px;
     font-size: 25px;
     flex: 8;
@@ -66,15 +66,29 @@ body {
 }
 
 .task {
-    border: 1px solid lightgrey;
+    border: 1px solid blue;
     margin-top: 5px;
     display: flex;
     flex-direction: column;
     min-height: 70px;
 }
 
+.task-progress {
+    border: 1px solid lightgrey;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: lightpink;
+    width: 50px;
+    height: 50px;
+}
+
+.task-progress-checkbox-checked {
+    background-color: lightgreen;
+}
+
 .task-description {
-    border: 1px solid blue;
+    border: 1px solid lightgrey;
     font-size: 25px;
     padding: 5px;
     flex: 8;

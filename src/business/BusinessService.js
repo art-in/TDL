@@ -29,3 +29,10 @@ exports.deleteTask = function (taskId, callback) {
 exports.moveTask = function (taskId, newPosition, callback) {
     taskManager.moveTask(taskId, newPosition, callback);
 }
+
+//----------------------------------------------------
+// Sets task progress.
+//----------------------------------------------------
+exports.setTaskProgress = function(taskId, progress, callback) {
+    taskManager.setTaskProgress(taskId, progress, callback);
+}
