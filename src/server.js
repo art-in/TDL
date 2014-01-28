@@ -9,7 +9,7 @@ var qs = require('./lib/node_modules/qs');
 
 var businessService = require('./business/BusinessService.js');
 
-var port = '80';
+var port = '89';
 
 var address = '0.0.0.0';
 
@@ -25,6 +25,15 @@ http.createServer(function (request, response) {
         // -------------------- STATIC ---------------------
         case '/':
             fs.readFile(path.join(__dirname, 'presentation/views/index.html'),
+                function (err, data) {
+                    response.end(data);
+                }
+            );
+            break;
+
+        case '/favicon.ico':
+            // TODO: Send ContentType info in response.
+            fs.readFile(path.join(__dirname, 'presentation/images/favicon.ico'),
                 function (err, data) {
                     response.end(data);
                 }
@@ -120,8 +129,6 @@ http.createServer(function (request, response) {
                 }
             );
             break;
-
-        // TODO: Add favicon.ico to static response.
 
         // -------------------- API ---------------------
         case '/api/addTask':
