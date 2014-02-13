@@ -5,171 +5,232 @@ var API_GET_TASKS = "/api/getTasks";
 var API_MOVE_TASK = "/api/moveTask";
 var API_SET_TASK_PROGRESS = "/api/setTaskProgress";
 
-var TASK_ID_ATTRIBUTE = "data-task-id";
+var CSS_CLASS_NEW_TASK_TEXTBOX = "new-task-input";
+var CSS_CLASS_NEW_TASK_ADD_BUTTON = "add-new-task-button";
+var CSS_CLASS_TASK = "task";
+var CSS_CLASS_TASK_LIST = "task-list";
+var CSS_CLASS_TASK_DESCRIPTION = "task-description";
+var CSS_CLASS_TASK_REMOVE_BUTTON = "task-remove-button";
 
-var TASK_CSS_CLASS = "task";
-var TASK_DESCRIPTION_CSS_CLASS = "task-description";
-var TASK_REMOVE_BUTTON_CSS_CLASS = "task-remove-button";
+var CSS_CLASS_TASK_DRAG_HANDLE = "task-drag-handle";
+var CSS_CLASS_TASK_SHIFT_UP_BUTTON = "task-shift-up-button";
+var CSS_CLASS_TASK_SHIFT_DOWN_BUTTON = "task-shift-down-button";
 
-var TASK_DRAG_HANDLE_CSS_CLASS = "task-drag-handle";
-var TASK_SHIFT_UP_BUTTON_CSS_CLASS = "task-shift-up-button";
-var TASK_SHIFT_DOWN_BUTTON_CSS_CLASS = "task-shift-down-button";
-
-var TASK_PROGRESS_CSS_CLASS = "task-progress";
-var TASK_PROGRESS_CHECKBOX_CSS_CLASS = "task-progress-checkbox";
-var TASK_PROGRESS_CHECKBOX_CHECKED_CSS_CLASS = "task-progress-checkbox-checked";
+var CSS_CLASS_TASK_PROGRESS = "task-progress";
+var CSS_CLASS_TASK_PROGRESS_CHECKBOX = "task-progress-checkbox";
 // --------------------- VARIABLES ---------------------------------------------
 var NewTaskTextBox;
-var TaskTemplate;
 var TaskListContainer;
 var XHR;
 // ---------------------  INIT  ------------------------------------------------
-// Install control handlers.
 window.onload = function () {
+    setupBindings();
     installControlHandlers();
-    refreshTaskList();
-    makeTaskListSortable();
+    makeTaskListDraggable();
+
+    taskListViewModel = new TaskListViewModel();
+    ko.applyBindings(taskListViewModel);
+
+    taskListViewModel.reloadTasks();
 };
 
+// Setup KO bindings.
+function setupBindings() {
+    logFunctionCall();
+
+    $('.' + CSS_CLASS_NEW_TASK_TEXTBOX).dataBind({ event: { "'keydown'": '$root.newTaskChanged' }});
+    $('.' + CSS_CLASS_NEW_TASK_ADD_BUTTON).dataBind({ click: '$root.addTask' });
+    $('.' + CSS_CLASS_TASK_LIST).dataBind({ foreach: 'Tasks' });
+    $('.' + CSS_CLASS_TASK_PROGRESS).dataBind({ css: { "'task-progress-checkbox-checked'": 'ProgressDone' }});
+    $('.' + CSS_CLASS_TASK_PROGRESS_CHECKBOX).dataBind({ checked: 'ProgressDone' });
+    $('.' + CSS_CLASS_TASK_DESCRIPTION).dataBind({ html: 'Description' });
+    $('.' + CSS_CLASS_TASK_SHIFT_UP_BUTTON).dataBind({ click: '$root.shiftTaskUp' });
+    $('.' + CSS_CLASS_TASK_SHIFT_DOWN_BUTTON).dataBind({ click: '$root.shiftTaskDown' });
+    $('.' + CSS_CLASS_TASK_REMOVE_BUTTON).dataBind({ click: '$root.removeTask' });
+}
+
+// Install control handlers.
 function installControlHandlers() {
     logFunctionCall();
 
-    document.getElementById("btnAddNewTask").onclick = btnAddNewTask_OnClick;
-    NewTaskTextBox = document.getElementById("tbNewTask");
-    TaskTemplate = document.getElementById("tmpTask");
+    NewTaskTextBox = document.getElementsByClassName(CSS_CLASS_NEW_TASK_TEXTBOX)[0];
     TaskListContainer = document.getElementById("cntTaskList");
-
-    NewTaskTextBox.onkeydown = NewTaskTextBox_KeyDown;
 }
 
-function makeTaskListSortable() {
+function makeTaskListDraggable() {
     new Sortable(TaskListContainer, {
         group: "tasks",
-        handle: "." + TASK_DRAG_HANDLE_CSS_CLASS,     // Restricts sort start click/touch to the specified element
-        draggable: "." + TASK_CSS_CLASS,   // Specifies which items inside the element should be sortable
+        handle: "." + CSS_CLASS_TASK_DRAG_HANDLE,     // Restricts sort start click/touch to the specified element
+        draggable: "." + CSS_CLASS_TASK,   // Specifies which items inside the element should be sortable
         onUpdate: TaskList_ItemMoved,
         ghostClass: "task-drag-ghost"
     });
 }
+// ---------------------  VIEW MODELS -----------------------------------------
+var taskListViewModel;
 
+var TaskViewModel = function (task) {
+    this.Id = ko.observable(null);
+    this.Description = ko.observable(null);
+    this.Progress = ko.observable(null);
+
+    if (task) {
+        this.Id(task._id);
+        this.Description(task.Description);
+        this.Progress(task.Progress);
+    }
+
+    var self = this;
+
+    //noinspection JSUnresolvedFunction
+    this.ProgressDone = ko.computed(
+        {
+            read: function () {
+                return self.Progress() == 1
+            },
+            write: function (checked) {
+                logFunctionCall();
+
+                self.Progress(checked ? 1 : 0);
+
+                var parameters = [
+                    {key: 'taskId', value: self.Id()},
+                    {key: 'progress', value: self.Progress()}
+                ];
+
+                callServerAPI(API_SET_TASK_PROGRESS, parameters, function () {
+                });
+            }
+        });
+}
+
+var TaskListViewModel = function () {
+    this.Tasks = ko.observableArray([]);
+
+    var self = this;
+
+    // ---------------------------------
+    // Loads tasks from server.
+    this.reloadTasks = function () {
+        logFunctionCall();
+
+        callServerAPI(API_GET_TASKS, null, function (taskModelsJson) {
+            var tasks = toViewModels(taskModelsJson);
+            taskListViewModel.Tasks(tasks);
+        });
+    }
+
+    // ---------------------------------
+    // Removes tasks.
+    this.removeTask = function (task) {
+        logFunctionCall();
+
+        self.Tasks.remove(task);
+
+        var parameters = [
+            {key: 'taskId', value: task.Id()}
+        ];
+        callServerAPI(API_DELETE_TASK, parameters, function () {
+        });
+    }
+
+    // ---------------------------------
+    // Adds new task.
+    this.addTask = function () {
+        logFunctionCall();
+
+        var description = NewTaskTextBox.innerHTML;
+
+        // Validate new task.
+        if (!description) {
+            alert("Description is empty.");
+            return;
+        }
+
+        refreshNewTaskField();
+
+        // Pass to server.
+        var parameters = [
+            {key: 'description', value: description}
+        ];
+        callServerAPI(API_ADD_TASK, parameters, function (taskModel) {
+            var task = new TaskViewModel(JSON.parse(taskModel));
+            self.Tasks.unshift(task);
+        });
+    }
+
+    // ---------------------------------
+    // Shifts task one position up.
+    this.shiftTaskUp = function (task) {
+        var currentPosition = self.Tasks.indexOf(task);
+        var newPosition = currentPosition - 1;
+        if (newPosition >= 0) {
+            logFunctionCall();
+
+            var array = self.Tasks();
+            self.Tasks.splice(newPosition, 2, array[currentPosition], array[newPosition]);
+            moveTask(task.Id(), newPosition);
+        }
+    }
+
+    // ---------------------------------
+    // Shifts task one position down.
+    this.shiftTaskDown = function (task) {
+        var currentPosition = self.Tasks.indexOf(task);
+        var newPosition = currentPosition + 1;
+        if (newPosition < self.Tasks().length) {
+            logFunctionCall();
+
+            var array = self.Tasks();
+            self.Tasks.splice(currentPosition, 2, array[newPosition], array[currentPosition]);
+            moveTask(task.Id(), newPosition);
+        }
+    }
+
+    // ---------------------------------
+    // Handles new task input changed event.
+    this.newTaskChanged = function (data, e) {
+        // 'Return' key handler.
+        if (e.keyCode == 13 && !e.ctrlKey) {
+            // Behave the same as on 'add' button click.
+            taskListViewModel.addTask();
+        }
+
+        // 'Return + CTRL' keys handler.
+        if (e.keyCode == 13 && e.ctrlKey) {
+            addNewLine(NewTaskTextBox);
+        }
+
+        return true;
+    }
+}
 // ---------------------  HANDLERS  -------------------------------------------
-function btnAddNewTask_OnClick() {
-    var description = NewTaskTextBox.innerHTML;
-    addNewTask(description);
-    refreshNewTaskField();
-}
-
-function btnRemoveTask_OnClick(e) {
-    var taskNode = getFirstParentByClass(e.target, TASK_CSS_CLASS);
-    var taskId = taskNode.getAttribute(TASK_ID_ATTRIBUTE);
-
-    deleteTask(taskId);
-}
-
-function NewTaskTextBox_KeyDown(e) {
-    // 'Return' key handler.
-    if (e.keyCode == 13 && !e.ctrlKey) {
-        // Behave the same as on 'add' button click.
-        btnAddNewTask_OnClick();
-    }
-
-    // 'Return + CTRL' keys handler.
-    if (e.keyCode == 13 && e.ctrlKey) {
-        addNewLine(NewTaskTextBox);
-    }
-}
-
-function btnShiftTaskUp_Click(e) {
-    var taskNode = getFirstParentByClass(e.target, TASK_CSS_CLASS);
-    var taskId = taskNode.getAttribute(TASK_ID_ATTRIBUTE);
-
-    if (shiftTaskNode(taskNode, false)) {
-        var taskPosition = Array.prototype.indexOf.call(TaskListContainer.childNodes, taskNode);
-        moveTask(taskId, taskPosition);
-    }
-}
-
-function btnShiftTaskDown_Click(e) {
-    var taskNode = getFirstParentByClass(e.target, TASK_CSS_CLASS);
-    var taskId = taskNode.getAttribute(TASK_ID_ATTRIBUTE);
-
-    if (shiftTaskNode(taskNode, true)) {
-        var taskPosition = Array.prototype.indexOf.call(TaskListContainer.childNodes, taskNode);
-        moveTask(taskId, taskPosition);
-    }
-}
-
 function TaskList_ItemMoved(e) {
     var taskNode = e.detail;
 
-    var taskId = taskNode.getAttribute(TASK_ID_ATTRIBUTE);
-    var taskPosition = Array.prototype.indexOf.call(TaskListContainer.childNodes, taskNode);
+    var task = ko.dataFor(taskNode);
 
-    moveTask(taskId, taskPosition);
+    var oldPosition = taskListViewModel.Tasks().indexOf(task);
+    var newPosition = getChildNodeIndex(TaskListContainer, taskNode, CSS_CLASS_TASK);
+
+    // Update position in view model.
+    taskListViewModel.Tasks().move(oldPosition, newPosition);
+
+    moveTask(task.Id(), newPosition);
 }
 
-function chbTaskProgress_Change(e) {
-    var taskNode = getFirstParentByClass(e.target, TASK_CSS_CLASS);
-    var taskId = taskNode.getAttribute(TASK_ID_ATTRIBUTE);
-    var taskChecked = e.target.checked;
-
-    // Set background color for progress container.
-    var taskProgressContainer = getFirstParentByClass(e.target, TASK_PROGRESS_CSS_CLASS);
-    if (taskChecked) {
-        taskProgressContainer.classList.add(TASK_PROGRESS_CHECKBOX_CHECKED_CSS_CLASS);
-    } else {
-        taskProgressContainer.classList.remove(TASK_PROGRESS_CHECKBOX_CHECKED_CSS_CLASS);
+Array.prototype.move = function (old_index, new_index) {
+    if (new_index >= this.length) {
+        var k = new_index - this.length;
+        while ((k--) + 1) {
+            this.push(undefined);
+        }
     }
-
-    setTaskProgress(taskId, taskChecked ? 1 : 0);
-}
+    this.splice(new_index, 0, this.splice(old_index, 1)[0]);
+    return this; // for testing purposes
+};
 // ---------------------  FUNCTIONS -------------------------------------------
-function addNewTask(description) {
-    logFunctionCall();
-
-    // Validate new task.
-    if (!description) {
-        alert("Description is empty.");
-        return;
-    }
-
-    // Pass to server.
-    var parameters = [
-        {key: 'description', value: description}
-    ];
-    callServerAPI(API_ADD_TASK, parameters, function () {
-        refreshTaskList();
-    });
-}
-
-function deleteTask(taskId) {
-    logFunctionCall();
-
-    var parameters = [
-        {key: 'taskId', value: taskId}
-    ];
-    callServerAPI(API_DELETE_TASK, parameters, function () {
-        refreshTaskList();
-    });
-}
-
-function shiftTaskNode(taskNode, isDown) {
-    // Swap two close nodes.
-    var nearTaskNode = isDown ? taskNode.nextSibling : taskNode.previousSibling;
-    if (nearTaskNode) {
-        taskNode.parentNode.insertBefore(
-            isDown ? nearTaskNode : taskNode,
-            isDown ? taskNode : nearTaskNode);
-        return true;
-    }
-    else {
-        return false;
-    }
-}
-
 function moveTask(taskId, newPosition) {
-    logFunctionCall();
-
     var parameters = [
         {key: 'taskId', value: taskId},
         {key: 'position', value: newPosition}
@@ -179,68 +240,19 @@ function moveTask(taskId, newPosition) {
     });
 }
 
-function setTaskProgress(taskId, progress) {
-    logFunctionCall();
-
-    var parameters = [
-        {key: 'taskId', value: taskId},
-        {key: 'progress', value: progress}
-    ];
-
-    callServerAPI(API_SET_TASK_PROGRESS, parameters, function () {
-    });
-}
-
-function refreshTaskList() {
-    logFunctionCall();
-
-    callServerAPI(API_GET_TASKS, null, function (data) {
-        // Clear list container.
-        clearNode(TaskListContainer);
-
-        // Get tasks and generate layout element for each in tasks list.
-        var tasks = JSON.parse(data);
-        for (var i = 0; i < tasks.length; i++) {
-            var taskInstance = TaskTemplate.cloneNode(true);
-
-            // Initialize elements in new task node.
-            taskInstance.id = "task_" + i;
-            taskInstance.setAttribute(TASK_ID_ATTRIBUTE, tasks[i]._id);
-
-            // Description.
-            var taskDescription = taskInstance.getElementsByClassName(TASK_DESCRIPTION_CSS_CLASS)[0];
-            taskDescription.innerHTML = tasks[i].Description;
-
-            // Remove button.
-            var removeButton = taskInstance.getElementsByClassName(TASK_REMOVE_BUTTON_CSS_CLASS)[0];
-            removeButton.onclick = btnRemoveTask_OnClick;
-
-            // Shift buttons.
-            var taskShiftUpButton = taskInstance.getElementsByClassName(TASK_SHIFT_UP_BUTTON_CSS_CLASS)[0];
-            var taskShiftDownButton = taskInstance.getElementsByClassName(TASK_SHIFT_DOWN_BUTTON_CSS_CLASS)[0];
-
-            taskShiftUpButton.onclick = btnShiftTaskUp_Click;
-            taskShiftDownButton.onclick = btnShiftTaskDown_Click;
-
-            // Progress indicator.
-            var taskProgressContainer = taskInstance.getElementsByClassName(TASK_PROGRESS_CSS_CLASS)[0];
-            var taskProgressCheckbox = taskInstance.getElementsByClassName(TASK_PROGRESS_CHECKBOX_CSS_CLASS)[0];
-
-            if (tasks[i].Progress) {
-                taskProgressCheckbox.checked = true;
-                taskProgressContainer.classList.add(TASK_PROGRESS_CHECKBOX_CHECKED_CSS_CLASS);
-            }
-
-            taskProgressCheckbox.onchange = chbTaskProgress_Change;
-
-            TaskListContainer.appendChild(taskInstance);
-        }
-    });
-}
-
 function refreshNewTaskField() {
     logFunctionCall();
     NewTaskTextBox.innerHTML = '';
+}
+// ---------------------  MAPPERS -------------------------------------------
+// Converts JSON list of Task models to list of view models.
+function toViewModels(taskModelsJson) {
+    var taskModels = JSON.parse(taskModelsJson);
+    var taskViewModels = [];
+    taskModels.forEach(function (model) {
+        taskViewModels.push(new TaskViewModel(model))
+    });
+    return taskViewModels;
 }
 // ---------------------  HELPERS -------------------------------------------
 function logFunctionCall() {
@@ -268,12 +280,6 @@ function logFunctionCall() {
 function isFunction(functionToCheck) {
     var getType = {};
     return functionToCheck && getType.toString.call(functionToCheck) === '[object Function]';
-}
-
-function clearNode(node) {
-    while (node.firstChild) {
-        node.removeChild(node.firstChild);
-    }
 }
 
 function addNewLine(node) {
@@ -304,21 +310,17 @@ function placeCaretAtEnd(el) {
     }
 }
 
-
-// Gets first (closest) parent by CSS class.
-// Returns: HTML node, or null if no parent with such class.
-function getFirstParentByClass(element, className) {
-    var p = element.parentNode;
-    while (p != null) {
-        if (p.classList.contains(className)) {
-            return p;
-        }
-        else {
-            p = p.parentNode;
-        }
-    }
+function getChildNodeIndex(container, childNode, childCssClass) {
+    return Array.prototype.indexOf.call(
+        Array.prototype.slice.call(container.childNodes)
+            .filter(
+            function (node) {
+                if (node.classList) {
+                    return node.classList.contains(childCssClass)
+                }
+                return false;
+            }), childNode);
 }
-
 // ---------------------  TRANSPORT  -------------------------------------------
 function callServerAPI(apiMethod, parameters, callback) {
     logFunctionCall();

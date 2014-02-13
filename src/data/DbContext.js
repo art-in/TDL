@@ -18,7 +18,7 @@ exports.addTask = function (newTask, callback) {
             function (err, records) {
                 if (err) throw err;
                 console.log("New task added as " + records[0]._id);
-                callback();
+                callback(records[0]);
                 db.close();
             });
     });

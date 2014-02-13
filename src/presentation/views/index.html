@@ -25,10 +25,14 @@
 
     <!-- Scripts -->
     <script language="javascript" type="text/javascript" src="/scripts/client.js"></script>
-    <script language="javascript" type="text/javascript" src="/scripts/Sortable.min.js"></script>
+    <script language="javascript" type="text/javascript" src="/scripts/Sortable.js"></script>
+    <script language="javascript" type="text/javascript" src="/scripts/knockout.js"></script>
+    <script language="javascript" type="text/javascript" src="/scripts/jquery.js"></script>
+    <script language="javascript" type="text/javascript" src="/scripts/jquery.unobtrusive-knockout.js"></script>
 
 </head>
 <body>
+
 <div class="main">
     <div class="new-task">
         <div id="tbNewTask" contenteditable="true" class="new-task-input"></div>
@@ -41,31 +45,28 @@
     </div>
 
     <div id="cntTaskList" class="task-list">
-        <div style="display: none">
-            <div id="tmpTask" class="task"> <!-- Task container template. -->
-                <div class="task-progress">
-                    <input type="checkbox" class="task-progress-checkbox"/>
-                </div>
-                <div class="task-description">
-                    <!--task description-->
-                </div>
-                <div class="task-buttons">
-                    <div class="task-shift">
-                        <div class="task-shift-up-button">
-                            <div class="task-shift-up-button-image"></div>
-                        </div>
-                        <div class="task-shift-down-button">
-                            <div class="task-shift-down-button-image"></div>
-                        </div>
+        <div id="tmpTask" class="task"> <!-- Task container template. -->
+            <div class="task-progress">
+                <input type="checkbox" class="task-progress-checkbox" />
+            </div>
+            <div class="task-description">
+            </div>
+            <div class="task-buttons">
+                <div class="task-shift">
+                    <div class="task-shift-up-button">
+                        <div class="task-shift-up-button-image"></div>
                     </div>
-                    <div class="task-drag-handle">
-                        <div class="task-drag-handle-image"></div>
+                    <div class="task-shift-down-button">
+                        <div class="task-shift-down-button-image"></div>
                     </div>
-                    <div class="task-remove-button">
-                        <div class="task-remove-button-image"></div>
-                        <div class="task-remove-button-label">
-                            remove
-                        </div>
+                </div>
+                <div class="task-drag-handle">
+                    <div class="task-drag-handle-image"></div>
+                </div>
+                <div class="task-remove-button">
+                    <div class="task-remove-button-image"></div>
+                    <div class="task-remove-button-label">
+                        remove
                     </div>
                 </div>
             </div>

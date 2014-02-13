@@ -47,8 +47,20 @@ http.createServer(function (request, response) {
             respondWithFile(response, 'presentation/scripts/client.js', 'application/javascript');
             break;
 
-        case '/scripts/Sortable.min.js':
+        case '/scripts/Sortable.js':
             respondWithFile(response, 'presentation/scripts/Sortable.min.js', 'application/javascript');
+            break;
+
+        case '/scripts/knockout.js':
+            respondWithFile(response, 'presentation/scripts/knockout-3.0.0.js', 'application/javascript');
+            break;
+
+        case '/scripts/jquery.unobtrusive-knockout.js':
+            respondWithFile(response, 'presentation/scripts/jquery.unobtrusive-knockout.min.js', 'application/javascript');
+            break;
+
+        case '/scripts/jquery.js':
+            respondWithFile(response, 'presentation/scripts/jquery-2.1.0.min.js', 'application/javascript');
             break;
 
         case '/images/remove.png':
@@ -68,16 +80,16 @@ http.createServer(function (request, response) {
             break;
 
         case '/images/down.png':
-            respondWithFile(response, 'presentation/images/down.png', 'image/png');
-            break;
+        respondWithFile(response, 'presentation/images/down.png', 'image/png');
+        break;
 
         // -------------------- API ---------------------
         case '/api/addTask':
             //noinspection JSUnresolvedVariable
             var description = qs.parse(requestQuery).description;
 
-            businessService.addTask(description, function () {
-                response.end();
+            businessService.addTask(description, function (task) {
+                respondWithJson(response, task);
             });
             break;
 

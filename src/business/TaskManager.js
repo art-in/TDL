@@ -20,9 +20,7 @@ exports.addTask = function (description, callback) {
 
     // Shift all existing tasks to one position down.
     DbContext.shiftTaskPositions(null, null, 1, function () {
-        DbContext.addTask(newTask, function () {
-            callback();
-        });
+        DbContext.addTask(newTask, callback);
     });
 }
 

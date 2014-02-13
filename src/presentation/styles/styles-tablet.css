@@ -90,7 +90,7 @@ body {
     border: 1px solid lightblue;
     font-size: 24px;
     padding: 5px;
-    flex: 5;
+    flex: 3;
     display: flex;
     align-items: center;
 }
@@ -99,8 +99,8 @@ body {
     border: 1px solid #d3d3d3;
     flex-direction: row;
     display: flex;
-    flex: 3;
-    min-width: 170px;
+    flex: 1;
+    min-width: 192px;
     max-width: 230px;
 }
 
@@ -129,25 +129,40 @@ body {
 }
 
 .task-drag-handle {
+    display: none;
+}
+
+.task-shift {
+    border: 1px solid lightgrey;
+    min-width: 50px;
+    display: flex;
+    flex-direction: column;
+}
+
+.task-shift-up-button {
     border: 1px solid lightgrey;
     flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 45px;
 }
 
-.task-drag-handle-image{
-    background-image: url("/images/drag.png");
-    width: 15px;
-    height: 13px;
-    max-width: 15px;
+.task-shift-up-button-image {
+    background-image: url("/images/up.png");
+    width: 26px;
+    height: 18px;
 }
 
-.task-drag-ghost {
-    border: 2px solid red;
+.task-shift-down-button {
+    border: 1px solid lightgrey;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.task-shift {
-    display: none;
+.task-shift-down-button-image {
+    background-image: url("/images/down.png");
+    width: 26px;
+    height: 18px;
 }
