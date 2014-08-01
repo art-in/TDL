@@ -2,6 +2,3 @@
 .idea/
 *.iml
 *.iws
-
-# NodeJs
-node_modules

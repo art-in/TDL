@@ -52,7 +52,7 @@ http.createServer(function (request, response) {
             break;
 
         case '/scripts/knockout.js':
-            respondWithFile(response, 'presentation/scripts/knockout-3.0.0.js', 'application/javascript');
+            respondWithFile(response, 'presentation/scripts/knockout-3.1.0.js', 'application/javascript');
             break;
 
         case '/scripts/jquery.unobtrusive-knockout.js':
@@ -60,7 +60,7 @@ http.createServer(function (request, response) {
             break;
 
         case '/scripts/jquery.js':
-            respondWithFile(response, 'presentation/scripts/jquery-2.1.0.min.js', 'application/javascript');
+            respondWithFile(response, 'presentation/scripts/jquery-2.1.1.min.js', 'application/javascript');
             break;
 
         case '/images/remove.png':
@@ -144,6 +144,7 @@ function respondWithFile(responseObject, filePath, mimeType) {
     responseObject.writeHead(200, {'Content-Type': mimeType, 'Content-Encoding': 'gzip'});
     fs.readFile(path.join(__dirname, filePath),
         function (err, data) {
+            if (err) throw err;
             zlib.gzip(data, function (_, result) {
                 responseObject.end(result);
             });
