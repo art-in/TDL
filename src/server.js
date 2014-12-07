@@ -55,6 +55,10 @@ http.createServer(function (request, response) {
             respondWithFile(response, 'presentation/scripts/knockout-3.1.0.js', 'application/javascript');
             break;
 
+        case '/scripts/koBindingHandlers.js':
+            respondWithFile(response, 'presentation/scripts/koBindingHandlers.js', 'application/javascript');
+            break;
+
         case '/scripts/jquery.unobtrusive-knockout.js':
             respondWithFile(response, 'presentation/scripts/jquery.unobtrusive-knockout.min.js', 'application/javascript');
             break;

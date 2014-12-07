@@ -60,13 +60,12 @@ body {
 }
 
 .task-list {
-    border: 1px solid lightgrey;
     display: flex;
     flex-direction: column;
 }
 
 .task {
-    border: 1px solid blue;
+    border: 1px solid gray;
     margin-top: 5px;
     display: flex;
     flex-direction: row;

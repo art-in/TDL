@@ -40,13 +40,20 @@ function setupBindings() {
 
     $('.' + CSS_CLASS_NEW_TASK_TEXTBOX).dataBind({ event: { "'keydown'": '$root.newTaskChanged' }});
     $('.' + CSS_CLASS_NEW_TASK_ADD_BUTTON).dataBind({ click: '$root.addTask' });
-    $('.' + CSS_CLASS_TASK_LIST).dataBind({ foreach: 'Tasks' });
-    $('.' + CSS_CLASS_TASK_PROGRESS).dataBind({ css: { "'task-progress-checkbox-checked'": 'ProgressDone' }});
-    $('.' + CSS_CLASS_TASK_PROGRESS_CHECKBOX).dataBind({ checked: 'ProgressDone' });
-    $('.' + CSS_CLASS_TASK_DESCRIPTION).dataBind({ html: 'Description' });
+    $('.' + CSS_CLASS_TASK_LIST).dataBind({ foreach: '$root.Tasks' });
     $('.' + CSS_CLASS_TASK_SHIFT_UP_BUTTON).dataBind({ click: '$root.shiftTaskUp' });
     $('.' + CSS_CLASS_TASK_SHIFT_DOWN_BUTTON).dataBind({ click: '$root.shiftTaskDown' });
     $('.' + CSS_CLASS_TASK_REMOVE_BUTTON).dataBind({ click: '$root.removeTask' });
+
+    $('.' + CSS_CLASS_TASK_PROGRESS).dataBind({ css: { "'task-progress-checkbox-checked'": '$data.ProgressDone' }});
+    $('.' + CSS_CLASS_TASK_PROGRESS_CHECKBOX).dataBind({ checked: '$data.ProgressDone' });
+    $('.' + CSS_CLASS_TASK_DESCRIPTION).dataBind({ html: '$data.Description',
+                                                   projectAssignment:
+                                                       "{ Description: $data.Description, " +
+                                                       "  Tags: [{ Tag: '[com]', Color: '#C4F2EA' }," +
+                                                       "         { Tag: '[c]', Color: '#FFE1B7' }," +
+                                                       "         { Tag: '[s]', Color: '#C1F2C1' }]," +
+                                                       "  DefaultTag:   '[com]'}" });
 }
 
 // Install control handlers.
