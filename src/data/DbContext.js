@@ -22,7 +22,7 @@ exports.addTask = function (newTask, callback) {
                 db.close();
             });
     });
-}
+};
 
 //----------------------------------------------------
 // Returns all tasks exist in the data storage.
@@ -43,7 +43,7 @@ exports.getTasks = function (callback) {
                 db.close();
             });
     });
-}
+};
 
 //----------------------------------------------------
 // Returns one existing task from the data storage.
@@ -63,7 +63,7 @@ exports.getTask = function (taskId, callback) {
                 db.close();
             });
     });
-}
+};
 
 //----------------------------------------------------
 // Updates existing task in the system.
@@ -82,7 +82,7 @@ exports.updateTask = function (task, callback) {
                 db.close();
             });
     });
-}
+};
 
 //----------------------------------------------------
 // Deletes task from the data storage.
@@ -101,7 +101,7 @@ exports.deleteTask = function (taskId, callback) {
                 db.close();
             })
     });
-}
+};
 
 //----------------------------------------------------
 // Shifts position of tasks in certain range to specified value.
@@ -125,7 +125,7 @@ exports.shiftTaskPositions = function (startPosition, endPosition, shift, callba
                 db.close();
             });
     });
-}
+};
 
 //----------------------------------------------------
 // Sets progress for existing task.
@@ -146,4 +146,4 @@ exports.setTaskProgress = function (taskId, progress, callback) {
             }
         )
     });
-}
+};

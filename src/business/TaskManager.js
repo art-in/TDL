@@ -8,7 +8,7 @@ var DbContext = require('../data/DbContext.js');
 //----------------------------------------------------
 exports.getTasks = function (callback) {
     DbContext.getTasks(callback);
-}
+};
 
 //----------------------------------------------------
 // Adds new task to the system.
@@ -22,7 +22,7 @@ exports.addTask = function (description, callback) {
     DbContext.shiftTaskPositions(null, null, 1, function () {
         DbContext.addTask(newTask, callback);
     });
-}
+};
 
 //----------------------------------------------------
 // Deletes task from the system.
@@ -43,7 +43,7 @@ exports.deleteTask = function (taskId, callback) {
                         })
                 })
         });
-}
+};
 
 //----------------------------------------------------
 // Moves task to new position.
@@ -67,7 +67,7 @@ exports.moveTask = function (taskId, newPosition, callback) {
                         })
                 });
         });
-}
+};
 
 //----------------------------------------------------
 // Sets task progress.
@@ -79,4 +79,4 @@ exports.setTaskProgress = function (taskId, progress, callback) {
         function () {
               callback();
         });
-}
+};

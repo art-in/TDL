@@ -1,6 +1,6 @@
 // ---------------------  CONSTANTS  -------------------------------------------
 var API_ADD_TASK = "/api/addTask";
-var API_DELETE_TASK = "/api/deleteTask"
+var API_DELETE_TASK = "/api/deleteTask";
 var API_GET_TASKS = "/api/getTasks";
 var API_MOVE_TASK = "/api/moveTask";
 var API_SET_TASK_PROGRESS = "/api/setTaskProgress";
@@ -109,7 +109,7 @@ var TaskViewModel = function (task) {
                 });
             }
         });
-}
+};
 
 var TaskListViewModel = function () {
     this.Tasks = ko.observableArray([]);
@@ -125,7 +125,7 @@ var TaskListViewModel = function () {
             var tasks = toViewModels(taskModelsJson);
             taskListViewModel.Tasks(tasks);
         });
-    }
+    };
 
     // ---------------------------------
     // Removes tasks.
@@ -139,7 +139,7 @@ var TaskListViewModel = function () {
         ];
         callServerAPI(API_DELETE_TASK, parameters, function () {
         });
-    }
+    };
 
     // ---------------------------------
     // Adds new task.
@@ -164,7 +164,7 @@ var TaskListViewModel = function () {
             var task = new TaskViewModel(JSON.parse(taskModel));
             self.Tasks.unshift(task);
         });
-    }
+    };
 
     // ---------------------------------
     // Shifts task one position up.
@@ -178,7 +178,7 @@ var TaskListViewModel = function () {
             self.Tasks.splice(newPosition, 2, array[currentPosition], array[newPosition]);
             moveTask(task.Id(), newPosition);
         }
-    }
+    };
 
     // ---------------------------------
     // Shifts task one position down.
@@ -192,7 +192,7 @@ var TaskListViewModel = function () {
             self.Tasks.splice(currentPosition, 2, array[newPosition], array[currentPosition]);
             moveTask(task.Id(), newPosition);
         }
-    }
+    };
 
     // ---------------------------------
     // Handles new task input changed event.
@@ -210,7 +210,7 @@ var TaskListViewModel = function () {
 
         return true;
     }
-}
+};
 // ---------------------  HANDLERS  -------------------------------------------
 function TaskList_ItemMoved(e) {
     var taskNode = e.target;

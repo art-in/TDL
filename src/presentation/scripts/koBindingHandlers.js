@@ -8,7 +8,7 @@
  *                           to associate with task if no tag was found in description;
  */
 ko.bindingHandlers.projectAssignment = {
-    update: function(element, valueAccessor, allBindings, viewModel, bindingContext) {
+    update: function(element, valueAccessor) {
         var value = valueAccessor();
 
         var description = value.Description();
@@ -40,4 +40,4 @@ ko.bindingHandlers.projectAssignment = {
             });
         }
     }
-}
+};
