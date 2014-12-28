@@ -10,9 +10,10 @@ var zlib = require('zlib');
 
 var businessService = require('./business/BusinessService.js');
 
+var address = '0.0.0.0';
 var port = '80';
 
-var address = '0.0.0.0';
+var buildFolder = 'presentation/build';
 
 http.createServer(function (request, response) {
     console.log("==> " + request.url);
@@ -20,133 +21,94 @@ http.createServer(function (request, response) {
     var requestPath = url.parse(request.url).pathname;
     var requestQuery = url.parse(request.url).query;
 
-    // Request routing.
-    switch (requestPath) {
-        // -------------------- STATIC ---------------------
-        case '/':
-            respondWithFile(response, 'presentation/views/index.html', 'text/html');
-            break;
+    //region API
+    if (requestPath.search(/^\/api\//) != -1){
+        switch (requestPath) {
+            case '/api/addTask':
+                //noinspection JSUnresolvedVariable
+                var description = qs.parse(requestQuery).description;
 
-        case '/favicon.ico':
-            respondWithFile(response, 'presentation/images/favicon.ico', 'image/x-icon');
-            break;
+                businessService.addTask(description, function (task) {
+                    respondWithJson(response, task);
+                });
+                break;
 
-        case '/styles.css':
-            respondWithFile(response, 'presentation/styles/styles.css', 'text/css');
-            break;
+            case '/api/deleteTask':
+                //noinspection JSUnresolvedVariable
+                businessService.deleteTask(
+                    qs.parse(requestQuery).taskId,
+                    function () {
+                        response.end();
+                    });
 
-        case '/styles-tablet.css':
-            respondWithFile(response, 'presentation/styles/styles-tablet.css', 'text/css');
-            break;
+                break;
 
-        case '/styles-smart.css':
-            respondWithFile(response, 'presentation/styles/styles-smart.css', 'text/css');
-            break;
-
-        case '/scripts/client.js':
-            respondWithFile(response, 'presentation/scripts/client.js', 'application/javascript');
-            break;
-
-        case '/scripts/Sortable.js':
-            respondWithFile(response, 'presentation/scripts/Sortable.min.js', 'application/javascript');
-            break;
-
-        case '/scripts/knockout.js':
-            respondWithFile(response, 'presentation/scripts/knockout-3.1.0.js', 'application/javascript');
-            break;
-
-        case '/scripts/koBindingHandlers.js':
-            respondWithFile(response, 'presentation/scripts/koBindingHandlers.js', 'application/javascript');
-            break;
-
-        case '/scripts/jquery.unobtrusive-knockout.js':
-            respondWithFile(response, 'presentation/scripts/jquery.unobtrusive-knockout.min.js', 'application/javascript');
-            break;
-
-        case '/scripts/jquery.js':
-            respondWithFile(response, 'presentation/scripts/jquery-2.1.1.min.js', 'application/javascript');
-            break;
-
-        case '/images/remove.png':
-            respondWithFile(response, 'presentation/images/remove.png', 'image/png');
-            break;
-
-        case '/images/add.png':
-            respondWithFile(response, 'presentation/images/add.png', 'image/png');
-            break;
-
-        case '/images/drag.png':
-            respondWithFile(response, 'presentation/images/drag.png', 'image/png');
-            break;
-
-        case '/images/up.png':
-            respondWithFile(response, 'presentation/images/up.png', 'image/png');
-            break;
-
-        case '/images/down.png':
-        respondWithFile(response, 'presentation/images/down.png', 'image/png');
-        break;
-
-        // -------------------- API ---------------------
-        case '/api/addTask':
-            //noinspection JSUnresolvedVariable
-            var description = qs.parse(requestQuery).description;
-
-            businessService.addTask(description, function (task) {
-                respondWithJson(response, task);
-            });
-            break;
-
-        case '/api/deleteTask':
-            //noinspection JSUnresolvedVariable
-            businessService.deleteTask(
-                qs.parse(requestQuery).taskId,
-                function () {
-                    response.end();
+            case '/api/getTasks':
+                businessService.getTasks(function (tasks) {
+                    respondWithJson(response, tasks);
                 });
 
-            break;
+                break;
 
-        case '/api/getTasks':
-            businessService.getTasks(function (tasks) {
-                respondWithJson(response, tasks);
-            });
+            case '/api/moveTask':
+                //noinspection JSUnresolvedVariable
+                businessService.moveTask(
+                    qs.parse(requestQuery).taskId,
+                    parseInt(qs.parse(requestQuery).position),
+                    function () {
+                        response.end();
+                    });
 
-            break;
+                break;
 
-        case '/api/moveTask':
-            //noinspection JSUnresolvedVariable
-            businessService.moveTask(
-                qs.parse(requestQuery).taskId,
-                parseInt(qs.parse(requestQuery).position),
-                function () {
-                    response.end();
-                });
+            case '/api/setTaskProgress':
+                //noinspection JSUnresolvedVariable
+                businessService.setTaskProgress(
+                    qs.parse(requestQuery).taskId,
+                    parseFloat(qs.parse(requestQuery).progress),
+                    function () {
+                        response.end();
+                    });
 
-            break;
-
-        case '/api/setTaskProgress':
-            //noinspection JSUnresolvedVariable
-            businessService.setTaskProgress(
-                qs.parse(requestQuery).taskId,
-                parseFloat(qs.parse(requestQuery).progress),
-                function () {
-                    response.end();
-                });
-
-            break;
-
-        default:
-            response.end("NO HANDLER.");
+                break;
+        }
     }
+    //endregion
+
+    //region Statics
+    if (requestPath.search(/^\/api\//) == -1) {
+        (requestPath === '/') && (requestPath += 'index.html');
+
+        var responseMime;
+        var fileExtension = requestPath.split('.').pop();
+
+        switch (fileExtension) {
+            case 'html': responseMime = 'text/html'; break;
+            case 'ico': responseMime = 'image/x-icon'; break;
+            case 'css': responseMime = 'text/css'; break;
+            case 'js': responseMime = 'application/javascript'; break;
+            case 'png': responseMime = 'image/png'; break;
+            default: responseMime = '';
+        }
+
+        respondWithFile(response, buildFolder + requestPath, responseMime);
+    }
+    //endregion
 }).listen(port, address);
 
 //----------------------------------------------------
 // Writes compressed file contents to response stream.
 //----------------------------------------------------
 function respondWithFile(responseObject, filePath, mimeType) {
+    var fullPath = path.join(__dirname, filePath);
+
+    if (!fs.existsSync(fullPath)) {
+        responseObject.end("NO HANDLER.");
+        return;
+    }
+
     responseObject.writeHead(200, {'Content-Type': mimeType, 'Content-Encoding': 'gzip'});
-    fs.readFile(path.join(__dirname, filePath),
+    fs.readFile(fullPath,
         function (err, data) {
             if (err) throw err;
             zlib.gzip(data, function (_, result) {
