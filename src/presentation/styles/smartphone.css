@@ -1,0 +1,169 @@
+/* CSS media query
+   First rule defines target device, second - desktop in different sizing. */
+
+/* Smartphone */
+@media (max-device-width: 900px),
+(min-device-width: 1000px) and (max-width: 500px) {
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: monospace;
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .screen-type:before {
+        position: fixed;
+        right: 0;
+        top: 0;
+        color: red;
+        content: 'S'; /* Smartphone */
+    }
+
+    .main {
+        border: 1px solid lightgray;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .new-task {
+        border: 1px solid lightpink;
+        margin-bottom: 5px;
+        display: flex;
+        flex-direction: row;
+    }
+
+    .new-task-input {
+        border: 1px solid deeppink;
+        padding: 15px;
+        font-size: 25px;
+        flex: 8;
+        min-height: 38px;
+    }
+
+    .add-new-task-button {
+        border: 1px solid lightgrey;
+        width: 70px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: 1;
+        min-width: 50px;
+    }
+
+    .add-new-task-button-label {
+        display: none;
+    }
+
+    .add-new-task-button-image {
+        background-image: url("/images/add.png");
+        width: 26px;
+        height: 26px;
+        max-width: inherit;
+    }
+
+    .task-list {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .task {
+        border: 1px solid gray;
+        margin-top: 5px;
+        display: flex;
+        flex-direction: column;
+        min-height: 70px;
+    }
+
+    .task-progress {
+        border: 1px solid lightgrey;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: lightpink;
+        width: 50px;
+        height: 50px;
+    }
+
+    .task-progress-checkbox-checked {
+        background-color: lightgreen;
+    }
+
+    .task-description {
+        border: 1px solid lightgrey;
+        font-size: 25px;
+        padding: 5px;
+        flex: 8;
+        display: flex;
+        align-items: center;
+    }
+
+    .task-buttons {
+        border: 1px solid lightgrey;
+        flex-direction: row;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .task-remove-button {
+        border: 1px solid lightgrey;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 50px;
+    }
+
+    .task-remove-button-label {
+        display: none;
+    }
+
+    .task-remove-button-image {
+        background-image: url("/images/remove.png");
+        width: 26px;
+        height: 26px;
+        max-width: inherit;
+    }
+
+    .task-drag-handle {
+        display: none;
+    }
+
+    .task-shift {
+        border: 1px solid lightgrey;
+        min-width: 50px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .task-shift-up-button {
+        border: 1px solid lightgrey;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .task-shift-up-button-image {
+        background-image: url("/images/up.png");
+        width: 26px;
+        height: 18px;
+    }
+
+    .task-shift-down-button {
+        border: 1px solid lightgrey;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .task-shift-down-button-image {
+        background-image: url("/images/down.png");
+        width: 26px;
+        height: 18px;
+    }
+}

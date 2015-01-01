@@ -1,19 +1,17 @@
 //----------------------------------------------------------
 // Server with request routing (static files + API).
 //----------------------------------------------------------
-var http = require('http');
-var url = require("url");
-var path = require('path');
-var fs = require('fs');
-var qs = require('./lib/node_modules/qs');
-var zlib = require('zlib');
+var http = require('http'),
+    url = require("url"),
+    path = require('path'),
+    fs = require('fs'),
+    qs = require('./lib/node_modules/qs'),
+    zlib = require('zlib'),
+    config = require('./lib/config').config;
 
 var businessService = require('./business/BusinessService.js');
 
-var address = '0.0.0.0';
-var port = '80';
-
-var buildFolder = 'presentation/build';
+var port = config.get('server:port');
 
 http.createServer(function (request, response) {
     console.log("==> " + request.url);
@@ -91,10 +89,10 @@ http.createServer(function (request, response) {
             default: responseMime = '';
         }
 
-        respondWithFile(response, buildFolder + requestPath, responseMime);
+        respondWithFile(response, 'presentation' + requestPath, responseMime);
     }
     //endregion
-}).listen(port, address);
+}).listen(port);
 
 //----------------------------------------------------
 // Writes compressed file contents to response stream.
@@ -102,7 +100,9 @@ http.createServer(function (request, response) {
 function respondWithFile(responseObject, filePath, mimeType) {
     var fullPath = path.join(__dirname, filePath);
 
-    if (!fs.existsSync(fullPath)) {
+    // TODO: Old version of nodejs does not support existsSync()
+    if (fs.existsSync && !fs.existsSync(fullPath)) {
+        responseObject.writeHead(404);
         responseObject.end("NO HANDLER.");
         return;
     }
@@ -127,5 +127,3 @@ function respondWithJson(responseObject, data) {
         responseObject.end(result);
     });
 }
-
-console.info("Server started at " + address + ":" + port);

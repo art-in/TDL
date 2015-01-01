@@ -1,7 +1,8 @@
-var MongoClient = require('../lib/node_modules/mongodb').MongoClient;
-var ObjectID = require('../lib/node_modules/mongodb').ObjectID;
+var MongoClient = require('../lib/node_modules/mongodb').MongoClient,
+    ObjectID = require('../lib/node_modules/mongodb').ObjectID,
+    config = require('../lib/config').config;
 
-var CONNECTION_STRING = "mongodb://127.0.0.1:27017/TDL";
+var connectionString = config.get('database:connectionString');
 
 var TASKS_COLLECTION = "Tasks";
 
@@ -9,7 +10,7 @@ var TASKS_COLLECTION = "Tasks";
 // Adds new task to the data storage.
 //----------------------------------------------------
 exports.addTask = function (newTask, callback) {
-    MongoClient.connect(CONNECTION_STRING, function (err, db) {
+    MongoClient.connect(connectionString, function (err, db) {
         if (err) throw err;
         console.log("connected to database");
 
@@ -28,7 +29,7 @@ exports.addTask = function (newTask, callback) {
 // Returns all tasks exist in the data storage.
 //----------------------------------------------------
 exports.getTasks = function (callback) {
-    MongoClient.connect(CONNECTION_STRING, function (err, db) {
+    MongoClient.connect(connectionString, function (err, db) {
         if (err) throw err;
         console.log("connected to database");
 
@@ -49,7 +50,7 @@ exports.getTasks = function (callback) {
 // Returns one existing task from the data storage.
 //----------------------------------------------------
 exports.getTask = function (taskId, callback) {
-    MongoClient.connect(CONNECTION_STRING, function (err, db) {
+    MongoClient.connect(connectionString, function (err, db) {
         if (err) throw err;
         console.log("connected to database");
 
@@ -69,7 +70,7 @@ exports.getTask = function (taskId, callback) {
 // Updates existing task in the system.
 //----------------------------------------------------
 exports.updateTask = function (task, callback) {
-    MongoClient.connect(CONNECTION_STRING, function (err, db) {
+    MongoClient.connect(connectionString, function (err, db) {
         if (err) throw err;
         console.log("connected to database");
 
@@ -88,7 +89,7 @@ exports.updateTask = function (task, callback) {
 // Deletes task from the data storage.
 //----------------------------------------------------
 exports.deleteTask = function (taskId, callback) {
-    MongoClient.connect(CONNECTION_STRING, function (err, db) {
+    MongoClient.connect(connectionString, function (err, db) {
         if (err) throw err;
         console.log("connected to database");
 
@@ -110,7 +111,7 @@ exports.shiftTaskPositions = function (startPosition, endPosition, shift, callba
     startPosition = startPosition != null ? startPosition : 0;
     endPosition = endPosition != null ? endPosition : 1000000;
 
-    MongoClient.connect(CONNECTION_STRING, function (err, db) {
+    MongoClient.connect(connectionString, function (err, db) {
         if (err) throw err;
         console.log("connected to database");
 
@@ -131,7 +132,7 @@ exports.shiftTaskPositions = function (startPosition, endPosition, shift, callba
 // Sets progress for existing task.
 //----------------------------------------------------
 exports.setTaskProgress = function (taskId, progress, callback) {
-    MongoClient.connect(CONNECTION_STRING, function (err, db) {
+    MongoClient.connect(connectionString, function (err, db) {
         if (err) throw err;
         console.log("connected to database");
 

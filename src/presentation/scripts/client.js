@@ -213,7 +213,7 @@ var TaskListViewModel = function () {
 };
 // ---------------------  HANDLERS  -------------------------------------------
 function TaskList_ItemMoved(e) {
-    var taskNode = e.target;
+    var taskNode = e.item;
 
     var task = ko.dataFor(taskNode);
 

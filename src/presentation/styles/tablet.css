@@ -1,0 +1,175 @@
+/* CSS media query
+   First rule defines target device, second - desktop in different sizing. */
+
+/* Tablet */
+@media (min-device-width: 900px) and (max-device-width: 1000px),
+(min-device-width: 1000px) and (min-width: 500px) and (max-width: 900px) {
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: monospace;
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .screen-type:before {
+        position: fixed;
+        right: 0;
+        top: 0;
+        color: red;
+        content: 'T'; /* Tablet */
+    }
+
+    .main {
+        border: 1px solid lightgray;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .new-task {
+        border: 1px solid lightpink;
+        margin-bottom: 5px;
+        display: flex;
+        flex-direction: row;
+    }
+
+    .new-task-input {
+        border: 1px solid deeppink;
+        padding: 5px;
+        font-size: 24px;
+        flex: 6;
+        min-height: 38px;
+    }
+
+    .add-new-task-button {
+        border: 1px solid lightgrey;
+        display: flex;
+        align-items: center;
+        width: 140px;
+        text-align: center;
+    }
+
+    .add-new-task-button-image {
+        background-image: url("/images/add.png");
+        width: 26px;
+        height: 26px;
+        max-width: 26px;
+        margin: 0 5px;
+        flex: 1;
+    }
+
+    .add-new-task-button-label {
+        flex: 1;
+        font-size: 22px;
+    }
+
+    .task-list {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .task {
+        border: 1px solid gray;
+        margin-top: 10px;
+        display: flex;
+        flex-direction: row;
+        min-height: 45px;
+    }
+
+    .task-progress {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: lightpink;
+        width: 45px;
+    }
+
+    .task-progress-checkbox-checked {
+        background-color: lightgreen;
+    }
+
+    .task-description {
+        border: 1px solid lightblue;
+        font-size: 24px;
+        padding: 5px;
+        flex: 3;
+        display: flex;
+        align-items: center;
+    }
+
+    .task-buttons {
+        border: 1px solid #d3d3d3;
+        flex-direction: row;
+        display: flex;
+        flex: 1;
+        min-width: 192px;
+        max-width: 230px;
+    }
+
+    .task-remove-button {
+        border: 1px solid lightgrey;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 140px;
+        flex-direction: row;
+        text-align: center;
+    }
+
+    .task-remove-button-image {
+        background-image: url("/images/remove.png");
+        width: 26px;
+        height: 26px;
+        max-width: 26px;
+        margin: 0 5px;
+        flex: 1;
+    }
+
+    .task-remove-button-label {
+        flex: 1;
+        font-size: 22px;
+    }
+
+    .task-drag-handle {
+        display: none;
+    }
+
+    .task-shift {
+        border: 1px solid lightgrey;
+        min-width: 50px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .task-shift-up-button {
+        border: 1px solid lightgrey;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .task-shift-up-button-image {
+        background-image: url("/images/up.png");
+        width: 26px;
+        height: 18px;
+    }
+
+    .task-shift-down-button {
+        border: 1px solid lightgrey;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .task-shift-down-button-image {
+        background-image: url("/images/down.png");
+        width: 26px;
+        height: 18px;
+    }
+}
