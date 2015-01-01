@@ -3,4 +3,5 @@
 *.iml
 *.iws
 
-bin/
+build/bin/
+build/config.overrides.json
