@@ -3,18 +3,16 @@
 //----------------------------------------------------------
 var http = require('http'),
     url = require("url"),
-    path = require('path'),
-    fs = require('fs'),
     qs = require('./lib/node_modules/qs'),
-    zlib = require('zlib'),
-    config = require('./lib/config').config;
+    config = require('./lib/config').config,
+    helpers = require('./lib/server.helpers');
 
 var businessService = require('./business/BusinessService.js');
 
 var port = config.get('server:port');
 
 http.createServer(function (request, response) {
-    console.log("==> " + request.url);
+    console.log("====> " + request.url);
 
     var requestPath = url.parse(request.url).pathname;
     var requestQuery = url.parse(request.url).query;
@@ -27,7 +25,7 @@ http.createServer(function (request, response) {
                 var description = qs.parse(requestQuery).description;
 
                 businessService.addTask(description, function (task) {
-                    respondWithJson(response, task);
+                    helpers.respondWithJson(response, requestPath, task);
                 });
                 break;
 
@@ -43,7 +41,7 @@ http.createServer(function (request, response) {
 
             case '/api/getTasks':
                 businessService.getTasks(function (tasks) {
-                    respondWithJson(response, tasks);
+                    helpers.respondWithJson(response, requestPath, tasks);
                 });
 
                 break;
@@ -69,6 +67,9 @@ http.createServer(function (request, response) {
                     });
 
                 break;
+
+            default:
+                helpers.respondApiFuncNotFound(response, requestPath);
         }
     }
     //endregion
@@ -89,41 +90,7 @@ http.createServer(function (request, response) {
             default: responseMime = '';
         }
 
-        respondWithFile(response, 'presentation' + requestPath, responseMime);
+        helpers.respondWithFile(request, response, 'presentation' + requestPath, responseMime);
     }
     //endregion
 }).listen(port);
-
-//----------------------------------------------------
-// Writes compressed file contents to response stream.
-//----------------------------------------------------
-function respondWithFile(responseObject, filePath, mimeType) {
-    var fullPath = path.join(__dirname, filePath);
-
-    // TODO: Old version of nodejs does not support existsSync()
-    if (fs.existsSync && !fs.existsSync(fullPath)) {
-        responseObject.writeHead(404);
-        responseObject.end("NO HANDLER.");
-        return;
-    }
-
-    responseObject.writeHead(200, {'Content-Type': mimeType, 'Content-Encoding': 'gzip'});
-    fs.readFile(fullPath,
-        function (err, data) {
-            if (err) throw err;
-            zlib.gzip(data, function (_, result) {
-                responseObject.end(result);
-            });
-        }
-    );
-}
-
-//----------------------------------------------------
-// Writes compressed JSONified data to response stream.
-//----------------------------------------------------
-function respondWithJson(responseObject, data) {
-    responseObject.writeHead(200, {'Content-Type': 'application/json', 'Content-Encoding': 'gzip'});
-    zlib.gzip(JSON.stringify(data), function (_, result) {
-        responseObject.end(result);
-    });
-}
