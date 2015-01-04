@@ -36,8 +36,6 @@ window.onload = function () {
 
 // Setup KO bindings.
 function setupBindings() {
-    logFunctionCall();
-
     $('.' + CSS_CLASS_NEW_TASK_TEXTBOX).dataBind({ event: { "'keydown'": '$root.newTaskChanged' }});
     $('.' + CSS_CLASS_NEW_TASK_ADD_BUTTON).dataBind({ click: '$root.addTask' });
     $('.' + CSS_CLASS_TASK_LIST).dataBind({ foreach: '$root.Tasks' });
@@ -58,8 +56,6 @@ function setupBindings() {
 
 // Install control handlers.
 function installControlHandlers() {
-    logFunctionCall();
-
     NewTaskTextBox = document.getElementsByClassName(CSS_CLASS_NEW_TASK_TEXTBOX)[0];
     TaskListContainer = document.getElementById("cntTaskList");
 }
@@ -96,8 +92,6 @@ var TaskViewModel = function (task) {
                 return self.Progress() == 1
             },
             write: function (checked) {
-                logFunctionCall();
-
                 self.Progress(checked ? 1 : 0);
 
                 var parameters = [
@@ -119,8 +113,6 @@ var TaskListViewModel = function () {
     // ---------------------------------
     // Loads tasks from server.
     this.reloadTasks = function () {
-        logFunctionCall();
-
         callServerAPI(API_GET_TASKS, null, function (taskModelsJson) {
             var tasks = toViewModels(taskModelsJson);
             taskListViewModel.Tasks(tasks);
@@ -130,8 +122,6 @@ var TaskListViewModel = function () {
     // ---------------------------------
     // Removes tasks.
     this.removeTask = function (task) {
-        logFunctionCall();
-
         self.Tasks.remove(task);
 
         var parameters = [
@@ -144,8 +134,6 @@ var TaskListViewModel = function () {
     // ---------------------------------
     // Adds new task.
     this.addTask = function () {
-        logFunctionCall();
-
         var description = NewTaskTextBox.innerHTML;
 
         // Validate new task.
@@ -172,8 +160,6 @@ var TaskListViewModel = function () {
         var currentPosition = self.Tasks.indexOf(task);
         var newPosition = currentPosition - 1;
         if (newPosition >= 0) {
-            logFunctionCall();
-
             var array = self.Tasks();
             self.Tasks.splice(newPosition, 2, array[currentPosition], array[newPosition]);
             moveTask(task.Id(), newPosition);
@@ -186,8 +172,6 @@ var TaskListViewModel = function () {
         var currentPosition = self.Tasks.indexOf(task);
         var newPosition = currentPosition + 1;
         if (newPosition < self.Tasks().length) {
-            logFunctionCall();
-
             var array = self.Tasks();
             self.Tasks.splice(currentPosition, 2, array[newPosition], array[currentPosition]);
             moveTask(task.Id(), newPosition);
@@ -248,7 +232,6 @@ function moveTask(taskId, newPosition) {
 }
 
 function refreshNewTaskField() {
-    logFunctionCall();
     NewTaskTextBox.innerHTML = '';
 }
 // ---------------------  MAPPERS -------------------------------------------
@@ -262,28 +245,6 @@ function toViewModels(taskModelsJson) {
     return taskViewModels;
 }
 // ---------------------  HELPERS -------------------------------------------
-function logFunctionCall() {
-    var callerName = arguments.callee.caller.name;
-    var callerArgs = Array.prototype.slice.call(arguments.callee.caller.arguments, 0);
-
-    var args = [];
-    for (var i = 0; i < callerArgs.length; i++) {
-        if (isFunction(callerArgs[i])) {
-            args.push("('[object Function]')");
-        }
-        else {
-            args.push("('" + callerArgs[i] + "')");
-        }
-    }
-
-    if (args.length > 0) {
-        console.log("--> " + callerName + "(" + args.join(", ") + ")");
-    }
-    else {
-        console.log("--> " + callerName + "()")
-    }
-}
-
 function isFunction(functionToCheck) {
     var getType = {};
     return functionToCheck && getType.toString.call(functionToCheck) === '[object Function]';
@@ -330,8 +291,6 @@ function getChildNodeIndex(container, childNode, childCssClass) {
 }
 // ---------------------  TRANSPORT  -------------------------------------------
 function callServerAPI(apiMethod, parameters, callback) {
-    logFunctionCall();
-
     var datasourceAddress = apiMethod;
 
     if (parameters) {
@@ -350,17 +309,19 @@ function callServerAPI(apiMethod, parameters, callback) {
         if (XHR.readyState == 4) {
             var responseData = XHR.responseText;
             console.log("data loaded: " + responseData);
+            console.groupEnd();
             callback(responseData);
         }
     };
 
     XHR.onerror = function () {
         console.log(XHR.statusText);
+        console.groupEnd();
     };
 
     XHR.open("GET", datasourceAddress, true);
     XHR.send(null);
 
-    console.log('GET ' + datasourceAddress);
+    console.groupCollapsed('GET ' + datasourceAddress);
 }
 // -----------------------------------------------------------------------------
