@@ -5,14 +5,18 @@ var http = require('http'),
     url = require("url"),
     qs = require('./lib/node_modules/qs'),
     config = require('./lib/config').config,
-    helpers = require('./lib/server.helpers');
+    helpers = require('./lib/server.helpers'),
+    logger = require('./lib/log/Logger').logger,
+    RequestLM = require('./lib/log/messages/RequestLogMessage').message,
+    ResponseLM = require('./lib/log/messages/ResponseLogMessage').message,
+    ResponseLMTypes = require('./lib/log/messages/ResponseLogMessageTypes').types;
 
 var businessService = require('./business/BusinessService.js');
 
 var port = config.get('server:port');
 
 http.createServer(function (request, response) {
-    console.log("====> " + request.url);
+    logger.log(new RequestLM(request.url));
 
     var requestPath = url.parse(request.url).pathname;
     var requestQuery = url.parse(request.url).query;
@@ -69,7 +73,10 @@ http.createServer(function (request, response) {
                 break;
 
             default:
-                helpers.respondApiFuncNotFound(response, requestPath);
+                response.writeHead(404);
+                response.end("Not Found");
+                logger.log(new ResponseLM(ResponseLMTypes.API,
+                    {requestPath: requestPath, statusCode: response.statusCode}));
         }
     }
     //endregion
@@ -90,7 +97,11 @@ http.createServer(function (request, response) {
             default: responseMime = '';
         }
 
-        helpers.respondWithFile(request, response, 'presentation' + requestPath, responseMime);
+        helpers.respondWithFile(
+            request,
+            response,
+            'presentation' + requestPath,
+            responseMime);
     }
     //endregion
 }).listen(port);

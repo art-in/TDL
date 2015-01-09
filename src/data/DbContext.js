@@ -1,6 +1,9 @@
 var MongoClient = require('../lib/node_modules/mongodb').MongoClient,
     ObjectID = require('../lib/node_modules/mongodb').ObjectID,
-    config = require('../lib/config').config;
+    config = require('../lib/config').config,
+    logger = require('../lib/log/Logger').logger,
+    DatabaseLM = require('../lib/log/messages/DatabaseLogMessage').message,
+    DatabaseLMTypes = require('../lib/log/messages/DatabaseLogMessageTypes').types;
 
 var connectionString = config.get('database:connectionString');
 
@@ -12,13 +15,13 @@ var TASKS_COLLECTION = "Tasks";
 exports.addTask = function (newTask, callback) {
     MongoClient.connect(connectionString, function (err, db) {
         if (err) throw err;
-        console.log("connected to database");
 
         db.collection(TASKS_COLLECTION).insert(
             newTask,
             function (err, records) {
                 if (err) throw err;
-                console.log("New task added as " + records[0]._id);
+                logger.log(new DatabaseLM(DatabaseLMTypes.AddTask,
+                    {taskId: records[0]._id}));
                 callback(records[0]);
                 db.close();
             });
@@ -31,7 +34,6 @@ exports.addTask = function (newTask, callback) {
 exports.getTasks = function (callback) {
     MongoClient.connect(connectionString, function (err, db) {
         if (err) throw err;
-        console.log("connected to database");
 
         db.collection(TASKS_COLLECTION)
             .find()
@@ -39,7 +41,8 @@ exports.getTasks = function (callback) {
             .toArray(
             function (err, tasks) {
                 if (err) throw err;
-                console.log("Returning tasks number: " + tasks.length);
+                logger.log(new DatabaseLM(DatabaseLMTypes.GetTasks,
+                    {taskCount: tasks.length}));
                 callback(tasks);
                 db.close();
             });
@@ -52,14 +55,14 @@ exports.getTasks = function (callback) {
 exports.getTask = function (taskId, callback) {
     MongoClient.connect(connectionString, function (err, db) {
         if (err) throw err;
-        console.log("connected to database");
 
         db.collection(TASKS_COLLECTION)
             .findOne(
             {_id: ObjectID(taskId)},
             function (err, task) {
                 if (err) throw err;
-                console.log("Returning task: " + taskId);
+                logger.log(new DatabaseLM(DatabaseLMTypes.GetTask,
+                    {taskId: taskId}));
                 callback(task);
                 db.close();
             });
@@ -72,13 +75,13 @@ exports.getTask = function (taskId, callback) {
 exports.updateTask = function (task, callback) {
     MongoClient.connect(connectionString, function (err, db) {
         if (err) throw err;
-        console.log("connected to database");
 
         db.collection(TASKS_COLLECTION).save(
             task,
             function (err) {
                 if (err) throw err;
-                console.log("Task saved: " + task._id);
+                logger.log(new DatabaseLM(DatabaseLMTypes.UpdateTask,
+                    {taskId: task._id}));
                 callback();
                 db.close();
             });
@@ -91,13 +94,13 @@ exports.updateTask = function (task, callback) {
 exports.deleteTask = function (taskId, callback) {
     MongoClient.connect(connectionString, function (err, db) {
         if (err) throw err;
-        console.log("connected to database");
 
         db.collection(TASKS_COLLECTION).remove(
             {"_id": ObjectID(taskId)},
             function (err) {
                 if (err) throw err;
-                console.log("Task was removed: " + taskId);
+                logger.log(new DatabaseLM(DatabaseLMTypes.DeleteTask,
+                    {taskId: taskId}));
                 callback();
                 db.close();
             })
@@ -109,11 +112,10 @@ exports.deleteTask = function (taskId, callback) {
 //----------------------------------------------------
 exports.shiftTaskPositions = function (startPosition, endPosition, shift, callback) {
     startPosition = startPosition != null ? startPosition : 0;
-    endPosition = endPosition != null ? endPosition : 1000000;
+    endPosition = endPosition != null ? endPosition : Number.MAX_VALUE;
 
     MongoClient.connect(connectionString, function (err, db) {
         if (err) throw err;
-        console.log("connected to database");
 
         db.collection(TASKS_COLLECTION).update(
             {Position: {$gte: startPosition, $lte: endPosition}},
@@ -121,7 +123,8 @@ exports.shiftTaskPositions = function (startPosition, endPosition, shift, callba
             {multi: true},
             function (err) {
                 if (err) throw err;
-                console.log("Tasks [" + startPosition + " ; " + endPosition + "]: shifted to " + shift);
+                logger.log(new DatabaseLM(DatabaseLMTypes.ShiftTaskPositions,
+                    {startPosition: startPosition, endPosition: endPosition, shift: shift}));
                 callback();
                 db.close();
             });
@@ -134,14 +137,14 @@ exports.shiftTaskPositions = function (startPosition, endPosition, shift, callba
 exports.setTaskProgress = function (taskId, progress, callback) {
     MongoClient.connect(connectionString, function (err, db) {
         if (err) throw err;
-        console.log("connected to database");
 
         db.collection(TASKS_COLLECTION).update(
             {_id: ObjectID(taskId)},
             {$set: {Progress: progress}},
             function(err) {
                 if (err) throw err;
-                console.log("Set task progress (" + taskId + "): " + progress);
+                logger.log(new DatabaseLM(DatabaseLMTypes.SetTaskProgress,
+                    {taskId: taskId, progress: progress}));
                 callback();
                 db.close();
             }

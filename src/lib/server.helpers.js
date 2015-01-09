@@ -1,7 +1,9 @@
 var path = require('path'),
     fs = require('fs'),
     zlib = require('zlib'),
-    util = require('util');
+    logger = require('./log/Logger').logger,
+    ResponseLM = require('./log/messages/ResponseLogMessage').message,
+    ResponseLMTypes = require('./log/messages/ResponseLogMessageTypes').types;
 
 //----------------------------------------------------
 // Writes compressed file contents to response stream.
@@ -14,7 +16,8 @@ exports.respondWithFile = function (request, response, filePath, mimeType) {
             if (err) {
                 response.writeHead(404);
                 response.end("File not found.");
-                console.log(util.format('X---- %s [404 - Not Found]', filePath));
+                logger.log(new ResponseLM(ResponseLMTypes.File,
+                    {requestPath: filePath, statusCode: response.statusCode}));
                 return;
             }
 
@@ -29,7 +32,6 @@ exports.respondWithFile = function (request, response, filePath, mimeType) {
                         'Last-Modified': modifiedDate
                     });
                     response.end(); // Take it from cache.
-                    console.log(util.format('<---- %s [304 - Not Modified]', filePath));
                 }
                 else {
                     response.writeHead(200,
@@ -41,9 +43,11 @@ exports.respondWithFile = function (request, response, filePath, mimeType) {
 
                     zlib.gzip(data, function (_, result) {
                         response.end(result);
-                        console.log(util.format('<==== %s [200 - OK]', filePath));
                     });
                 }
+
+                logger.log(new ResponseLM(ResponseLMTypes.File,
+                    {requestPath: filePath, statusCode: response.statusCode}));
             });
         }
     );
@@ -52,7 +56,7 @@ exports.respondWithFile = function (request, response, filePath, mimeType) {
 //----------------------------------------------------
 // Writes compressed JSONified data to response stream.
 //----------------------------------------------------
-exports.respondWithJson = function (response, requestPath, data) {
+exports.respondWithJson = function (response, apiPath, data) {
     response.writeHead(200,
         {
             'Content-Type': 'application/json',
@@ -62,16 +66,7 @@ exports.respondWithJson = function (response, requestPath, data) {
 
     zlib.gzip(JSON.stringify(data), function (_, result) {
         response.end(result);
-        console.log(util.format('<==== %s [200 - OK]', requestPath));
-        console.log('[200 - OK]');
+        logger.log(new ResponseLM(ResponseLMTypes.API,
+            {requestPath: apiPath, statusCode: response.statusCode}));
     });
-};
-
-//----------------------------------------------------
-// Writes appropriate response when API function was not found.
-//----------------------------------------------------
-exports.respondApiFuncNotFound = function (response, requestPath) {
-    response.writeHead(404);
-    response.end("Not Found");
-    console.log(util.format('X--- %s [404 - Not Found]', requestPath));
 };

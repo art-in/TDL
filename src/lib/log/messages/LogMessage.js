@@ -1,0 +1,11 @@
+function LogMessage (message) {
+    this.message = message;
+}
+
+LogMessage.prototype.message = 'EMPTY MESSAGE';
+
+LogMessage.prototype.toString = function() {
+    return message;
+}
+
+exports.message = LogMessage;
