@@ -13,8 +13,6 @@ var http = require('http'),
 
 var businessService = require('./business/BusinessService.js');
 
-var port = config.get('server:port');
-
 http.createServer(function (request, response) {
     logger.log(new RequestLM(request.url));
 
@@ -104,4 +102,4 @@ http.createServer(function (request, response) {
             responseMime);
     }
     //endregion
-}).listen(port);
+}).listen(config.get('server:port'), config.get('server:ip'));
