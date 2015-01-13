@@ -1,6 +1,6 @@
 {
     "server": {
-        "ip": "localhost",
+        "ip": "0.0.0.0",
         "port": 80
     },
     "database": {
