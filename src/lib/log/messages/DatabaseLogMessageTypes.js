@@ -4,6 +4,5 @@ exports.types = {
     GetTask: 3,
     UpdateTask: 4,
     DeleteTask: 5,
-    ShiftTaskPositions: 6,
-    SetTaskProgress: 7
+    ShiftTaskPositions: 6
 };

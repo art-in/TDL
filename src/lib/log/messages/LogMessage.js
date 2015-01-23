@@ -5,7 +5,7 @@ function LogMessage (message) {
 LogMessage.prototype.message = 'EMPTY MESSAGE';
 
 LogMessage.prototype.toString = function() {
-    return message;
+    return this.message;
 }
 
 exports.message = LogMessage;

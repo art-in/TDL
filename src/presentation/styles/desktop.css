@@ -94,8 +94,12 @@
         font-size: 22px;
         padding: 0 5px;
         flex: 4;
-        display: flex;
         align-items: center;
+        outline: none;
+    }
+    
+    .task-description.editing {
+        border: 2px solid yellow;
     }
 
     .task-buttons {
@@ -103,14 +107,42 @@
         flex: 1;
         display: flex;
         flex-direction: row;
+        max-height: 150px;
     }
 
+    .task-edit {
+        display: flex;
+        flex: 1;
+    }
+    
+    .task-edit-button {
+        display: flex;
+        flex: 1;
+    }
+    
+    .task-edit-save-button {
+        display: flex;
+        flex: 1;
+    }
+    
+    .task-edit-cancel-button {
+        display: flex;
+        flex: 1;
+    }
+    
+    .task-edit-button,
+    .task-edit-save-button,
+    .task-edit-cancel-button,
     .task-remove-button {
         border: 1px solid lightgrey;
-        display: flex;
         align-items: center;
         text-align: center;
-        width: 90px;
+        justify-content: center;
+    }
+    
+    .task-remove-button {
+        display: flex;
+        flex: 1;
     }
 
     .task-remove-button-image {

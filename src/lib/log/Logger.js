@@ -59,16 +59,20 @@ Logger.prototype.log = function (logMessage) {
                     message = util.format("Returning task (%s)", logMessage.taskId);
                     break;
                 case LogMessageTypes.UpdateTask:
-                    message = util.format("Task updated (%s)", logMessage.taskId);
+                    message = util.format("Task updated (%s) description = '%s', position = %s, progress = %s",
+                        logMessage.taskId, 
+                        logMessage.description, 
+                        logMessage.position,
+                        logMessage.progress);
                     break;
                 case LogMessageTypes.DeleteTask:
                     message = util.format("Task was removed (%s)", logMessage.taskId);
                     break;
                 case LogMessageTypes.ShiftTaskPositions:
-                    message = util.format("Tasks in range [%d ; %d] was shifted to %d position(s)", logMessage.startPosition, logMessage.endPosition, logMessage.shift);
-                    break;
-                case LogMessageTypes.SetTaskProgress:
-                    message = util.format("Set task progress (%s): %d", logMessage.taskId, logMessage.progress);
+                    message = util.format("Tasks in range [%d ; %d] was shifted to %d position(s)",
+                        logMessage.startPosition, 
+                        logMessage.endPosition, 
+                        logMessage.shift);
                     break;
                 default:
                     throw new Error('Unknown message type: ' + logMessage.type);

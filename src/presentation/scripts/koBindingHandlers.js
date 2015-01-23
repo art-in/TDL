@@ -1,43 +1,121 @@
 /**
  * Sets background color to the element
- * depending on project tag found in the description.
+ * depending on tag found in the @source string.
  * Binding properties:
- *  @Description - task description;
- *  @Tags - array of project tag definitions (objects - {Tag, Color});
- *  @DefaultTag (optional) - default project tag
- *                           to associate with task if no tag was found in description;
+ *  @source - source string observable;
+ *  @tags - array of tag definitions (objects - {tag, color});
+ *  @defaultTag (optional) - default tag if no tag found in source string.
  */
-ko.bindingHandlers.projectAssignment = {
+ko.bindingHandlers.backgroundColorTag = {
     update: function(element, valueAccessor) {
         var value = valueAccessor();
 
-        var description = value.Description();
-        var tags = value.Tags;
-        var defaultTag = value.DefaultTag;
+        var source = value.source();
+        var tags = value.tags;
+        var defaultTag = value.defaultTag;
 
         // Check arguments.
-        if (!description || !tags || tags.length < 1) {
+        if (!source || !tags || tags.length < 1) {
             return;
         }
 
-        // Find project tag to associate this description with.
+        // Find tag to associate this description with.
         var tagFound = false;
         tags.forEach(function(tag) {
-            if (description.indexOf(tag.Tag) != -1) {
-                $(element).css({'background-color': tag.Color });
+            if (source.indexOf(tag.tag) != -1) {
+                $(element).css({'background-color': tag.color });
                 tagFound = true;
                 return true;
             }
         });
 
-        // Set default project tag.
+        // Set default tag.
         if (!tagFound && defaultTag) {
             tags.forEach(function(tag) {
-                if (tag.Tag == defaultTag ) {
-                    $(element).css({'background-color': tag.Color });
+                if (tag.tag == defaultTag ) {
+                    $(element).css({'background-color': tag.color });
                     return true;
                 }
             });
         }
     }
 };
+
+/**
+ * Synchronizes observable with inner HTML of the element.
+ */
+ko.bindingHandlers.editableHTML = {
+    init: function(element, valueAccessor) {
+        var $element = $(element);
+        var initialValue = ko.utils.unwrapObservable(valueAccessor());
+        $element.html(initialValue);
+        $element.on('keyup', function() {
+            var observable = valueAccessor();
+            observable($element.html());
+        });
+    },
+    update: function(element, valueAccessor) {
+        var $element = $(element);
+        
+        var value = ko.unwrap(valueAccessor());
+        
+        if ($element.html() !== value) {
+            $element.html(value);
+        }
+    }
+};
+
+/**
+ * Sets value of contentEditable attribute of target element.
+ */
+ko.bindingHandlers.contentEditable = {
+    update: function(element, valueAccessor) {
+        var isCE = ko.unwrap(valueAccessor());
+        
+        if (isCE) {
+            element.contentEditable = true;
+        } else {
+            element.contentEditable = false;
+        }
+    }
+}
+
+/**
+ * Calls function when 'Return'-key pressed on target element.
+ * 'Return'+Ctrl adds new line.
+ */
+ko.bindingHandlers.returnKeyPress = {
+    init: function(element, valueAccessor) {
+        $(element).on('keydown', function(e) {
+            // 'Return'
+            if (e.keyCode == 13 && !e.ctrlKey) {
+                valueAccessor()();
+                return false;
+            }
+
+            // 'Return + CTRL'
+            if (e.keyCode == 13 && e.ctrlKey) {
+                document.execCommand('insertHTML', false, '<br><br>');
+                return false;
+            }
+        });
+    }
+};
+
+/**
+ * Selects all contents of target element when observable turns to true.
+ */
+ko.bindingHandlers.contentSelect = {
+    update: function(element, valueAccessor) {
+        var select = ko.unwrap(valueAccessor());
+        
+        if (select) {
+            var range = document.createRange();
+            range.selectNodeContents(element);
+            
+            var sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
+        }
+    }
+}

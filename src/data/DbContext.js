@@ -37,7 +37,7 @@ exports.getTasks = function (callback) {
 
         db.collection(TASKS_COLLECTION)
             .find()
-            .sort({Position: 1})
+            .sort({position: 1})
             .toArray(
             function (err, tasks) {
                 if (err) throw err;
@@ -70,9 +70,22 @@ exports.getTask = function (taskId, callback) {
 };
 
 //----------------------------------------------------
-// Updates existing task in the system.
+// Updates existing task.
+// TODO: add good comments. Oveloads.
 //----------------------------------------------------
-exports.updateTask = function (task, callback) {
+exports.updateTask = function () {
+    if (typeof arguments[0] == 'object') {
+        updateTaskEntirely.apply(null, arguments);
+    }
+    else {
+        updateTaskProperties.apply(null, arguments);
+    }
+}
+
+//----------------------------------------------------
+// Updates existing task entirely.
+//----------------------------------------------------
+var updateTaskEntirely = function (task, callback) {
     MongoClient.connect(connectionString, function (err, db) {
         if (err) throw err;
 
@@ -81,10 +94,37 @@ exports.updateTask = function (task, callback) {
             function (err) {
                 if (err) throw err;
                 logger.log(new DatabaseLM(DatabaseLMTypes.UpdateTask,
-                    {taskId: task._id}));
+                    {taskId: task._id,
+                     description: task.description,
+                     position: task.position,
+                     progress: task.progress}));
                 callback();
                 db.close();
             });
+    });
+};
+
+
+//----------------------------------------------------
+// Updates properties of existing task.
+//----------------------------------------------------
+var updateTaskProperties = function (taskId, properties, callback) {
+    MongoClient.connect(connectionString, function (err, db) {
+        if (err) throw err;
+        
+        db.collection(TASKS_COLLECTION).update(
+            {_id: ObjectID(taskId)},
+            {$set: properties},
+            function(err) {
+                if (err) throw err;
+                
+                properties.taskId = taskId;
+                
+                logger.log(new DatabaseLM(DatabaseLMTypes.UpdateTask, properties));
+                callback();
+                db.close();
+            }
+        ) 
     });
 };
 
@@ -96,7 +136,7 @@ exports.deleteTask = function (taskId, callback) {
         if (err) throw err;
 
         db.collection(TASKS_COLLECTION).remove(
-            {"_id": ObjectID(taskId)},
+            {_id: ObjectID(taskId)},
             function (err) {
                 if (err) throw err;
                 logger.log(new DatabaseLM(DatabaseLMTypes.DeleteTask,
@@ -118,8 +158,8 @@ exports.shiftTaskPositions = function (startPosition, endPosition, shift, callba
         if (err) throw err;
 
         db.collection(TASKS_COLLECTION).update(
-            {Position: {$gte: startPosition, $lte: endPosition}},
-            {$inc: {Position: shift}},
+            {position: {$gte: startPosition, $lte: endPosition}},
+            {$inc: {position: shift}},
             {multi: true},
             function (err) {
                 if (err) throw err;
@@ -128,26 +168,5 @@ exports.shiftTaskPositions = function (startPosition, endPosition, shift, callba
                 callback();
                 db.close();
             });
-    });
-};
-
-//----------------------------------------------------
-// Sets progress for existing task.
-//----------------------------------------------------
-exports.setTaskProgress = function (taskId, progress, callback) {
-    MongoClient.connect(connectionString, function (err, db) {
-        if (err) throw err;
-
-        db.collection(TASKS_COLLECTION).update(
-            {_id: ObjectID(taskId)},
-            {$set: {Progress: progress}},
-            function(err) {
-                if (err) throw err;
-                logger.log(new DatabaseLM(DatabaseLMTypes.SetTaskProgress,
-                    {taskId: taskId, progress: progress}));
-                callback();
-                db.close();
-            }
-        )
     });
 };

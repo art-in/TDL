@@ -33,13 +33,29 @@
     </div>
 
     <div id="cntTaskList" class="task-list">
-        <div id="tmpTask" class="task"> <!-- Task container template. -->
-            <div class="task-progress">
+        <div id="tmpTask" class="task"> <!-- Task container -->
+            <label class="task-progress">
                 <input type="checkbox" class="task-progress-checkbox" />
-            </div>
+            </label>
             <div class="task-description">
             </div>
             <div class="task-buttons">
+                <div class="task-edit">
+                    <div class="task-edit-button">
+                        <div>
+                            edit
+                        </div>
+                    </div>
+                    <div class="task-edit-save-button">
+                        <div>save</div>
+                    </div>
+                    <div class="task-edit-cancel-button">
+                        <div>cancel</div>
+                    </div>
+                </div>
+                <div class="task-remove-button">
+                    <div class="task-remove-button-image"></div>
+                </div>
                 <div class="task-shift">
                     <div class="task-shift-up-button">
                         <div class="task-shift-up-button-image"></div>
@@ -50,12 +66,6 @@
                 </div>
                 <div class="task-drag-handle">
                     <div class="task-drag-handle-image"></div>
-                </div>
-                <div class="task-remove-button">
-                    <div class="task-remove-button-image"></div>
-                    <div class="task-remove-button-label">
-                        remove
-                    </div>
                 </div>
             </div>
         </div>

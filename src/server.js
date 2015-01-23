@@ -5,7 +5,7 @@ var http = require('http'),
     url = require("url"),
     qs = require('./lib/node_modules/qs'),
     config = require('./lib/config').config,
-    helpers = require('./lib/server.helpers'),
+    srvHelpers = require('./lib/server.helpers'),
     logger = require('./lib/log/Logger').logger,
     RequestLM = require('./lib/log/messages/RequestLogMessage').message,
     ResponseLM = require('./lib/log/messages/ResponseLogMessage').message,
@@ -27,7 +27,7 @@ http.createServer(function (request, response) {
                 var description = qs.parse(requestQuery).description;
 
                 businessService.addTask(description, function (task) {
-                    helpers.respondWithJson(response, requestPath, task);
+                    srvHelpers.respondWithJson(response, requestPath, task);
                 });
                 break;
 
@@ -43,7 +43,7 @@ http.createServer(function (request, response) {
 
             case '/api/getTasks':
                 businessService.getTasks(function (tasks) {
-                    helpers.respondWithJson(response, requestPath, tasks);
+                    srvHelpers.respondWithJson(response, requestPath, tasks);
                 });
 
                 break;
@@ -59,11 +59,13 @@ http.createServer(function (request, response) {
 
                 break;
 
-            case '/api/setTaskProgress':
+            case '/api/updateTask':
+                var props = qs.parse(requestQuery);
+                var taskId = props.taskId;
+                delete props.taskId;
+              
                 //noinspection JSUnresolvedVariable
-                businessService.setTaskProgress(
-                    qs.parse(requestQuery).taskId,
-                    parseFloat(qs.parse(requestQuery).progress),
+                businessService.updateTask(taskId, props,
                     function () {
                         response.end();
                     });
@@ -95,7 +97,7 @@ http.createServer(function (request, response) {
             default: responseMime = '';
         }
 
-        helpers.respondWithFile(
+        srvHelpers.respondWithFile(
             request,
             response,
             'presentation' + requestPath,

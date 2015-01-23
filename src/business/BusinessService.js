@@ -1,38 +1,97 @@
-// Represents interface to business layer.
+// Contains task-specific business logic.
 
-var taskManager = require('./TaskManager.js');
+var Task = require('../model/Task.js').Task,
+    DbContext = require('../data/DbContext.js');
 
 //----------------------------------------------------
 // Returns list of task currently exist in the system.
 //----------------------------------------------------
 exports.getTasks = function (callback) {
-    return taskManager.getTasks(callback);
+    DbContext.getTasks(callback);
 };
 
 //----------------------------------------------------
 // Adds new task to the system.
 //----------------------------------------------------
 exports.addTask = function (description, callback) {
-    taskManager.addTask(description, callback);
+    var newTask = new Task(description);
+    newTask.position = 0;
+    newTask.progress = 0;
+
+    // Shift all existing tasks one position down.
+    DbContext.shiftTaskPositions(null, null, 1, function () {
+        DbContext.addTask(newTask, callback);
+    });
 };
 
 //----------------------------------------------------
 // Deletes task from the system.
 //----------------------------------------------------
 exports.deleteTask = function (taskId, callback) {
-    taskManager.deleteTask(taskId, callback);
+    DbContext.getTask(taskId,
+        function (task) {
+            var taskPosition = task.position;
+
+            // Shift all existing task below one position up.
+            DbContext.shiftTaskPositions(taskPosition, null, -1,
+                function () {
+                    // Delete target task.
+                    DbContext.deleteTask(taskId,
+                        function () {
+                            callback();
+                        })
+                })
+        });
 };
 
 //----------------------------------------------------
 // Moves task to new position.
 //----------------------------------------------------
 exports.moveTask = function (taskId, newPosition, callback) {
-    taskManager.moveTask(taskId, newPosition, callback);
+    DbContext.getTask(taskId,
+        function (task) {
+            var oldPosition = task.position;
+            var movedDown = newPosition > oldPosition;
+
+            // Shift all tasks between old and new positions.
+            DbContext.shiftTaskPositions(
+                movedDown ? oldPosition + 1 : newPosition,
+                movedDown ? newPosition : oldPosition - 1,
+                movedDown ? -1 : 1,
+                function () {
+                    task.position = newPosition;
+                    DbContext.updateTask(task,
+                        function () {
+                            callback();
+                        })
+                });
+        });
 };
 
 //----------------------------------------------------
-// Sets task progress.
+// Updates task properties.
 //----------------------------------------------------
-exports.setTaskProgress = function(taskId, progress, callback) {
-    taskManager.setTaskProgress(taskId, progress, callback);
+exports.updateTask = function (taskId, properties, callback) {
+    // Validate properties
+    var propertyNames = Object.getOwnPropertyNames(properties);
+    if (propertyNames.length === 0) {
+        throw Error('No task properties to update');
+    }
+    
+    var validPropertyNames = Object.getOwnPropertyNames(new Task());
+    propertyNames.forEach(function(prop) {
+        if (validPropertyNames.indexOf(prop) == -1) {
+            throw Error('Unknown task property to update: ' + prop);
+        }
+    });
+    
+    // Convert types
+    properties = Task.prototype.adjustTypes.call(null, properties);
+    
+    DbContext.updateTask(
+        taskId,
+        properties,
+        function () {
+              callback();
+        });
 };

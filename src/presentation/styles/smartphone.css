@@ -98,8 +98,8 @@
         font-size: 25px;
         padding: 5px;
         flex: 8;
-        display: flex;
         align-items: center;
+        outline: none;
     }
 
     .task-buttons {
@@ -107,14 +107,45 @@
         flex-direction: row;
         display: flex;
         justify-content: flex-end;
+        min-height: 50px;
     }
 
+    .task-edit {
+        display: flex;
+        flex: 3;
+    }
+    
+    .task-edit-button {
+        display: flex;
+        flex: 1;
+    }
+    
+    .task-edit-save-button {
+        display: flex;
+        flex: 1;
+    }
+    
+    .task-edit-cancel-button {
+        display: flex;
+        flex: 1;
+    }
+    
+    .task-edit-button,
+    .task-edit-save-button,
+    .task-edit-cancel-button {
+        border: 1px solid lightgrey;
+        align-items: center;
+        text-align: center;
+        justify-content: center;
+    }
+    
+    
     .task-remove-button {
         border: 1px solid lightgrey;
         display: flex;
         align-items: center;
         justify-content: center;
-        min-width: 50px;
+        flex: 1;
     }
 
     .task-remove-button-label {
@@ -134,8 +165,8 @@
 
     .task-shift {
         border: 1px solid lightgrey;
-        min-width: 50px;
         display: flex;
+        flex: 2;
         flex-direction: column;
     }
 

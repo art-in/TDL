@@ -1,26 +1,23 @@
-var LogMessage = require('./LogMessage').message;
+var LogMessage = require('./LogMessage').message,
+    extend = require('../../node_modules/extend');
 
 function DatabaseLogMessage (messageType, options) {
     this.type = messageType;
 
-    this.taskId = options.taskId;
-    this.taskCount = options.taskCount;
-    this.startPosition = options.startPosition;
-    this.endPosition = options.endPosition;
-    this.shift = options.shift;
-    this.progress = options.progress;
+    extend(this, options);
 }
 
 DatabaseLogMessage.prototype = new LogMessage();
 DatabaseLogMessage.prototype.constructor = DatabaseLogMessage;
 
-DatabaseLogMessage.prototype.type = 0;
-DatabaseLogMessage.prototype.taskId = 'UNDEFINED TASK ID';
-DatabaseLogMessage.prototype.taskCount = 0;
-DatabaseLogMessage.prototype.startPosition = 0;
-DatabaseLogMessage.prototype.endPosition = 0;
-DatabaseLogMessage.prototype.shift = 0;
-DatabaseLogMessage.prototype.progress = 0;
-
+DatabaseLogMessage.prototype.type = -1;
+DatabaseLogMessage.prototype.taskId = 'UNDEFINED';
+DatabaseLogMessage.prototype.taskCount = -1;
+DatabaseLogMessage.prototype.description = 'UNDEFINED';
+DatabaseLogMessage.prototype.position = -1;
+DatabaseLogMessage.prototype.startPosition = -1;
+DatabaseLogMessage.prototype.endPosition = -1;
+DatabaseLogMessage.prototype.shift = -1;
+DatabaseLogMessage.prototype.progress = -1;
 
 exports.message = DatabaseLogMessage;

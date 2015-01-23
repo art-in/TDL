@@ -1,27 +1,31 @@
 // ---------------------  CONSTANTS  -------------------------------------------
 var API_ADD_TASK = "/api/addTask";
 var API_DELETE_TASK = "/api/deleteTask";
+var API_UPDATE_TASK = "/api/updateTask";
 var API_GET_TASKS = "/api/getTasks";
 var API_MOVE_TASK = "/api/moveTask";
-var API_SET_TASK_PROGRESS = "/api/setTaskProgress";
 
 var CSS_CLASS_NEW_TASK_TEXTBOX = "new-task-input";
 var CSS_CLASS_NEW_TASK_ADD_BUTTON = "add-new-task-button";
 var CSS_CLASS_TASK = "task";
 var CSS_CLASS_TASK_LIST = "task-list";
 var CSS_CLASS_TASK_DESCRIPTION = "task-description";
+var CSS_CLASS_TASK_EDIT_BUTTON = "task-edit-button";
+var CSS_CLASS_TASK_EDIT_SAVE_BUTTON = "task-edit-save-button";
+var CSS_CLASS_TASK_EDIT_CANCEL_BUTTON = "task-edit-cancel-button";
 var CSS_CLASS_TASK_REMOVE_BUTTON = "task-remove-button";
 
 var CSS_CLASS_TASK_DRAG_HANDLE = "task-drag-handle";
+var CSS_CLASS_TASK_SHIFT = "task-shift";
 var CSS_CLASS_TASK_SHIFT_UP_BUTTON = "task-shift-up-button";
 var CSS_CLASS_TASK_SHIFT_DOWN_BUTTON = "task-shift-down-button";
 
 var CSS_CLASS_TASK_PROGRESS = "task-progress";
 var CSS_CLASS_TASK_PROGRESS_CHECKBOX = "task-progress-checkbox";
 // --------------------- VARIABLES ---------------------------------------------
-var NewTaskTextBox;
-var TaskListContainer;
-var XHR;
+var newTaskTextBox;
+var taskListContainer;
+var xhr;
 // ---------------------  INIT  ------------------------------------------------
 window.onload = function () {
     setupBindings();
@@ -36,36 +40,49 @@ window.onload = function () {
 
 // Setup KO bindings.
 function setupBindings() {
-    $('.' + CSS_CLASS_NEW_TASK_TEXTBOX).dataBind({ event: { "'keydown'": '$root.newTaskChanged' }});
+    $('.' + CSS_CLASS_NEW_TASK_TEXTBOX).dataBind({ returnKeyPress: '$root.addTask' });
     $('.' + CSS_CLASS_NEW_TASK_ADD_BUTTON).dataBind({ click: '$root.addTask' });
-    $('.' + CSS_CLASS_TASK_LIST).dataBind({ foreach: '$root.Tasks' });
+    $('.' + CSS_CLASS_TASK_LIST).dataBind({ foreach: '$root.tasks' });
     $('.' + CSS_CLASS_TASK_SHIFT_UP_BUTTON).dataBind({ click: '$root.shiftTaskUp' });
     $('.' + CSS_CLASS_TASK_SHIFT_DOWN_BUTTON).dataBind({ click: '$root.shiftTaskDown' });
-    $('.' + CSS_CLASS_TASK_REMOVE_BUTTON).dataBind({ click: '$root.removeTask' });
+    $('.' + CSS_CLASS_TASK_REMOVE_BUTTON).dataBind({ click: '$root.removeTask',
+                                                     visible: '!$data.inEditMode()' });
 
-    $('.' + CSS_CLASS_TASK_PROGRESS).dataBind({ css: { "'task-progress-checkbox-checked'": '$data.ProgressDone' }});
-    $('.' + CSS_CLASS_TASK_PROGRESS_CHECKBOX).dataBind({ checked: '$data.ProgressDone' });
-    $('.' + CSS_CLASS_TASK_DESCRIPTION).dataBind({ html: '$data.Description',
-                                                   projectAssignment:
-                                                       "{ Description: $data.Description, " +
-                                                       "  Tags: [{ Tag: '[com]', Color: '#C4F2EA' }," +
-                                                       "         { Tag: '[c]', Color: '#FFE1B7' }," +
-                                                       "         { Tag: '[s]', Color: '#C1F2C1' }]," +
-                                                       "  DefaultTag:   '[com]'}" });
+    $('.' + CSS_CLASS_TASK_PROGRESS).dataBind({ css: { "'task-progress-checkbox-checked'": '$data.progressDone' }});
+    $('.' + CSS_CLASS_TASK_PROGRESS_CHECKBOX).dataBind({ checked: '$data.progressDone' });
+    $('.' + CSS_CLASS_TASK_SHIFT).dataBind({ visible: '!$data.inEditMode()' });
+    $('.' + CSS_CLASS_TASK_DRAG_HANDLE).dataBind({ visible: '!$data.inEditMode()'});
+    $('.' + CSS_CLASS_TASK_EDIT_BUTTON).dataBind({ click: '$data.toggleEditMode',
+                                                   visible: '!$data.inEditMode()' });
+    $('.' + CSS_CLASS_TASK_EDIT_SAVE_BUTTON).dataBind({ click: '$data.saveDescription',
+                                                        visible: '$data.inEditMode() && $data.description()' });
+    $('.' + CSS_CLASS_TASK_EDIT_CANCEL_BUTTON).dataBind({ click: '$data.toggleEditMode',
+                                                          visible: '$data.inEditMode' });                                                   
+    $('.' + CSS_CLASS_TASK_DESCRIPTION).dataBind({ editableHTML: '$data.description',
+                                                   contentEditable: '$data.inEditMode',
+                                                   css: { "'editing'": '$data.inEditMode' },
+                                                   returnKeyPress: '$data.saveDescription',
+                                                   contentSelect: '$data.inEditMode',
+                                                   backgroundColorTag:
+                                                       "{ source: $data.description, " +
+                                                       "  tags: [{ tag: '[com]', color: '#C4F2EA' }," +
+                                                       "         { tag: '[c]', color: '#FFE1B7' }," +
+                                                       "         { tag: '[s]', color: '#C1F2C1' }]," +
+                                                       "  defaultTag:   '[com]'}" });
 }
 
 // Install control handlers.
 function installControlHandlers() {
-    NewTaskTextBox = document.getElementsByClassName(CSS_CLASS_NEW_TASK_TEXTBOX)[0];
-    TaskListContainer = document.getElementById("cntTaskList");
+    newTaskTextBox = document.getElementsByClassName(CSS_CLASS_NEW_TASK_TEXTBOX)[0];
+    taskListContainer = document.getElementById("cntTaskList");
 }
 
 function makeTaskListDraggable() {
-    new Sortable(TaskListContainer, {
+    new Sortable(taskListContainer, {
         group: "tasks",
         handle: "." + CSS_CLASS_TASK_DRAG_HANDLE,     // Restricts sort start click/touch to the specified element
         draggable: "." + CSS_CLASS_TASK,   // Specifies which items inside the element should be sortable
-        onUpdate: TaskList_ItemMoved,
+        onUpdate: taskList_ItemMoved,
         ghostClass: "task-drag-ghost"
     });
 }
@@ -73,40 +90,72 @@ function makeTaskListDraggable() {
 var taskListViewModel;
 
 var TaskViewModel = function (task) {
-    this.Id = ko.observable(null);
-    this.Description = ko.observable(null);
-    this.Progress = ko.observable(null);
+    this.id = ko.observable(null);
+    this.description = ko.observable(null);
+    this.progress = ko.observable(null); // [0;1]
 
     if (task) {
-        this.Id(task._id);
-        this.Description(task.Description);
-        this.Progress(task.Progress);
+        this.id(task._id);
+        this.description(task.description);
+        this.progress(task.progress);
     }
+
+    this.inEditMode = ko.observable(false);
+
+    // Description saved before entering edit mode
+    var descriptionBeforeEdit = this.description.peek();
+
+    this.inEditMode.subscribe(function(inEditMode) {
+        // Save/restore description before/after editing
+        if (inEditMode) {
+            descriptionBeforeEdit = self.description.peek();
+        } else {
+            self.description(descriptionBeforeEdit);
+        }
+    });
 
     var self = this;
 
+    this.toggleEditMode = function() {
+        self.inEditMode(!self.inEditMode());
+    };
+    
+    this.saveDescription = function() {
+        if (self.description() !== descriptionBeforeEdit) {
+            var parameters = [
+                {key: 'taskId', value: self.id()},
+                {key: 'description', value: self.description()}
+            ];
+        
+            callServerAPI(API_UPDATE_TASK, parameters);
+            
+            descriptionBeforeEdit = self.description.peek();
+        }
+        
+        self.toggleEditMode();
+    };
+
     //noinspection JSUnresolvedFunction
-    this.ProgressDone = ko.computed(
+    this.progressDone = ko.computed(
         {
             read: function () {
-                return self.Progress() == 1
+                return self.progress() == 1;
             },
             write: function (checked) {
-                self.Progress(checked ? 1 : 0);
+                self.progress(checked ? 1 : 0);
 
                 var parameters = [
-                    {key: 'taskId', value: self.Id()},
-                    {key: 'progress', value: self.Progress()}
+                    {key: 'taskId', value: self.id()},
+                    {key: 'progress', value: self.progress()}
                 ];
 
-                callServerAPI(API_SET_TASK_PROGRESS, parameters, function () {
-                });
+                callServerAPI(API_UPDATE_TASK, parameters);
             }
         });
 };
 
 var TaskListViewModel = function () {
-    this.Tasks = ko.observableArray([]);
+    this.tasks = ko.observableArray([]);
 
     var self = this;
 
@@ -115,26 +164,25 @@ var TaskListViewModel = function () {
     this.reloadTasks = function () {
         callServerAPI(API_GET_TASKS, null, function (taskModelsJson) {
             var tasks = toViewModels(taskModelsJson);
-            taskListViewModel.Tasks(tasks);
+            taskListViewModel.tasks(tasks);
         });
     };
 
     // ---------------------------------
     // Removes tasks.
     this.removeTask = function (task) {
-        self.Tasks.remove(task);
+        self.tasks.remove(task);
 
         var parameters = [
-            {key: 'taskId', value: task.Id()}
+            {key: 'taskId', value: task.id()}
         ];
-        callServerAPI(API_DELETE_TASK, parameters, function () {
-        });
+        callServerAPI(API_DELETE_TASK, parameters);
     };
 
     // ---------------------------------
     // Adds new task.
     this.addTask = function () {
-        var description = NewTaskTextBox.innerHTML;
+        var description = newTaskTextBox.innerHTML;
 
         // Validate new task.
         if (!description) {
@@ -142,72 +190,55 @@ var TaskListViewModel = function () {
             return;
         }
 
-        refreshNewTaskField();
-
+        newTaskTextBox.innerHTML = '';
+        
         // Pass to server.
         var parameters = [
             {key: 'description', value: description}
         ];
         callServerAPI(API_ADD_TASK, parameters, function (taskModel) {
             var task = new TaskViewModel(JSON.parse(taskModel));
-            self.Tasks.unshift(task);
+            self.tasks.unshift(task);
         });
     };
 
     // ---------------------------------
     // Shifts task one position up.
     this.shiftTaskUp = function (task) {
-        var currentPosition = self.Tasks.indexOf(task);
+        var currentPosition = self.tasks.indexOf(task);
         var newPosition = currentPosition - 1;
         if (newPosition >= 0) {
-            var array = self.Tasks();
-            self.Tasks.splice(newPosition, 2, array[currentPosition], array[newPosition]);
-            moveTask(task.Id(), newPosition);
+            var array = self.tasks();
+            self.tasks.splice(newPosition, 2, array[currentPosition], array[newPosition]);
+            moveTask(task.id(), newPosition);
         }
     };
 
     // ---------------------------------
     // Shifts task one position down.
     this.shiftTaskDown = function (task) {
-        var currentPosition = self.Tasks.indexOf(task);
+        var currentPosition = self.tasks.indexOf(task);
         var newPosition = currentPosition + 1;
-        if (newPosition < self.Tasks().length) {
-            var array = self.Tasks();
-            self.Tasks.splice(currentPosition, 2, array[newPosition], array[currentPosition]);
-            moveTask(task.Id(), newPosition);
+        if (newPosition < self.tasks().length) {
+            var array = self.tasks();
+            self.tasks.splice(currentPosition, 2, array[newPosition], array[currentPosition]);
+            moveTask(task.id(), newPosition);
         }
     };
-
-    // ---------------------------------
-    // Handles new task input changed event.
-    this.newTaskChanged = function (data, e) {
-        // 'Return' key handler.
-        if (e.keyCode == 13 && !e.ctrlKey) {
-            // Behave the same as on 'add' button click.
-            taskListViewModel.addTask();
-        }
-
-        // 'Return + CTRL' keys handler.
-        if (e.keyCode == 13 && e.ctrlKey) {
-            addNewLine(NewTaskTextBox);
-        }
-
-        return true;
-    }
 };
 // ---------------------  HANDLERS  -------------------------------------------
-function TaskList_ItemMoved(e) {
+function taskList_ItemMoved(e) {
     var taskNode = e.item;
 
     var task = ko.dataFor(taskNode);
 
-    var oldPosition = taskListViewModel.Tasks().indexOf(task);
-    var newPosition = getChildNodeIndex(TaskListContainer, taskNode, CSS_CLASS_TASK);
+    var oldPosition = taskListViewModel.tasks().indexOf(task);
+    var newPosition = getChildNodeIndex(taskListContainer, taskNode, CSS_CLASS_TASK);
 
     // Update position in view model.
-    taskListViewModel.Tasks().move(oldPosition, newPosition);
+    taskListViewModel.tasks().move(oldPosition, newPosition);
 
-    moveTask(task.Id(), newPosition);
+    moveTask(task.id(), newPosition);
 }
 
 Array.prototype.move = function (old_index, new_index) {
@@ -227,12 +258,7 @@ function moveTask(taskId, newPosition) {
         {key: 'position', value: newPosition}
     ];
 
-    callServerAPI(API_MOVE_TASK, parameters, function () {
-    });
-}
-
-function refreshNewTaskField() {
-    NewTaskTextBox.innerHTML = '';
+    callServerAPI(API_MOVE_TASK, parameters);
 }
 // ---------------------  MAPPERS -------------------------------------------
 // Converts JSON list of Task models to list of view models.
@@ -248,34 +274,6 @@ function toViewModels(taskModelsJson) {
 function isFunction(functionToCheck) {
     var getType = {};
     return functionToCheck && getType.toString.call(functionToCheck) === '[object Function]';
-}
-
-function addNewLine(node) {
-    // Adding two br-tags, in chrome it works like:
-    // first intended to finish current line, second - to initiate new line.
-    // When start typing, second br-tag will be replaced with entered text.
-    node.innerHTML += "<br><br>";
-    placeCaretAtEnd(node);
-}
-
-function placeCaretAtEnd(el) {
-    // Solution for content editable divs from here:
-    // http://stackoverflow.com/questions/4233265/contenteditable-set-caret-at-the-end-of-the-text-cross-browser
-    el.focus();
-    if (typeof window.getSelection != "undefined"
-        && typeof document.createRange != "undefined") {
-        var range = document.createRange();
-        range.selectNodeContents(el);
-        range.collapse(false);
-        var sel = window.getSelection();
-        sel.removeAllRanges();
-        sel.addRange(range);
-    } else if (typeof document.body.createTextRange != "undefined") {
-        var textRange = document.body.createTextRange();
-        textRange.moveToElementText(el);
-        textRange.collapse(false);
-        textRange.select();
-    }
 }
 
 function getChildNodeIndex(container, childNode, childCssClass) {
@@ -304,23 +302,23 @@ function callServerAPI(apiMethod, parameters, callback) {
         }
     }
 
-    XHR = new XMLHttpRequest();
-    XHR.onreadystatechange = function () {
-        if (XHR.readyState == 4) {
-            var responseData = XHR.responseText;
+    xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState == 4) {
+            var responseData = xhr.responseText;
             console.log("data loaded: " + responseData);
             console.groupEnd();
-            callback(responseData);
+            if (callback) callback(responseData);
         }
     };
 
-    XHR.onerror = function () {
-        console.log(XHR.statusText);
+    xhr.onerror = function () {
+        console.log(xhr.statusText);
         console.groupEnd();
     };
 
-    XHR.open("GET", datasourceAddress, true);
-    XHR.send(null);
+    xhr.open("GET", datasourceAddress, true);
+    xhr.send(null);
 
     console.groupCollapsed('GET ' + datasourceAddress);
 }
