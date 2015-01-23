@@ -3,7 +3,8 @@
  * depending on tag found in the @source string.
  * Binding properties:
  *  @source - source string observable;
- *  @tags - array of tag definitions (objects - {tag, color});
+ *  @tags - array of tag definitions 
+ *          (objects - {tag - regex string, color, default - (optional) bool});
  *  @defaultTag (optional) - default tag if no tag found in source string.
  */
 ko.bindingHandlers.backgroundColorTag = {
@@ -11,29 +12,28 @@ ko.bindingHandlers.backgroundColorTag = {
         var value = valueAccessor();
 
         var source = value.source();
-        var tags = value.tags;
-        var defaultTag = value.defaultTag;
-
+        var tagDefs = value.tags;
+        
         // Check arguments.
-        if (!source || !tags || tags.length < 1) {
+        if (!source || !tagDefs || tagDefs.length < 1) {
             return;
         }
 
-        // Find tag to associate this description with.
-        var tagFound = false;
-        tags.forEach(function(tag) {
-            if (source.indexOf(tag.tag) != -1) {
-                $(element).css({'background-color': tag.color });
+        // Find tag in source string and set background.
+        var tagFound = tagDefs.filter(function(tagDef) {
+            var regexp = new RegExp(tagDef.tag, 'gim');
+            if (source.search(regexp) !== -1) {
+                $(element).css({'background-color': tagDef.color });
                 tagFound = true;
                 return true;
             }
-        });
+        })[0];
 
         // Set default tag.
-        if (!tagFound && defaultTag) {
-            tags.forEach(function(tag) {
-                if (tag.tag == defaultTag ) {
-                    $(element).css({'background-color': tag.color });
+        if (!tagFound) {
+            tagDefs.forEach(function(tagDef) {
+                if (tagDef.default) {
+                    $(element).css({'background-color': tagDef.color });
                     return true;
                 }
             });

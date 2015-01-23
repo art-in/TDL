@@ -65,10 +65,9 @@ function setupBindings() {
                                                    contentSelect: '$data.inEditMode',
                                                    backgroundColorTag:
                                                        "{ source: $data.description, " +
-                                                       "  tags: [{ tag: '[com]', color: '#C4F2EA' }," +
-                                                       "         { tag: '[c]', color: '#FFE1B7' }," +
-                                                       "         { tag: '[s]', color: '#C1F2C1' }]," +
-                                                       "  defaultTag:   '[com]'}" });
+                                                       "  tags: [{ tag: '(#|№)(com|common)', color: '#C4F2EA', default: true }," +
+                                                       "         { tag: '(#|№)(c|с|craft)', color: '#FFE1B7' }," +
+                                                       "         { tag: '(#|№)(s|sport|сп|спорт)', color: '#C1F2C1' }]}" });
 }
 
 // Install control handlers.
