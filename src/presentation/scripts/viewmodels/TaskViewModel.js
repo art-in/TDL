@@ -1,9 +1,6 @@
-define('TDL.presentation.viewmodels', function(exports, require) {
+define(['ko', 'lib/transport'], function(ko, transport) {
 
-    var ko = require('ko');
-    var transport = require('TDL.presentation.lib.transport');
-    
-    exports.TaskViewModel = function (task) {
+    return function (task) {
         this.id = ko.observable(null);
         this.description = ko.observable(null);
         this.progress = ko.observable(null); // [0;1]

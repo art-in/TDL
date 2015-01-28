@@ -1,7 +1,10 @@
-define(function (require) {
-
-    var ko = require('ko');
-    var TaskListViewModel = require('TDL.presentation.viewmodels.TaskListViewModel');
+define('client', 
+      ['jquery', 
+       'ko', 
+       'viewmodels/TaskListViewModel', 
+       'unobtrusive-knockout', 
+       'lib/knockout-bindings'], 
+    function ($, ko, TaskListViewModel) {
     
     // Init.
     window.onload = function () {

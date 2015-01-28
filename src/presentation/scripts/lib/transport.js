@@ -1,5 +1,6 @@
-define('TDL.presentation.lib.transport', function(exports, require) {
-
+define(function() {
+    var exports = {};
+    
     exports.apiMethods = {
         addTask: "/api/addTask",
         deleteTask: "/api/deleteTask",
@@ -42,4 +43,6 @@ define('TDL.presentation.lib.transport', function(exports, require) {
         
         console.groupCollapsed('GET ' + datasourceAddress);
     };
+    
+    return exports;
 });

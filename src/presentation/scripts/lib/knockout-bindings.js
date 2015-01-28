@@ -1,8 +1,4 @@
-define(function (require) {
-
-    var ko = require('ko');
-    var Sortable = require('Sortable');
-    var helpers = require('TDL.presentation.lib.helpers');
+define(['ko', 'Sortable', 'lib/helpers'], function (ko, Sortable, helpers) {
 
     /**
      * Sets background color to the element

@@ -1,11 +1,7 @@
-define('TDL.presentation.viewmodels', function(exports, require) {
-
-    var ko = require('ko');
-    var helpers = require('TDL.presentation.lib.helpers');
-    var transport = require('TDL.presentation.lib.transport');
-    var TaskViewModel = require('TDL.presentation.viewmodels.TaskViewModel');
+define(['ko', 'lib/helpers', 'lib/transport', 'viewmodels/TaskViewModel'],
+    function(ko, helpers, transport, TaskViewModel) {
     
-    exports.TaskListViewModel = function () {
+    return function() {
         this.tasks = ko.observableArray([]);
     
         this.newTaskDescription = ko.observable('');

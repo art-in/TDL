@@ -1,5 +1,6 @@
-define('TDL.presentation.lib.helpers', function(exports, require){
-
+define(function(){
+    var exports = {};
+    
     exports.getChildNodeIndex = function (container, childNode, childCssClass) {
         return Array.prototype.indexOf.call(
             Array.prototype.slice.call(container.childNodes)
@@ -22,4 +23,6 @@ define('TDL.presentation.lib.helpers', function(exports, require){
         this.splice(new_index, 0, this.splice(old_index, 1)[0]);
         return this; // for testing purposes
     };
+    
+    return exports;
 });
