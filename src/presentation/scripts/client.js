@@ -7,14 +7,12 @@ define('client',
     function ($, ko, TaskListViewModel) {
     
     // Init.
-    window.onload = function () {
-        setupBindings();
-    
-        var taskListViewModel = new TaskListViewModel();
-        ko.applyBindings(taskListViewModel);
-    
-        taskListViewModel.reloadTasks();
-    };
+    setupBindings();
+
+    var taskListViewModel = new TaskListViewModel();
+    ko.applyBindings(taskListViewModel);
+
+    taskListViewModel.reloadTasks();
     
     // Setup KO bindings.
     function setupBindings() {

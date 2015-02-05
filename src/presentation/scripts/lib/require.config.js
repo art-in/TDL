@@ -1,4 +1,8 @@
-requirejs.config({
+/** 
+ * Main RequireJs config file for both runtime loader and build optimizer.
+ */
+
+var require = {
     baseUrl: 'scripts',
     paths: {
         'jquery': 'lib/vendor/jquery-2.1.3',
@@ -13,7 +17,6 @@ requirejs.config({
         'unobtrusive-knockout': {
             deps: ['jquery', 'ko']
         }
-    } 
-});
-
-define(['client']);
+    },
+    "waitSeconds": 120
+};

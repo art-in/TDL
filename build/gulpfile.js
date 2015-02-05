@@ -1,10 +1,12 @@
 var gulp = require('gulp'),
     concat = require('gulp-concat'),
+    addsrc = require('gulp-add-src'),
     uglify = require('gulp-uglify'),
     del = require('del'),
     minifyCSS = require('gulp-minify-css'),
     sprite = require('gulp-sprite-generator'),
-    replace = require('gulp-replace');
+    replace = require('gulp-replace'),
+    requirejs = require('gulp-requirejs');
 
 //region Paths
 var paths = {
@@ -24,7 +26,8 @@ paths.presentation = {
 
 paths.presentation.scripts = {
     folder: paths.presentation.src + 'scripts/',
-    mask: paths.presentation.src + 'scripts/*.js'
+    mask: paths.presentation.src + 'scripts/*.js',
+    targetMask: paths.presentation.target + '*.js'
 };
 
 paths.presentation.styles = {
@@ -51,10 +54,15 @@ gulp.task('clean', function(cb) {
 });
 
 gulp.task('scripts', ['clean'], function() {
-    return gulp.src(paths.presentation.scripts.mask)
-        .pipe(uglify())
-        .pipe(concat('app.js'))
-        .pipe(gulp.dest(paths.presentation.target));
+    requirejs({
+        name: "client",
+        baseUrl: paths.presentation.scripts.folder,
+        out: 'client.js',
+        mainConfigFile: paths.presentation.scripts.folder + 'lib/require.config.js'
+    })
+     .pipe(addsrc(paths.presentation.scripts.folder + 'lib/vendor/require.js'))
+     .pipe(uglify())
+     .pipe(gulp.dest(paths.presentation.target));
 });
 
 gulp.task('styles', ['clean'], function() {
@@ -101,7 +109,8 @@ gulp.task('views', ['clean'], function() {
         .pipe(replace(/<script.*script>/, '#FIRSTSCRIPTTAG#'))
         .pipe(replace(/<script.*script>/g, ''))
         .pipe(replace(/#FIRSTSCRIPTTAG#/,
-            '<script language="javascript" type="text/javascript" src="app.js"></script>'))
+            '<script type="text/javascript" data-main="client" src="require.js"></script>\n\t' +
+            '<script>requirejs.config({waitSeconds:0})</script>'))
         .pipe(gulp.dest(paths.presentation.target));
 });
 
