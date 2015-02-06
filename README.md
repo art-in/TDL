@@ -6,7 +6,7 @@ TODO List (TDL)
 **Purpose:** quick and handy work with tasks.
 
 **TODO:**
-- [ ] task editing
+- [x] task editing
 - [x] task reordering
 - [x] task progress
 - [ ] sub-tasking
