@@ -1,6 +1,7 @@
 var gulp = require('gulp'),
     concat = require('gulp-concat'),
     addsrc = require('gulp-add-src'),
+    insert = require('gulp-insert'),
     uglify = require('gulp-uglify'),
     del = require('del'),
     minifyCSS = require('gulp-minify-css'),
@@ -57,10 +58,14 @@ gulp.task('scripts', ['clean'], function() {
     requirejs({
         name: "client",
         baseUrl: paths.presentation.scripts.folder,
-        out: 'client.js',
-        mainConfigFile: paths.presentation.scripts.folder + 'lib/require.config.js'
+        out: 'app.js',
+        mainConfigFile: paths.presentation.scripts.folder + 'lib/require.config.js',
+        paths: {
+            requireLib: 'lib/vendor/require'
+        },
+        include: ['requireLib']
     })
-     .pipe(addsrc(paths.presentation.scripts.folder + 'lib/vendor/require.js'))
+     .pipe(insert.append(';require(["client"]);'))
      .pipe(uglify())
      .pipe(gulp.dest(paths.presentation.target));
 });
@@ -109,8 +114,7 @@ gulp.task('views', ['clean'], function() {
         .pipe(replace(/<script.*script>/, '#FIRSTSCRIPTTAG#'))
         .pipe(replace(/<script.*script>/g, ''))
         .pipe(replace(/#FIRSTSCRIPTTAG#/,
-            '<script type="text/javascript" data-main="client" src="require.js"></script>\n\t' +
-            '<script>requirejs.config({waitSeconds:0})</script>'))
+            '<script type="text/javascript" src="app.js"></script>'))
         .pipe(gulp.dest(paths.presentation.target));
 });
 
