@@ -16,6 +16,7 @@ define('client',
     
     // Setup KO bindings.
     function setupBindings() {
+        $('.task').dataBind({ visible: 'true' }); // Prevent FOUC
         $('.new-task-input').dataBind({ editableHTML: '$root.newTaskDescription',
                                         returnKeyPress: '$root.addTask' });
         $('.add-new-task-button').dataBind({ click: '$root.addTask' });

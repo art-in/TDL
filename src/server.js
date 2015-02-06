@@ -94,9 +94,14 @@ http.createServer(function (request, response) {
             case 'css': responseMime = 'text/css'; break;
             case 'js': responseMime = 'application/javascript'; break;
             case 'png': responseMime = 'image/png'; break;
+            case 'ico': responseMime = 'image/x-icon'; break;
             default: responseMime = '';
         }
-
+        
+        if (requestPath === '/favicon.ico') {
+            requestPath = '/images' + requestPath;
+        }
+        
         srvHelpers.respondWithFile(
             request,
             response,
