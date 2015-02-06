@@ -1,13 +1,14 @@
 define(['ko', 'Sortable', 'lib/helpers'], function (ko, Sortable, helpers) {
 
     /**
-     * Sets background color to the element
-     * depending on tag found in the @source string.
+     * Sets background color to the element 
+     * depending on tag found in the source string.
+     * 
      * Binding properties:
-     *  @source - source string observable;
-     *  @tags - array of tag definitions 
-     *          (objects - {tag - regex string, color, default - (optional) bool});
-     *  @defaultTag (optional) - default tag if no tag found in source string.
+     * @param {string} source - source string observable
+     * @param {Array} tags - array of tag definitions 
+     *        (objects - {tag - regex string, color, default - (optional) bool});
+     * @param {string} [defaultTag] - default tag if no tag found in source string.
      */
     ko.bindingHandlers.backgroundColorTag = {
         update: function(element, valueAccessor) {
@@ -45,8 +46,8 @@ define(['ko', 'Sortable', 'lib/helpers'], function (ko, Sortable, helpers) {
     
     /**
      * Synchronizes observable with inner HTML of the element.
-     * Usually better for contenteditables than default 'html'-binding,
-     * because it syncs HTML change immediately on each keyup.
+     * Usually used for contentEditables instead of default 'html'-binding,
+     * because it syncs HTML changes immediately after each keyup.
      */
     ko.bindingHandlers.editableHTML = {
         init: function(element, valueAccessor) {
@@ -86,7 +87,7 @@ define(['ko', 'Sortable', 'lib/helpers'], function (ko, Sortable, helpers) {
     
     /**
      * Calls function when 'Return'-key pressed on target element.
-     * 'Return'+Ctrl adds new line.
+     * 'Return + CTRL' adds new line.
      */
     ko.bindingHandlers.returnKeyPress = {
         init: function(element, valueAccessor) {
@@ -107,7 +108,7 @@ define(['ko', 'Sortable', 'lib/helpers'], function (ko, Sortable, helpers) {
     };
     
     /**
-     * Selects all contents of target element when observable turns to true.
+     * Selects all contents of target element when observable turns true.
      */
     ko.bindingHandlers.contentSelect = {
         update: function(element, valueAccessor) {
@@ -126,11 +127,12 @@ define(['ko', 'Sortable', 'lib/helpers'], function (ko, Sortable, helpers) {
     
     /**
      * Makes childs of target element - draggable.
+     * 
      * Binding properties:
-     *  @draggableClass - CSS class of draggable elements
-     *  @handleClass - CSS class of handle element inside each draggable element
-     *  @ghostClass - CCS class element currently dragged
-     *  @onUpdate - function which is called after element released
+     * @param {string} draggableClass - CSS class of draggable elements
+     * @param {string} handleClass - CSS class of handle element inside each draggable element
+     * @param {string} ghostClass - CCS class element currently dragged
+     * @param {function} onUpdate - function which is called after element released
      */
     ko.bindingHandlers.sortable = {
         init: function(element, valueAccessor) {
@@ -140,8 +142,10 @@ define(['ko', 'Sortable', 'lib/helpers'], function (ko, Sortable, helpers) {
             
             new Sortable(container, {
                 group: element.id,
-                draggable: '.' + params.draggableClass,   // Specifies which items inside the element should be sortable
-                handle: '.' + params.handleClass,     // Restricts sort start click/touch to the specified element
+                // Specifies which items inside the element should be sortable
+                draggable: '.' + params.draggableClass,
+                // Restricts sort start click/touch to the specified element
+                handle: '.' + params.handleClass,
                 ghostClass: params.ghostClass,
                 onUpdate: function(e) {
                     if (params.onUpdate) {

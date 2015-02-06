@@ -1,6 +1,3 @@
-//----------------------------------------------------------
-// Server with request routing (static files + API).
-//----------------------------------------------------------
 var http = require('http'),
     url = require("url"),
     qs = require('./lib/node_modules/qs'),
@@ -13,6 +10,9 @@ var http = require('http'),
 
 var businessService = require('./business/BusinessService.js');
 
+/**
+ * Server with request routing (static files + API).
+ */
 http.createServer(function (request, response) {
     logger.log(new RequestLM(request.url));
 

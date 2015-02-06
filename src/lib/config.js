@@ -1,11 +1,10 @@
 var path  = require('path'),
-    fs = require('fs'),
     nconf = require('./node_modules/nconf/lib/nconf');
 
 var DEFAULT_CONFIG_PATH = path.join(__dirname, '../' + 'config.json');
 var OVERRIDES_CONFIG_PATH = path.join(__dirname, '../' + 'config.overrides.json');
 
-// 1. Overrides config should have higher priority
+// 1. Config with overrides should have higher priority
 nconf.file(OVERRIDES_CONFIG_PATH);
 
 // 2. Default config

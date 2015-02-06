@@ -1,13 +1,32 @@
 exports.Task = Task;
 
+/**
+ * Represents task.
+ * 
+ * @constructor
+ * @param {string} description
+ */
 function Task(description) {
     this.description = description;
     this.position = null;
     this.progress = null; /* Float. [0;1] */
 }
 
-// Converts properties to right types,
-// in passed obj or current instance of task.
+/**
+ * Converts properties of the task to correct types.
+ * 
+ * @example
+ * // Updating task properties from custom object, while adjusting types
+ * var task = new Task();
+ * task.adjustTypes({position: "10"});
+ * 
+ * @example
+ * // Create custom object and adjust types of its properties
+ * var properties = {position: "10"};
+ * properties = Task.prototype.adjustTypes.call(null, properties);
+ * 
+ * @param {Object} - properties
+ */
 Task.prototype.adjustTypes = function (obj) {
     var target = this != global ? this : obj;
     
@@ -24,4 +43,4 @@ Task.prototype.adjustTypes = function (obj) {
     }
     
     return target;
-}
+};

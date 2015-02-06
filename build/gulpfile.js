@@ -16,7 +16,7 @@ var paths = {
 };
 
 paths.config = {
-    default: paths.src + 'config.json',
+    main: paths.src + 'config.json',
     overrides: './config.overrides.json'
 };
 
@@ -131,7 +131,7 @@ gulp.task('backend', ['clean'], function() {
 
 //region Config
 gulp.task('config', ['clean', 'backend'], function() {
-    return gulp.src([paths.config.default, paths.config.overrides])
+    return gulp.src([paths.config.main, paths.config.overrides])
         .pipe(gulp.dest(paths.target));
 });
 //endregion

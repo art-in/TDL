@@ -1,18 +1,21 @@
-// Contains task-specific business logic.
-
 var Task = require('../model/Task.js').Task,
     DbContext = require('../data/DbContext.js');
 
-//----------------------------------------------------
-// Returns list of task currently exist in the system.
-//----------------------------------------------------
+/**
+ * Returns list of task that currently exist in the system.
+ * 
+ * @param {function} callback
+ */
 exports.getTasks = function (callback) {
     DbContext.getTasks(callback);
 };
 
-//----------------------------------------------------
-// Adds new task to the system.
-//----------------------------------------------------
+/**
+ * Adds new task to the system.
+ * 
+ * @param {string} description
+ * @param {function} callback
+ */
 exports.addTask = function (description, callback) {
     var newTask = new Task(description);
     newTask.position = 0;
@@ -24,9 +27,12 @@ exports.addTask = function (description, callback) {
     });
 };
 
-//----------------------------------------------------
-// Deletes task from the system.
-//----------------------------------------------------
+/**
+ * Deletes task from the system.
+ * 
+ * @param {string} taskId - Mongo ObjectId hex string
+ * @param {function} callback
+ */
 exports.deleteTask = function (taskId, callback) {
     DbContext.getTask(taskId,
         function (task) {
@@ -39,14 +45,18 @@ exports.deleteTask = function (taskId, callback) {
                     DbContext.deleteTask(taskId,
                         function () {
                             callback();
-                        })
-                })
+                        });
+                });
         });
 };
 
-//----------------------------------------------------
-// Moves task to new position.
-//----------------------------------------------------
+/**
+ * Moves task to new position.
+ * 
+ * @param {string} taskId - Mongo ObjectId hex string
+ * @param {number} newPosition
+ * @param {function} callback
+ */
 exports.moveTask = function (taskId, newPosition, callback) {
     DbContext.getTask(taskId,
         function (task) {
@@ -63,14 +73,18 @@ exports.moveTask = function (taskId, newPosition, callback) {
                     DbContext.updateTask(task,
                         function () {
                             callback();
-                        })
+                        });
                 });
         });
 };
 
-//----------------------------------------------------
-// Updates task properties.
-//----------------------------------------------------
+/**
+ * Updates task properties.
+ * 
+ * @param {string} taskId - Mongo ObjectId hex string
+ * @param {Object} properties
+ * @param {function} callback
+ */
 exports.updateTask = function (taskId, properties, callback) {
     // Validate properties
     var propertyNames = Object.getOwnPropertyNames(properties);

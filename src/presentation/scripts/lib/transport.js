@@ -1,6 +1,10 @@
 define(function() {
     var exports = {};
     
+    
+    /**
+     * Server API methods.
+     */
     exports.apiMethods = {
         addTask: "/api/addTask",
         deleteTask: "/api/deleteTask",
@@ -9,6 +13,13 @@ define(function() {
         moveTask: "/api/moveTask"
     };
     
+    /**
+     * Calls server API.
+     * 
+     * @param {string} apiMethod
+     * @param {string[]} parameters
+     * @param {function} callback
+     */
     exports.callServerAPI = function (apiMethod, parameters, callback) {
         var datasourceAddress = apiMethod;
             

@@ -9,9 +9,12 @@ var connectionString = config.get('database:connectionString');
 
 var TASKS_COLLECTION = "Tasks";
 
-//----------------------------------------------------
-// Adds new task to the data storage.
-//----------------------------------------------------
+/**
+ * Adds new task to the data storage.
+ * 
+ * @param {Task} newTask
+ * @param {function} callback
+ */
 exports.addTask = function (newTask, callback) {
     MongoClient.connect(connectionString, function (err, db) {
         if (err) throw err;
@@ -28,9 +31,11 @@ exports.addTask = function (newTask, callback) {
     });
 };
 
-//----------------------------------------------------
-// Returns all tasks exist in the data storage.
-//----------------------------------------------------
+/**
+ * Returns all tasks exist in the data storage.
+ * 
+ * @param {function} callback
+ */
 exports.getTasks = function (callback) {
     MongoClient.connect(connectionString, function (err, db) {
         if (err) throw err;
@@ -49,9 +54,12 @@ exports.getTasks = function (callback) {
     });
 };
 
-//----------------------------------------------------
-// Returns one existing task from the data storage.
-//----------------------------------------------------
+/**
+ * Returns one existing task from the data storage.
+ * 
+ * @param {string} taskId - Mongo ObjectId hex string
+ * @param {function} callback
+ */
 exports.getTask = function (taskId, callback) {
     MongoClient.connect(connectionString, function (err, db) {
         if (err) throw err;
@@ -69,10 +77,16 @@ exports.getTask = function (taskId, callback) {
     });
 };
 
-//----------------------------------------------------
-// Updates existing task.
-// TODO: add good comments. Oveloads.
-//----------------------------------------------------
+/**
+ * Updates existing task.
+ * 
+ * @param {Task} - Existing task with updated properties
+ * @param {function} callback
+ * or
+ * @param {string} taskId - Mongo ObjectId hex string
+ * @param {Object} properties
+ * @param {function} callback
+ */
 exports.updateTask = function () {
     if (typeof arguments[0] == 'object') {
         updateTaskEntirely.apply(null, arguments);
@@ -80,12 +94,15 @@ exports.updateTask = function () {
     else {
         updateTaskProperties.apply(null, arguments);
     }
-}
+};
 
-//----------------------------------------------------
-// Updates existing task entirely.
-//----------------------------------------------------
-var updateTaskEntirely = function (task, callback) {
+/**
+ * Updates existing task entirely.
+ * 
+ * @param {Task} - Existing task with updated properties
+ * @param {function} callback
+ */
+function updateTaskEntirely(task, callback) {
     MongoClient.connect(connectionString, function (err, db) {
         if (err) throw err;
 
@@ -102,13 +119,16 @@ var updateTaskEntirely = function (task, callback) {
                 db.close();
             });
     });
-};
+}
 
-
-//----------------------------------------------------
-// Updates properties of existing task.
-//----------------------------------------------------
-var updateTaskProperties = function (taskId, properties, callback) {
+/**
+ * Updates properties of existing task.
+ * 
+ * @param {string} taskId - Mongo ObjectId hex string
+ * @param {Object} properties
+ * @param {function} callback
+ */
+function updateTaskProperties(taskId, properties, callback) {
     MongoClient.connect(connectionString, function (err, db) {
         if (err) throw err;
         
@@ -124,13 +144,16 @@ var updateTaskProperties = function (taskId, properties, callback) {
                 callback();
                 db.close();
             }
-        ) 
+        );
     });
-};
+}
 
-//----------------------------------------------------
-// Deletes task from the data storage.
-//----------------------------------------------------
+/**
+ * Deletes task from the data storage.
+ * 
+ * @param {string} taskId - Mongo ObjectId hex string
+ * @param {function} callback
+ */
 exports.deleteTask = function (taskId, callback) {
     MongoClient.connect(connectionString, function (err, db) {
         if (err) throw err;
@@ -143,13 +166,19 @@ exports.deleteTask = function (taskId, callback) {
                     {taskId: taskId}));
                 callback();
                 db.close();
-            })
+            });
     });
 };
 
-//----------------------------------------------------
-// Shifts position of tasks in certain range to specified value.
-//----------------------------------------------------
+/**
+ * Shifts position of tasks in certain range to specified value.
+ * 
+ * @param {number} startPosition
+ * @param {number} endPosition
+ * @param {number} shift - number of positions to move
+ *                         positive number to move further, negavive - to move backwards
+ * @param {function} callback
+ */
 exports.shiftTaskPositions = function (startPosition, endPosition, shift, callback) {
     startPosition = startPosition != null ? startPosition : 0;
     endPosition = endPosition != null ? endPosition : Number.MAX_VALUE;

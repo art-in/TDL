@@ -1,6 +1,13 @@
 define(function(){
     var exports = {};
     
+    /**
+     * Returns index of child node inside container.
+     * 
+     * @param {HTMLElement} container
+     * @param {HTMLElement} childNode
+     * @param {string} childCssClass - only take childs with this CSS class into account
+     */
     exports.getChildNodeIndex = function (container, childNode, childCssClass) {
         return Array.prototype.indexOf.call(
             Array.prototype.slice.call(container.childNodes)
@@ -13,6 +20,12 @@ define(function(){
                 }), childNode);
     };
     
+    /**
+     * Moves Array element to new position.
+     * 
+     * @param {number} old_index
+     * @param {number} new_index
+     */
     exports.arrayMoveItem = function (old_index, new_index) {
         if (new_index >= this.length) {
             var k = new_index - this.length;

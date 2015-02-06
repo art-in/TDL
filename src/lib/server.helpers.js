@@ -5,9 +5,15 @@ var path = require('path'),
     ResponseLM = require('./log/messages/ResponseLogMessage').message,
     ResponseLMTypes = require('./log/messages/ResponseLogMessageTypes').types;
 
-//----------------------------------------------------
-// Writes compressed file contents to response stream.
-//----------------------------------------------------
+/**
+ * Writes compressed file contents to response stream.
+ * Takes client cache into account (can send '304 - Not Modified').
+ * 
+ * @param {ClientRequest} request
+ * @param {ServerResponse} response
+ * @param {string} filePath - path relative to 'src' folder
+ * @param {string} mimeType
+ */
 exports.respondWithFile = function (request, response, filePath, mimeType) {
     var fullPath = path.join(__dirname, '../' + filePath);
 
@@ -22,7 +28,8 @@ exports.respondWithFile = function (request, response, filePath, mimeType) {
             }
 
             fs.stat(fullPath, function (err, stats) {
-
+                if (err) { throw err; }
+                
                 // Check if file was modified since last time browser loaded it.
                 var modifiedDate = stats.mtime.toUTCString();
                 var modifiedRequestDate = new Date(request.headers['if-modified-since']).toUTCString();
@@ -53,9 +60,12 @@ exports.respondWithFile = function (request, response, filePath, mimeType) {
     );
 };
 
-//----------------------------------------------------
-// Writes compressed JSONified data to response stream.
-//----------------------------------------------------
+/**
+ * Writes compressed JSONified data to response stream.
+ * 
+ * @param {ServerReponse} response
+ * @param {string} apiPath - requested API method
+ */
 exports.respondWithJson = function (response, apiPath, data) {
     response.writeHead(200,
         {

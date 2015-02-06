@@ -1,3 +1,6 @@
+/**
+ * Main client-side module.
+ */
 define('client', 
       ['jquery', 
        'ko', 
@@ -6,7 +9,7 @@ define('client',
        'lib/knockout-bindings'], 
     function ($, ko, TaskListViewModel) {
     
-    // Init.
+    // Init
     setupBindings();
 
     var taskListViewModel = new TaskListViewModel();
@@ -14,7 +17,7 @@ define('client',
 
     taskListViewModel.reloadTasks();
     
-    // Setup KO bindings.
+    /** Setup KO bindings */
     function setupBindings() {
         $('.task').dataBind({ visible: 'true' }); // Prevent FOUC
         $('.new-task-input').dataBind({ editableHTML: '$root.newTaskDescription',

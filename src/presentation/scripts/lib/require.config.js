@@ -1,5 +1,5 @@
 /** 
- * Main RequireJs config file for both runtime loader and build optimizer.
+ * Main RequireJs config file.
  */
 
 var require = {
