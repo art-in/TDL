@@ -21,16 +21,16 @@ define('client',
     function setupBindings() {
         $('.task').dataBind({ visible: 'true' }); // Prevent FOUC
         $('.new-task-input').dataBind({ editableHTML: '$root.newTaskDescription',
-                                        returnKeyPress: '$root.addTask' });
+                                        returnKeyPress: '$root.addTask()' });
         $('.add-new-task-button').dataBind({ click: '$root.addTask' });
         $('.task-list').dataBind({ foreach: '$root.tasks',
                                    sortable: "{ draggableClass: 'task'," +
                                              " handleClass: 'task-drag-handle'," +
                                              " ghostClass: 'task-drag-ghost'," + 
-                                             " onUpdate: $root.dragTask }"});
+                                             " onUpdate: $root.dragTask.bind($root) }"});
         $('.task-shift-up-button').dataBind({ click: '$root.shiftTaskUp' });
         $('.task-shift-down-button').dataBind({ click: '$root.shiftTaskDown' });
-        $('.task-remove-button').dataBind({ click: '$root.removeTask',
+        $('.task-remove-button').dataBind({ click: '$root.removeTask.bind($root)',
                                             visible: '!$data.inEditMode()' });
     
         $('.task-progress').dataBind({ css: { "'task-progress-checkbox-checked'": '$data.progressDone' }});
@@ -46,7 +46,7 @@ define('client',
         $('.task-description').dataBind({ editableHTML: '$data.description',
                                           contentEditable: '$data.inEditMode',
                                           css: { "'editing'": '$data.inEditMode' },
-                                          returnKeyPress: '$data.saveDescription',
+                                          returnKeyPress: '$data.saveDescription()',
                                           contentSelect: '$data.inEditMode',
                                           backgroundColorTag:
                                               "{ source: $data.description, " +

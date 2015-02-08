@@ -65,7 +65,7 @@ define(['ko', 'lib/helpers', 'lib/transport', 'viewmodels/TaskViewModel'],
             function (taskModel) {
                 var task = new TaskViewModel(JSON.parse(taskModel));
                 this.tasks.unshift(task);
-            });
+            }.bind(this));
     };
 
     /**

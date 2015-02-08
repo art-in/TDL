@@ -94,7 +94,7 @@ define(['ko', 'Sortable', 'lib/helpers'], function (ko, Sortable, helpers) {
             $(element).on('keydown', function(e) {
                 // 'Return'
                 if (e.keyCode == 13 && !e.ctrlKey) {
-                    valueAccessor()();
+                    valueAccessor();
                     return false;
                 }
     
