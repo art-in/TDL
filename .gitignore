@@ -1,7 +1,11 @@
+build/bin/
+build/config.overrides.json
+
 # Intellij
 .idea/
 *.iml
 *.iws
 
-build/bin/
-build/config.overrides.json
+# Cloud9
+.c9/
+c9/
