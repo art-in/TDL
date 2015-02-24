@@ -28,8 +28,8 @@ define('client',
                                              " handleClass: 'task-drag-handle'," +
                                              " ghostClass: 'task-drag-ghost'," + 
                                              " onUpdate: $root.dragTask.bind($root) }"});
-        $('.task-shift-up-button').dataBind({ click: '$root.shiftTaskUp' });
-        $('.task-shift-down-button').dataBind({ click: '$root.shiftTaskDown' });
+        $('.task-shift-up-button').dataBind({ click: '$root.shiftTaskUp.bind($root)' });
+        $('.task-shift-down-button').dataBind({ click: '$root.shiftTaskDown.bind($root)' });
         $('.task-remove-button').dataBind({ click: '$root.removeTask.bind($root)',
                                             visible: '!$data.inEditMode()' });
     
