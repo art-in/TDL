@@ -85,28 +85,28 @@ http.createServer(function (request, response) {
     if (requestPath.search(/^\/api\//) == -1) {
         (requestPath === '/') && (requestPath += 'index.html');
 
-        var responseMime;
+        var respHeaders = {};
         var fileExtension = requestPath.split('.').pop();
 
         switch (fileExtension) {
-            case 'html': responseMime = 'text/html'; break;
-            case 'ico': responseMime = 'image/x-icon'; break;
-            case 'css': responseMime = 'text/css'; break;
-            case 'js': responseMime = 'application/javascript'; break;
-            case 'png': responseMime = 'image/png'; break;
-            case 'ico': responseMime = 'image/x-icon'; break;
-            default: responseMime = '';
-        }
-        
-        if (requestPath === '/favicon.ico') {
-            requestPath = '/images' + requestPath;
+            case 'html': respHeaders.mime = 'text/html'; break;
+            case 'ico': respHeaders.mime = 'image/x-icon'; break;
+            case 'css': respHeaders.mime = 'text/css'; break;
+            case 'js': respHeaders.mime = 'application/javascript'; break;
+            case 'png': respHeaders.mime = 'image/png'; break;
+            case 'ico': respHeaders.mime = 'image/x-icon'; break;
+            case 'appcache': 
+                respHeaders.mime = 'text/cache-manifest'; 
+                respHeaders.maxAge = 0;
+                break;
+            default: respHeaders.mime = '';
         }
         
         srvHelpers.respondWithFile(
             request,
             response,
             'presentation' + requestPath,
-            responseMime);
+            respHeaders);
     }
     //endregion
 }).listen(config.get('server:port'), config.get('server:ip'));

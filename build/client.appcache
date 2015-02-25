@@ -1,0 +1,9 @@
+CACHE MANIFEST #version:VERSION
+
+favicon.ico
+app.js
+sprite.png
+styles.css
+
+NETWORK:
+/api

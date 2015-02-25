@@ -12,9 +12,13 @@ var path = require('path'),
  * @param {ClientRequest} request
  * @param {ServerResponse} response
  * @param {string} filePath - path relative to 'src' folder
- * @param {string} mimeType
+ * @param {Object} [headers]
+ * @param {string} [headers.mime]
+ * @param {number} [headers.maxAge] - seconds to live in client cache
  */
-exports.respondWithFile = function (request, response, filePath, mimeType) {
+exports.respondWithFile = function (request, response, filePath, headers) {
+    headers === undefined && (headers = {});
+    
     var fullPath = path.join(__dirname, '../' + filePath);
 
     fs.readFile(fullPath,
@@ -41,13 +45,22 @@ exports.respondWithFile = function (request, response, filePath, mimeType) {
                     response.end(); // Take it from cache.
                 }
                 else {
+                    // Set headers
+                    if (headers.maxAge !== undefined) {
+                        response.setHeader('Cache-Control', 'max-age=' + headers.maxAge);
+                    }
+                    
+                    if (headers.mime !== undefined) {
+                        response.setHeader('Content-Type', headers.mime);
+                    }
+                    
                     response.writeHead(200,
                         {
-                            'Content-Type': mimeType,
                             'Content-Encoding': 'gzip',
                             'Last-Modified': modifiedDate
                         });
-
+                    
+                    // Compress
                     zlib.gzip(data, function (_, result) {
                         response.end(result);
                     });

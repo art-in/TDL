@@ -25,6 +25,8 @@ paths.presentation = {
     target: paths.target + 'presentation/'
 };
 
+paths.presentation.manifest = 'client.appcache';
+
 paths.presentation.scripts = {
     folder: paths.presentation.src + 'scripts/',
     mask: paths.presentation.src + 'scripts/*.js',
@@ -103,8 +105,16 @@ gulp.task('sprites', ['clean', 'styles', 'images'], function() {
     del([paths.presentation.images.targetMask, '!**/' + spriteName], {force: true});
 });
 
+gulp.task('manifest', ['clean'], function() {
+   return  gulp.src(paths.presentation.manifest)
+        .pipe(replace(/VERSION/, Date.now()))
+        .pipe(gulp.dest(paths.presentation.target));
+});
+
 gulp.task('views', ['clean'], function() {
     return gulp.src(paths.presentation.views.mask)
+        // Set cache manifest
+        .pipe(replace('<html>', '<html manifest="client.appcache">'))
         // Replace all style links with singe link referencing combined css
         .pipe(replace(/<link rel="stylesheet".*>/, '#FIRSTSTYLETAG#'))
         .pipe(replace(/<link rel="stylesheet".*>/g, ''))
@@ -118,7 +128,7 @@ gulp.task('views', ['clean'], function() {
         .pipe(gulp.dest(paths.presentation.target));
 });
 
-gulp.task('presentation', ['scripts', 'styles', 'images', 'sprites', 'views']);
+gulp.task('presentation', ['scripts', 'styles', 'images', 'sprites', 'manifest', 'views']);
 //endregion
 
 //region Backend
