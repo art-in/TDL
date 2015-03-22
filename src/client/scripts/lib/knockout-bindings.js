@@ -77,11 +77,7 @@ define(['ko', 'Sortable', 'lib/helpers'], function (ko, Sortable, helpers) {
         update: function(element, valueAccessor) {
             var isCE = ko.unwrap(valueAccessor());
             
-            if (isCE) {
-                element.contentEditable = true;
-            } else {
-                element.contentEditable = false;
-            }
+            element.contentEditable = !!isCE;
         }
     };
     
@@ -95,13 +91,29 @@ define(['ko', 'Sortable', 'lib/helpers'], function (ko, Sortable, helpers) {
                 // 'Return'
                 if (e.keyCode == 13 && !e.ctrlKey) {
                     valueAccessor();
-                    return false;
+                    e.preventDefault();
                 }
     
                 // 'Return + CTRL'
                 if (e.keyCode == 13 && e.ctrlKey) {
                     document.execCommand('insertHTML', false, '<br><br>');
-                    return false;
+                    e.preventDefault();
+                }
+            });
+        }
+    };
+
+    /**
+     * Calls function when 'Escape'-key pressed on target element.
+     */
+    ko.bindingHandlers.escapeKeyPress = {
+        init: function(element, valueAccessor) {
+            $(element).on('keydown', function(e) {
+                // 'Escape'
+                if (e.keyCode === 27) {
+                    valueAccessor();
+
+                    window.getSelection().removeAllRanges();
                 }
             });
         }
@@ -140,6 +152,7 @@ define(['ko', 'Sortable', 'lib/helpers'], function (ko, Sortable, helpers) {
             
             var params = valueAccessor();
             
+            //noinspection JSUnusedGlobalSymbols
             new Sortable(container, {
                 group: element.id,
                 // Specifies which items inside the element should be sortable
@@ -150,6 +163,7 @@ define(['ko', 'Sortable', 'lib/helpers'], function (ko, Sortable, helpers) {
                 onUpdate: function(e) {
                     if (params.onUpdate) {
                         var draggedElement = e.item;
+                        //noinspection JSCheckFunctionSignatures
                         var newPosition = helpers.getChildNodeIndex(container, draggedElement, params.draggableClass);
                         
                         params.onUpdate(draggedElement, newPosition);

@@ -1,4 +1,4 @@
-define(['ko', 'lib/transport'], function(ko, transport) {
+define(['ko', 'business/taskManager'], function(ko, taskManager) {
 
     /** 
      * Task view model.
@@ -13,7 +13,7 @@ define(['ko', 'lib/transport'], function(ko, transport) {
         
         if (task) {
             // Map from the model.
-            this.id(task._id);
+            this.id(task.id);
             this.description(task.description);
             this.progress(task.progress);
         }
@@ -62,13 +62,8 @@ define(['ko', 'lib/transport'], function(ko, transport) {
      */
     TaskViewModel.prototype.saveDescription = function() {
         if (this.description() !== this.descriptionBeforeEdit) {
-            var parameters = [
-                {key: 'taskId', value: this.id()},
-                {key: 'description', value: this.description()}
-            ];
-        
-            transport.callServerAPI(transport.apiMethods.updateTask, parameters);
-            
+            taskManager.updateTask(this.id(), {description: this.description()});
+
             this.descriptionBeforeEdit = this.description.peek();
         }
         
@@ -79,12 +74,7 @@ define(['ko', 'lib/transport'], function(ko, transport) {
      * Sends current task progress to the server.
      */
     TaskViewModel.prototype.saveProgress = function () {
-        var parameters = [
-            {key: 'taskId', value: this.id()},
-            {key: 'progress', value: this.progress()}
-        ];
-
-        transport.callServerAPI(transport.apiMethods.updateTask, parameters);
+        taskManager.updateTask(this.id(), {progress: this.progress()});
     };
     
     return TaskViewModel;

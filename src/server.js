@@ -2,13 +2,13 @@ var http = require('http'),
     url = require("url"),
     qs = require('./lib/node_modules/qs'),
     config = require('./lib/config').config,
-    srvHelpers = require('./lib/server.helpers'),
+    helpers = require('./lib/server.helpers'),
     logger = require('./lib/log/Logger').logger,
     RequestLM = require('./lib/log/messages/RequestLogMessage').message,
     ResponseLM = require('./lib/log/messages/ResponseLogMessage').message,
     ResponseLMTypes = require('./lib/log/messages/ResponseLogMessageTypes').types;
 
-var businessService = require('./business/BusinessService.js');
+var storage = require('./data/storage');
 
 /**
  * Server with request routing (static files + API).
@@ -17,59 +17,44 @@ http.createServer(function (request, response) {
     logger.log(new RequestLM(request.url));
 
     var requestPath = url.parse(request.url).pathname;
-    var requestQuery = url.parse(request.url).query;
+    var requestQuery = qs.parse(url.parse(request.url).query);
+
+    Object.keys(requestQuery).forEach(function(paramName) {
+        requestQuery[paramName] = JSON.parse(requestQuery[paramName]);
+    });
 
     //region API
-    if (requestPath.search(/^\/api\//) != -1){
+    if (requestPath.search(/^\/api\//) != -1) {
+
         switch (requestPath) {
-            case '/api/addTask':
-                //noinspection JSUnresolvedVariable
-                var description = qs.parse(requestQuery).description;
-
-                businessService.addTask(description, function (task) {
-                    srvHelpers.respondWithJson(response, requestPath, task);
-                });
-                break;
-
-            case '/api/deleteTask':
-                //noinspection JSUnresolvedVariable
-                businessService.deleteTask(
-                    qs.parse(requestQuery).taskId,
-                    function () {
-                        response.end();
-                    });
-
-                break;
-
             case '/api/getTasks':
-                businessService.getTasks(function (tasks) {
-                    srvHelpers.respondWithJson(response, requestPath, tasks);
-                });
-
+                storage.getTasks(
+                    helpers.respondWithJson.bind(null, response, requestPath)
+                );
                 break;
 
-            case '/api/moveTask':
-                //noinspection JSUnresolvedVariable
-                businessService.moveTask(
-                    qs.parse(requestQuery).taskId,
-                    parseInt(qs.parse(requestQuery).position),
-                    function () {
-                        response.end();
-                    });
+            case '/api/addTask':
+                var newTask = requestQuery.newTask;
 
+                storage.addTask(
+                    newTask,
+                    helpers.respondEmpty.bind(null, response, requestPath));
                 break;
 
             case '/api/updateTask':
-                var props = qs.parse(requestQuery);
-                var taskId = props.taskId;
-                delete props.taskId;
-              
-                //noinspection JSUnresolvedVariable
-                businessService.updateTask(taskId, props,
-                    function () {
-                        response.end();
-                    });
+                var taskId = requestQuery.taskId;
+                var properties = requestQuery.properties;
 
+                storage.updateTask(
+                    taskId,
+                    properties,
+                    helpers.respondEmpty.bind(null, response, requestPath));
+                break;
+
+            case '/api/deleteTask':
+                storage.deleteTask(
+                    requestQuery.taskId,
+                    helpers.respondEmpty.bind(null, response, requestPath));
                 break;
 
             default:
@@ -94,7 +79,6 @@ http.createServer(function (request, response) {
             case 'css': respHeaders.mime = 'text/css'; break;
             case 'js': respHeaders.mime = 'application/javascript'; break;
             case 'png': respHeaders.mime = 'image/png'; break;
-            case 'ico': respHeaders.mime = 'image/x-icon'; break;
             case 'appcache': 
                 respHeaders.mime = 'text/cache-manifest'; 
                 respHeaders.maxAge = 0;
@@ -102,10 +86,10 @@ http.createServer(function (request, response) {
             default: respHeaders.mime = '';
         }
         
-        srvHelpers.respondWithFile(
+        helpers.respondWithFile(
             request,
             response,
-            'presentation' + requestPath,
+            'client' + requestPath,
             respHeaders);
     }
     //endregion

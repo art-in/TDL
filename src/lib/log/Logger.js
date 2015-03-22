@@ -7,7 +7,8 @@ var REQUEST_LOG = chalk.bgRed.white.bold,
     RESPONSE_SUCCESS_LOG = chalk.bgBlack.green.bold,
     RESPONSE_NOTMODIFIED_LOG = chalk.bgBlack.yellow,
     RESPONSE_NOTFOUND_LOG = chalk.bgBlack.red.bold,
-    DB_LOG = chalk.bgMagenta.white;
+    RESPONSE_SERVERERROR_LOG = chalk.bgBlack.red.bold,
+    DB_LOG = chalk.magenta;
 
 /**
  * The logger.
@@ -18,7 +19,7 @@ function Logger() {
 /**
  * Logs the message.
  * 
- * @param {logMessage} logMessage - typed log message.
+ * @param {LogMessage} logMessage - typed log message.
  */
 Logger.prototype.log = function (logMessage) {
     var messageType = logMessage.constructor.name;
@@ -42,9 +43,15 @@ Logger.prototype.log = function (logMessage) {
                     break;
 
                 case 404:
-                    console.log(RESPONSE_NOTFOUND_LOG('X---- %s [%d - %s]'),
+                    console.log(RESPONSE_NOTFOUND_LOG('<---X %s [%d - %s]'),
                         logMessage.requestPath,
                         logMessage.statusCode, 'Not Found');
+                    break;
+
+                case 500:
+                    console.log(RESPONSE_SERVERERROR_LOG('<-XXX %s [%d - %s]'),
+                        logMessage.requestPath,
+                        logMessage.statusCode, 'Internal Server Error');
                     break;
 
                 default:
@@ -55,19 +62,26 @@ Logger.prototype.log = function (logMessage) {
         case 'DatabaseLogMessage':
             var message;
             switch (logMessage.type) {
-                case LogMessageTypes.AddTask:
-                    message = util.format("New task added (%s)", logMessage.taskId);
-                    break;
                 case LogMessageTypes.GetTasks:
                     message = util.format("Returning tasks count: %d", logMessage.taskCount);
                     break;
                 case LogMessageTypes.GetTask:
                     message = util.format("Returning task (%s)", logMessage.taskId);
                     break;
-                case LogMessageTypes.UpdateTask:
+                case LogMessageTypes.AddTask:
+                    message = util.format("New task added (%s)", logMessage.taskId);
+                    break;
+                case LogMessageTypes.UpdateTaskEntirely:
                     message = util.format("Task updated (%s) description = '%s', position = %s, progress = %s",
                         logMessage.taskId, 
                         logMessage.description, 
+                        logMessage.position,
+                        logMessage.progress);
+                    break;
+                case LogMessageTypes.UpdateTaskProperties:
+                    message = util.format("Task updated (%s) description = '%s', position = %s, progress = %s",
+                        logMessage.taskId,
+                        logMessage.description,
                         logMessage.position,
                         logMessage.progress);
                     break;

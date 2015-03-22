@@ -75,11 +75,19 @@ exports.respondWithFile = function (request, response, filePath, headers) {
 
 /**
  * Writes compressed JSONified data to response stream.
- * 
- * @param {ServerReponse} response
+ *
+ * @param {Object} response
  * @param {string} apiPath - requested API method
+ * @param {string|boolean} error
+ * @param {Object[]} data
  */
-exports.respondWithJson = function (response, apiPath, data) {
+exports.respondWithJson = function (response, apiPath, error, data) {
+    if (error) {
+        response.writeHead(500);
+        response.end(e.message);
+        return;
+    }
+
     response.writeHead(200,
         {
             'Content-Type': 'application/json',
@@ -87,9 +95,31 @@ exports.respondWithJson = function (response, apiPath, data) {
             'Cache-Control': 'no-cache'
         });
 
-    zlib.gzip(JSON.stringify(data), function (_, result) {
+    var responseString = JSON.stringify(data);
+
+    zlib.gzip(responseString, function (_, result) {
         response.end(result);
         logger.log(new ResponseLM(ResponseLMTypes.API,
             {requestPath: apiPath, statusCode: response.statusCode}));
     });
+};
+
+/**
+ * Ends response with no data.
+ *
+ * @param response
+ * @param apiPath
+ * @param error
+ */
+exports.respondEmpty = function (response, apiPath, error) {
+    if (error) {
+        response.writeHead(500);
+        response.end(error);
+    } else {
+        response.writeHead(200);
+        response.end();
+    }
+
+    logger.log(new ResponseLM(ResponseLMTypes.API,
+        {requestPath: apiPath, statusCode: response.statusCode}));
 };

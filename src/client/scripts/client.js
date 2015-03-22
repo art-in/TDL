@@ -15,13 +15,14 @@ define('client',
     var taskListViewModel = new TaskListViewModel();
     ko.applyBindings(taskListViewModel);
 
-    taskListViewModel.reloadTasks();
+    taskListViewModel.update();
     
     /** Setup KO bindings */
     function setupBindings() {
         $('.task').dataBind({ visible: 'true' }); // Prevent FOUC
         $('.new-task-input').dataBind({ editableHTML: '$root.newTaskDescription',
-                                        returnKeyPress: '$root.addTask()' });
+                                        returnKeyPress: '$root.addTask()',
+                                        escapeKeyPress: '$root.emptyNewTask()' });
         $('.add-new-task-button').dataBind({ click: '$root.addTask' });
         $('.task-list').dataBind({ foreach: '$root.tasks',
                                    sortable: "{ draggableClass: 'task'," +
@@ -47,6 +48,7 @@ define('client',
                                           contentEditable: '$data.inEditMode',
                                           css: { "'editing'": '$data.inEditMode' },
                                           returnKeyPress: '$data.saveDescription()',
+                                          escapeKeyPress: '$data.toggleEditMode()',
                                           contentSelect: '$data.inEditMode',
                                           backgroundColorTag:
                                               "{ source: $data.description, " +

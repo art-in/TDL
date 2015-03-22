@@ -1,8 +1,9 @@
 exports.types = {
-    AddTask: 1,
-    GetTasks: 2,
-    GetTask: 3,
-    UpdateTask: 4,
-    DeleteTask: 5,
-    ShiftTaskPositions: 6
+    GetTasks: 1,
+    GetTask: 2,
+    AddTask: 3,
+    UpdateTaskEntirely: 4,
+    UpdateTaskProperties: 5,
+    DeleteTask: 6,
+    ShiftTaskPositions: 7
 };
