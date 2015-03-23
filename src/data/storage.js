@@ -1,6 +1,6 @@
 var MongoClient = require('../lib/node_modules/mongodb').MongoClient,
     ObjectID = require('../lib/node_modules/mongodb').ObjectID,
-    Queue = require('Queue').Queue,
+    Queue = require('../lib/Queue').Queue,
     config = require('../lib/config').config,
     logger = require('../lib/log/Logger').logger,
     DatabaseLM = require('../lib/log/messages/DatabaseLogMessage').message,
