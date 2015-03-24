@@ -10,6 +10,7 @@ var gulp = require('gulp'),
     requirejs = require('gulp-requirejs');
 
 //region Paths
+
 var paths = {
     src: '../src/',
     target: './bin/'
@@ -49,9 +50,11 @@ paths.client.views = {
     folder: paths.client.src,
     mask: paths.client.src + '*.html'
 };
+
 //endregion
 
 //region Presentation
+
 gulp.task('clean', function(cb) {
     del([paths.target], {force: true},  cb);
 });
@@ -115,12 +118,12 @@ gulp.task('views', ['clean'], function() {
     return gulp.src(paths.client.views.mask)
         // Set cache manifest
         .pipe(replace('<html>', '<html manifest="' + paths.client.manifest +'">'))
-        // Replace all style links with singe link referencing combined css
+        // Replace all style links with singe link with reference to combined css
         .pipe(replace(/<link rel="stylesheet".*>/, '#FIRSTSTYLETAG#'))
         .pipe(replace(/<link rel="stylesheet".*>/g, ''))
         .pipe(replace(/#FIRSTSTYLETAG#/,
             '<link rel="stylesheet" type="text/css" href="styles.css">'))
-        // Replace all script tags with single tag referencing combined js
+        // Replace all script tags with single tag with reference to combined js
         .pipe(replace(/<script.*script>/, '#FIRSTSCRIPTTAG#'))
         .pipe(replace(/<script.*script>/g, ''))
         .pipe(replace(/#FIRSTSCRIPTTAG#/,
@@ -129,21 +132,26 @@ gulp.task('views', ['clean'], function() {
 });
 
 gulp.task('client', ['scripts', 'styles', 'images', 'sprites', 'manifest', 'views']);
+
 //endregion
 
 //region Backend
+
 gulp.task('backend', ['clean'], function() {
     // Copy everything except client folder
     return gulp.src([paths.src + '**/*', '!' + paths.client.src + '**/*'])
         .pipe(gulp.dest(paths.target));
 });
+
 //endregion
 
 //region Config
+
 gulp.task('config', ['clean', 'backend'], function() {
     return gulp.src([paths.config.main, paths.config.overrides])
         .pipe(gulp.dest(paths.target));
 });
+
 //endregion
 
 gulp.task('build', ['backend', 'client', 'config']);

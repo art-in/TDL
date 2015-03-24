@@ -1,9 +1,11 @@
 var gulp = require('gulp'),
+    runSequence = require('run-sequence'),
     complexityConfig = require('./complexity-config.json'),
     complexity = require('gulp-complexity'),
     jshintConfig = require('./jshint-config.json'),
     jshint = require('gulp-jshint'),
-    jshintStylish = require('jshint-stylish');
+    jshintStylish = require('jshint-stylish'),
+    sloc = require('gulp-sloc');
 
 //region Paths
 
@@ -23,12 +25,17 @@ paths.scripts = {
 
 //region Static Analysis
 
-gulp.task('code-complexity',  function(){
+gulp.task('code-lines', function(){
+    return gulp.src(paths.scripts.nonThirdPartyCodeMask)
+        .pipe(sloc());
+});
+
+gulp.task('code-complexity', function(){
     return gulp.src(paths.scripts.nonThirdPartyCodeMask)
         .pipe(complexity(complexityConfig));
 });
 
-gulp.task('code-quality', ['code-complexity'], function() {
+gulp.task('code-quality', function() {
     return gulp.src(paths.scripts.nonThirdPartyCodeMask)
         .pipe(jshint(jshintConfig))
         .pipe(jshint.reporter(jshintStylish));
@@ -36,6 +43,8 @@ gulp.task('code-quality', ['code-complexity'], function() {
 
 //endregion 
 
-gulp.task('tests', ['code-complexity', 'code-quality']);
+gulp.task('tests', function(cb) {
+    runSequence('code-lines', 'code-complexity', 'code-quality', cb);
+});
 
 gulp.task('default', ['tests']);
