@@ -1,4 +1,5 @@
 var gulp = require('gulp'),
+    complexityConfig = require('./complexity-config.json'),
     complexity = require('gulp-complexity'),
     jshintConfig = require('./jshint-config.json'),
     jshint = require('gulp-jshint'),
@@ -24,12 +25,7 @@ paths.scripts = {
 
 gulp.task('code-complexity',  function(){
     return gulp.src(paths.scripts.nonThirdPartyCodeMask)
-        .pipe(complexity({
-                cyclomatic: [10], // [1; +infinity] less is better
-    		    halstead: [],
-    		    maintainability: 65, // [-infinity; 171] more is better
-    		    breakOnErrors: false 
-            }));
+        .pipe(complexity(complexityConfig));
 });
 
 gulp.task('code-quality', ['code-complexity'], function() {

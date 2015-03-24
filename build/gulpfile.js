@@ -146,4 +146,6 @@ gulp.task('config', ['clean', 'backend'], function() {
 });
 //endregion
 
-gulp.task('default', ['backend', 'client', 'config']);
+gulp.task('build', ['backend', 'client', 'config']);
+
+gulp.task('default', ['build']);
