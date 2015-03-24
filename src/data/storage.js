@@ -21,16 +21,11 @@ var queue = new Queue();
 exports.getTasks = function (cb) {
     queueDb(cb, function (cb) {
         db.collection(TASKS_COLLECTION)
-            .find()
+            .find({}, {_id:0})
             .sort({position: 1})
             .toArray(
             function (err, tasks) {
                 if (err) throw err;
-
-                // Cut out db ids
-                tasks.map(function(task) {
-                    delete task._id;
-                });
 
                 logger.log(new DatabaseLM(DatabaseLMTypes.GetTasks,
                     {taskCount: tasks.length}));
