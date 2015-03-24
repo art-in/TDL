@@ -95,7 +95,7 @@ define(function() {
         if (this.currentRequest === null) throw new Error('Current request is empty');
 
         if (this.currentRequest.tail && this.requests.length > 0 &&
-            !this.requests.every(function(r) { return r.tail })) {
+            !this.requests.every(function(r) { return r.tail; })) {
 
             removeRequest.call(this, this.currentRequest);
             this.requests.push(this.currentRequest);
@@ -130,15 +130,23 @@ define(function() {
             if (xhr.readyState == XMLHttpRequest.DONE) {
                 logResponse(request.url, xhr);
 
-                if (xhr.status === 0) {
+                if (xhr.status === 0 || 
+                    xhr.status === 502 || // Bad Gateway
+                    xhr.status === 503) { // Service Unavailable
                     // Connection failed. Retry later.
                     setTimeout(trySend.bind(this), this.retryDelay);
                     return;
                 }
 
+                if (xhr.status === 500) { // Internal Server Error
+                    // Bad thing happend on server. Go to next request.
+                    cb(true);
+                    return;
+                }
+
                 var responseData = xhr.responseText;
 
-                if (responseData.length > 0 && xhr.status !== 500)
+                if (responseData.length > 0)
                     try {
                         JSON.parse(responseData);
                     } catch (e) {
@@ -147,12 +155,6 @@ define(function() {
                         setTimeout(trySend.bind(this), 1);
                         return;
                     }
-
-                if (xhr.status === 500) {
-                    // Bad thing happend on the server.
-                    cb(true);
-                    return;
-                }
 
                 cb(false, responseData);
             }
@@ -185,7 +187,9 @@ define(function() {
     }
 
     function logResponse(url, xhr) {
-        if (xhr.status === 0) {
+        if (xhr.status === 0 || 
+            xhr.status === 502 ||
+            xhr.status === 503) {
             return;
         }
 

@@ -39,7 +39,7 @@ function Queue(logEnabled) {
  */
 Queue.prototype.push = function (jobCb, job) {
     // Check arguments
-    if (arguments.length == 0 || arguments.length > 2)
+    if (arguments.length === 0 || arguments.length > 2)
         throw new Error('Invalid arguments count');
     else if
         ((arguments.length === 1 && typeof arguments[0] !== 'function') ||

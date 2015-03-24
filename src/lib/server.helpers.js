@@ -84,7 +84,7 @@ exports.respondWithFile = function (request, response, filePath, headers) {
 exports.respondWithJson = function (response, apiPath, error, data) {
     if (error) {
         response.writeHead(500);
-        response.end(e.message);
+        response.end(error.message);
         return;
     }
 

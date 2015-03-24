@@ -68,7 +68,7 @@ http.createServer(function (request, response) {
 
     //region Statics
     if (requestPath.search(/^\/api\//) == -1) {
-        (requestPath === '/') && (requestPath += 'index.html');
+        if (requestPath === '/') requestPath += 'index.html';
 
         var respHeaders = {};
         var fileExtension = requestPath.split('.').pop();

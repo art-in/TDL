@@ -18,9 +18,7 @@ define(['lib/transport/apiAgent'],
                 }
 
                 var tasks = JSON.parse(tasksJson);
-
                 tasks.sort(tasksComparer);
-
                 cb && cb(error, tasks);
 
                 return tasks;
@@ -194,8 +192,8 @@ define(['lib/transport/apiAgent'],
             // Shift locally
             initTasksIfRequired();
 
-            startPosition = startPosition != null ? startPosition : 0;
-            endPosition = endPosition != null ? endPosition : Number.MAX_VALUE;
+            startPosition = startPosition !== null ? startPosition : 0;
+            endPosition = endPosition !== null ? endPosition : Number.MAX_VALUE;
 
             var tasks = JSON.parse(localStorage.tasks);
 

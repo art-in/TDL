@@ -76,7 +76,7 @@ exports.updateTask = function (taskId, properties, cb) {
         getTask(taskId, function (error, task) {
             if (error) {
                 cb(error);
-                return
+                return;
             }
 
             if (properties.position !== undefined) {
@@ -112,7 +112,7 @@ exports.updateTask = function (taskId, properties, cb) {
                     logger.log(new DatabaseLM(DatabaseLMTypes.UpdateTaskProperties, properties));
                     cb(false);
                 }
-            )
+            );
         }
     });
 };
@@ -149,7 +149,7 @@ exports.deleteTask = function (taskId, cb) {
                         cb(false);
                     });
             });
-        })
+        });
     });
 };
 
@@ -178,7 +178,7 @@ exports.deleteTask = function (taskId, cb) {
  * @param jobDb
  */
 function queueDb(cb, jobDb) {
-    return queue.push.apply(queue, arguments)
+    return queue.push.apply(queue, arguments);
 }
 
 /**
@@ -204,7 +204,7 @@ function getTask(taskId, cb) {
 
 
             cb(false, tasks[0]);
-        })
+        });
 }
 
 /**
@@ -217,8 +217,8 @@ function getTask(taskId, cb) {
  * @param {function} cb
  */
 function shiftTaskPositions(startPosition, endPosition, shift, cb) {
-    startPosition = startPosition != null ? startPosition : 0;
-    endPosition = endPosition != null ? endPosition : Number.MAX_VALUE;
+    startPosition = startPosition !== null ? startPosition : 0;
+    endPosition = endPosition !== null ? endPosition : Number.MAX_VALUE;
 
     db.collection(TASKS_COLLECTION).update(
         {position: {$gte: startPosition, $lte: endPosition}},
