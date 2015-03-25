@@ -24,6 +24,7 @@ define(function() {
         this.requests = JSON.parse(localStorage.requests);
 
         this.currentRequest = null;
+        this.xhr = new XMLHttpRequest();
 
         next.call(this);
     }
@@ -127,28 +128,29 @@ define(function() {
     function send (request, cb) {
 
         var onStateChange =  function () {
-            if (xhr.readyState == XMLHttpRequest.DONE) {
-                logResponse(request.url, xhr);
+            if (this.xhr.readyState == XMLHttpRequest.DONE) {
+                logResponse.call(this, request.url);
 
-                if (xhr.status === 0 || 
-                    xhr.status === 502 || // Bad Gateway
-                    xhr.status === 503) { // Service Unavailable
+                if (this.xhr.status === 0 || 
+                    this.xhr.status === 502 || // Bad Gateway
+                    this.xhr.status === 503) { // Service Unavailable
                     // Connection failed. Retry later.
                     setTimeout(trySend.bind(this), this.retryDelay);
                     return;
                 }
 
-                if (xhr.status === 500) { // Internal Server Error
-                    // Bad thing happend on server. Go to next request.
+                if (this.xhr.status === 500) { // Internal Server Error
+                    // Bad thing happend on server. 
+                    // Return error and go to next request.
                     cb(true);
                     return;
                 }
 
-                var responseData = xhr.responseText;
+                var responseText = this.xhr.responseText;
 
-                if (responseData.length > 0)
+                if (responseText.length > 0)
                     try {
-                        JSON.parse(responseData);
+                        JSON.parse(responseText);
                     } catch (e) {
                         // Response corrupted. Retry now.
                         console.log('Response corrupted. Retring now.');
@@ -156,21 +158,19 @@ define(function() {
                         return;
                     }
 
-                cb(false, responseData);
+                cb(false, responseText);
             }
-        }.bind(this);
-
-        var onError = function () {
-            console.log(xhr.statusText);
-            console.groupEnd();
         };
 
-        var xhr = new XMLHttpRequest();
-        xhr.onreadystatechange = onStateChange;
-        xhr.onerror = onError;
-
-        xhr.open("GET", request.url, true);
-        xhr.send(null);
+        this.xhr.onreadystatechange = onStateChange.bind(this);
+        
+        if (this.xhr.readyState === XMLHttpRequest.HEADERS_RECEIVED ||
+            this.xhr.readyState === XMLHttpRequest.LOADING) {
+            console.warn('Previous request was not completed');
+        }
+        
+        this.xhr.open("GET", request.url, true);
+        this.xhr.send(null);
 
         console.log('GET ' + request.url);
     }
@@ -186,30 +186,36 @@ define(function() {
         localStorage.requests = JSON.stringify(this.requests);
     }
 
-    function logResponse(url, xhr) {
-        if (xhr.status === 0 || 
-            xhr.status === 502 ||
-            xhr.status === 503) {
+    function logResponse(url) {
+        var responseText = this.xhr.responseText;
+        var responseStatus = this.xhr.status;
+        
+        if (responseStatus === 0 || 
+            responseStatus === 502 ||
+            responseStatus === 503) {
             return;
         }
-
-        if (xhr.status === 500) {
-            console.error('GET ' + url + ' SERVER FAILED [' + xhr.status + '] ("' + xhr.responseText + '")');
+        
+        var maxUrlLengthBeforeNewline = 120;
+        var maxResponseTextBeforeCollapse = 100;
+        
+        if (responseStatus === 500) {
+            console.error('GET ' + url + ' ' + (url.length > maxUrlLengthBeforeNewline ? '\r\n' : '') + 'SERVER FAILED [' + responseStatus + '] ("' + responseText + '")');
             return;
         }
 
         var logHeader;
 
-        if (xhr.responseText.length === 0) {
-            logHeader = 'GET ' + url + ' DONE [' + xhr.status + '] (response empty)';
-        } else if (xhr.responseText.length <= 100) {
-            logHeader = 'GET ' + url + ' DONE [' + xhr.status + '] (response: ' + xhr.responseText + ')';
+        if (responseText.length === 0) {
+            logHeader = 'GET ' + url + ' ' + (url.length > maxUrlLengthBeforeNewline ? '\r\n' : '') + 'DONE [' + responseStatus + '] (response empty)';
+        } else if (responseText.length <= maxResponseTextBeforeCollapse) {
+            logHeader = 'GET ' + url + ' ' + (url.length > maxUrlLengthBeforeNewline ? '\r\n' : '') + 'DONE [' + responseStatus + '] (response: ' + responseText + ')';
         } else {
-            logHeader = 'GET ' + url + ' DONE [' + xhr.status + '] (response length: ' + xhr.responseText.length + ')';
+            logHeader = 'GET ' + url + ' ' + (url.length > maxUrlLengthBeforeNewline ? '\r\n' : '') + 'DONE [' + responseStatus + '] (response length: ' + responseText.length + ')';
         }
 
         console.groupCollapsed(logHeader);
-        console.log(xhr.responseText);
+        console.log(responseText);
         console.groupEnd();
     }
 
