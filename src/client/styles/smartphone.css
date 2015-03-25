@@ -78,6 +78,10 @@
         flex-direction: column;
         min-height: 70px;
     }
+    
+    .task.done {
+        opacity: 0.4;
+    }
 
     .task-progress {
         border: 1px solid lightgrey;

@@ -76,6 +76,10 @@
         display: flex;
         flex-direction: row;
     }
+    
+    .task.done {
+        opacity: 0.4;
+    }
 
     .task-progress {
         display: flex;

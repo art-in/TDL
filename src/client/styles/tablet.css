@@ -79,6 +79,10 @@
         flex-direction: row;
         min-height: 45px;
     }
+    
+    .task.done {
+        opacity: 0.4;
+    }
 
     .task-progress {
         display: flex;

@@ -19,16 +19,17 @@ define('client',
     
     /** Setup KO bindings */
     function setupBindings() {
-        $('.task').dataBind({ visible: 'true' }); // Prevent FOUC
         $('.new-task-input').dataBind({ editableHTML: '$root.newTaskDescription',
                                         returnKeyPress: '$root.addTask()',
                                         escapeKeyPress: '$root.emptyNewTask()' });
         $('.add-new-task-button').dataBind({ click: '$root.addTask' });
-        $('.task-list').dataBind({ foreach: '$root.tasks',
+        $('.task-list').dataBind({ visible: 'true', // Prevent FOUC
+                                   foreach: '$root.tasks',
                                    sortable: "{ draggableClass: 'task'," +
-                                             " handleClass: 'task-drag-handle'," +
-                                             " ghostClass: 'task-drag-ghost'," + 
-                                             " onUpdate: $root.dragTask.bind($root) }"});
+                                             "  handleClass: 'task-drag-handle'," +
+                                             "  ghostClass: 'task-drag-ghost'," + 
+                                             "  onUpdate: $root.dragTask.bind($root) }"});
+        $('.task').dataBind({ css: { "'done'": '$data.progressDone' }});
         $('.task-shift-up-button').dataBind({ click: '$root.shiftTaskUp.bind($root)' });
         $('.task-shift-down-button').dataBind({ click: '$root.shiftTaskDown.bind($root)' });
         $('.task-remove-button').dataBind({ click: '$root.removeTask.bind($root)',
