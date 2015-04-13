@@ -11,7 +11,6 @@ TODO List (TDL)
 - [x] task progress
 - [ ] sub-tasking
 - [x] projects (i.e. sports, music, craft, etc.)
-- [x] custom color marker for each task
 - [ ] estimation / actual time for performing task
 - [ ] similar-task detection
 - [ ] history of completed tasks
