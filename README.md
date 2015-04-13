@@ -10,7 +10,7 @@ TODO List (TDL)
 - [x] task reordering
 - [x] task progress
 - [ ] sub-tasking
-- [ ] projects (i.e. sports, music, craft, etc.)
+- [x] projects (i.e. sports, music, craft, etc.)
 - [x] custom color marker for each task
 - [ ] estimation / actual time for performing task
 - [ ] similar-task detection
