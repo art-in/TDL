@@ -16,7 +16,7 @@ var path = require('path'),
  * @param {string} [headers.mime]
  * @param {number} [headers.maxAge] - seconds to live in client cache
  */
-exports.respondWithFile = function (request, response, filePath, headers) {
+function respondWithFile (request, response, filePath, headers) {
     headers === undefined && (headers = {});
     
     var fullPath = path.join(__dirname, '../' + filePath);
@@ -71,7 +71,7 @@ exports.respondWithFile = function (request, response, filePath, headers) {
             });
         }
     );
-};
+}
 
 /**
  * Writes compressed JSONified data to response stream.
@@ -81,10 +81,9 @@ exports.respondWithFile = function (request, response, filePath, headers) {
  * @param {string|boolean} error
  * @param {Object[]} data
  */
-exports.respondWithJson = function (response, apiPath, error, data) {
+function respondWithJson (response, apiPath, error, data) {
     if (error) {
-        response.writeHead(500);
-        response.end(error.message);
+        respondWithError(response, error);
         return;
     }
 
@@ -102,7 +101,12 @@ exports.respondWithJson = function (response, apiPath, error, data) {
         logger.log(new ResponseLM(ResponseLMTypes.API,
             {requestPath: apiPath, statusCode: response.statusCode}));
     });
-};
+}
+
+function respondWithError (response, error) {
+    response.writeHead(500);
+    response.end(error);
+}
 
 /**
  * Ends response with no data.
@@ -111,10 +115,9 @@ exports.respondWithJson = function (response, apiPath, error, data) {
  * @param apiPath
  * @param error
  */
-exports.respondEmpty = function (response, apiPath, error) {
+function respondEmpty (response, apiPath, error) {
     if (error) {
-        response.writeHead(500);
-        response.end(error);
+        respondWithError(response, error);
     } else {
         response.writeHead(200);
         response.end();
@@ -122,4 +125,11 @@ exports.respondEmpty = function (response, apiPath, error) {
 
     logger.log(new ResponseLM(ResponseLMTypes.API,
         {requestPath: apiPath, statusCode: response.statusCode}));
+}
+
+module.exports = {
+    respondWithFile: respondWithFile,
+    respondWithJson: respondWithJson,
+    respondError: respondWithError,
+    respondEmpty: respondEmpty
 };

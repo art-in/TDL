@@ -119,15 +119,15 @@ gulp.task('views', ['clean'], function() {
         // Set cache manifest
         .pipe(replace('<html>', '<html manifest="' + paths.client.manifest +'">'))
         // Replace all style links with singe link with reference to combined css
-        .pipe(replace(/<link rel="stylesheet".*>/, '#FIRSTSTYLETAG#'))
-        .pipe(replace(/<link rel="stylesheet".*>/g, ''))
+        .pipe(replace(/<link rel='stylesheet'.*>/, '#FIRSTSTYLETAG#'))
+        .pipe(replace(/<link rel='stylesheet'.*>/g, ''))
         .pipe(replace(/#FIRSTSTYLETAG#/,
-            '<link rel="stylesheet" type="text/css" href="styles.css">'))
+            "<link rel='stylesheet' type='text/css' href='styles.css'>"))
         // Replace all script tags with single tag with reference to combined js
         .pipe(replace(/<script.*script>/, '#FIRSTSCRIPTTAG#'))
         .pipe(replace(/<script.*script>/g, ''))
         .pipe(replace(/#FIRSTSCRIPTTAG#/,
-            '<script type="text/javascript" src="app.js"></script>'))
+            "<script type='text/javascript' src='app.js'></script>"))
         .pipe(gulp.dest(paths.client.target));
 });
 

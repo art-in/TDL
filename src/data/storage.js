@@ -1,5 +1,4 @@
 var MongoClient = require('../lib/node_modules/mongodb').MongoClient,
-    ObjectID = require('../lib/node_modules/mongodb').ObjectID,
     Queue = require('../lib/Queue').Queue,
     config = require('../lib/config').config,
     logger = require('../lib/log/Logger').logger,
@@ -7,7 +6,8 @@ var MongoClient = require('../lib/node_modules/mongodb').MongoClient,
     DatabaseLMTypes = require('../lib/log/messages/DatabaseLogMessageTypes').types;
 
 var connectionString = config.get('database:connectionString'),
-    TASKS_COLLECTION = "tasks";
+    TASK_COLLECTION = "tasks",
+    PROJECT_COLLECTION = "projects";
 
 var db;
 
@@ -18,9 +18,9 @@ var queue = new Queue();
  *
  * @param {function} cb
  */
-exports.getTasks = function (cb) {
+function getTasks (cb) {
     queueDb(cb, function (cb) {
-        db.collection(TASKS_COLLECTION)
+        db.collection(TASK_COLLECTION)
             .find({}, {_id:0})
             .sort({position: 1})
             .toArray(
@@ -32,7 +32,7 @@ exports.getTasks = function (cb) {
                 cb(false, tasks);
             });
     });
-};
+}
 
 /**
  * Adds new task to the data storage.
@@ -40,12 +40,12 @@ exports.getTasks = function (cb) {
  * @param {Task} newTask
  * @param {function} cb
  */
-exports.addTask = function (newTask, cb) {
+function addTask (newTask, cb) {
     queueDb(cb, function (cb) {
         var taskPosition = newTask.position;
 
         shiftTaskPositions(taskPosition, null, 1, function () {
-            db.collection(TASKS_COLLECTION).insert(
+            db.collection(TASK_COLLECTION).insert(
                 newTask,
                 function (err, records) {
                     if (err) throw err;
@@ -56,16 +56,16 @@ exports.addTask = function (newTask, cb) {
                 });
         });
     });
-};
+}
 
 /**
  * Updates properties of existing task.
  *
- * @param {string} taskId - Mongo ObjectId hex string
+ * @param {string} taskId
  * @param {Object} properties
  * @param {function} cb
  */
-exports.updateTask = function (taskId, properties, cb) {
+function updateTask (taskId, properties, cb) {
     queueDb(cb, function (cb) {
 
         getTask(taskId, function (error, task) {
@@ -96,7 +96,7 @@ exports.updateTask = function (taskId, properties, cb) {
 
         // Updates properties of the task
         function updateTaskProperties(taskId, properties) {
-            db.collection(TASKS_COLLECTION).update(
+            db.collection(TASK_COLLECTION).update(
                 {id: taskId},
                 {$set: properties},
                 function (err) {
@@ -104,29 +104,26 @@ exports.updateTask = function (taskId, properties, cb) {
 
                     properties.taskId = taskId;
 
-                    logger.log(new DatabaseLM(DatabaseLMTypes.UpdateTaskProperties, properties));
+                    logger.log(new DatabaseLM(DatabaseLMTypes.UpdateTask, properties));
                     cb(false);
                 }
             );
         }
     });
-};
+}
 
 /**
  * Deletes task from the data storage.
  *
- * @param {string} taskId - Mongo ObjectId hex string
+ * @param {string} taskId
  * @param {function} cb
  */
-exports.deleteTask = function (taskId, cb) {
+function deleteTask (taskId, cb) {
     queueDb(cb, function (cb) {
 
         // Get target task
         getTask(taskId, function (error, task) {
-            if (error) {
-                cb(error);
-                return;
-            }
+            if (error) { cb(error); return; }
 
             var taskPosition = task.position;
 
@@ -134,10 +131,10 @@ exports.deleteTask = function (taskId, cb) {
             shiftTaskPositions(taskPosition, null, -1, function () {
 
                 // Remove the task itself
-                db.collection(TASKS_COLLECTION).remove(
+                db.collection(TASK_COLLECTION).remove(
                     {id: taskId},
                     function (err) {
-                        if (err) throw err;
+                        if (err) { cb(err); return; }
 
                         logger.log(new DatabaseLM(DatabaseLMTypes.DeleteTask,
                             {taskId: taskId}));
@@ -146,13 +143,111 @@ exports.deleteTask = function (taskId, cb) {
             });
         });
     });
+}
+
+/**
+ * Returns all projects exist in the data storage.
+ *
+ * @param {function} cb
+ */
+function getProjects (cb) {
+    queueDb(cb, function(cb) {
+       db.collection(PROJECT_COLLECTION)
+        .find({}, {_id:0})
+        .toArray(function(err, projects) {
+           if (err) throw err;
+           
+           logger.log(new DatabaseLM(DatabaseLMTypes.GetProjects,
+                     {projectCount: projects.length}));
+           cb(false, projects);
+       });
+    });
+}
+
+/**
+ * Adds new project to the data storage.
+ *
+ * @param {Project} newProject
+ * @param {function} cb
+ */
+function addProject (newProject, cb) {
+    queueDb(cb, function (cb) {
+        db.collection(PROJECT_COLLECTION).insert(
+            newProject,
+            function (err, records) {
+                if (err) throw err;
+
+                logger.log(new DatabaseLM(DatabaseLMTypes.AddProject,
+                    {projectId: records[0].id}));
+                cb(false);
+            });
+    });
+}
+
+/**
+ * Updates properties of existing project.
+ *
+ * @param {string} projectId
+ * @param {Object} properties
+ * @param {function} cb
+ */
+function updateProject (projectId, properties, cb) {
+    queueDb(cb, function (cb) {
+        db.collection(PROJECT_COLLECTION).update(
+                {id: projectId},
+                {$set: properties},
+                function (err) {
+                    if (err) throw err;
+
+                    properties.projectId = projectId;
+
+                    logger.log(new DatabaseLM(DatabaseLMTypes.UpdateProject, properties));
+                    cb(false);
+                }
+            );
+    });
+}
+
+/**
+ * Deletes project from the data storage.
+ *
+ * @param {string} projectId
+ * @param {function} cb
+ */
+function deleteProject (projectId, cb) {
+    queueDb(cb, function (cb) {
+        db.collection(PROJECT_COLLECTION).remove(
+            {id: projectId},
+            function (err) {
+                if (err) { cb(err); return; }
+        
+                logger.log(new DatabaseLM(DatabaseLMTypes.DeleteProject,
+                    {projectId: projectId}));
+                cb(false);
+            });
+    });
+}
+
+module.exports = {
+    getTasks: getTasks,
+    addTask: addTask,
+    updateTask: updateTask,
+    deleteTask: deleteTask,
+    
+    getProjects: getProjects,
+    addProject: addProject,
+    updateProject: updateProject,
+    deleteProject: deleteProject
 };
+
+//region Private methods
 
 // Connect to database.
 (function () {
     MongoClient.connect(connectionString,
         function (err, dbContext) {
             if (err) throw err;
+            // TODO: log connected to db
             db = dbContext;
         });
 })();
@@ -183,7 +278,7 @@ function queueDb(cb, jobDb) {
  * @param cb
  */
 function getTask(taskId, cb) {
-    db.collection(TASKS_COLLECTION)
+    db.collection(TASK_COLLECTION)
         .find({id: taskId})
         .toArray(function (err, tasks) {
             if (err) throw err;
@@ -215,7 +310,7 @@ function shiftTaskPositions(startPosition, endPosition, shift, cb) {
     startPosition = startPosition !== null ? startPosition : 0;
     endPosition = endPosition !== null ? endPosition : Number.MAX_VALUE;
 
-    db.collection(TASKS_COLLECTION).update(
+    db.collection(TASK_COLLECTION).update(
         {position: {$gte: startPosition, $lte: endPosition}},
         {$inc: {position: shift}},
         {multi: true},
@@ -227,3 +322,5 @@ function shiftTaskPositions(startPosition, endPosition, shift, cb) {
             cb();
         });
 }
+
+//endregion

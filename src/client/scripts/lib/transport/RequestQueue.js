@@ -17,11 +17,9 @@ define(function() {
     function RequestQueue() {
 
         // Load preserved requests
-        if (localStorage.requests === undefined) {
-            localStorage.requests = '[]';
-        }
+        !localStorage._requests && (localStorage._requests = '[]');
 
-        this.requests = JSON.parse(localStorage.requests);
+        this.requests = JSON.parse(localStorage._requests);
 
         this.currentRequest = null;
         this.xhr = new XMLHttpRequest();
@@ -139,7 +137,8 @@ define(function() {
                     return;
                 }
 
-                if (this.xhr.status === 500) { // Internal Server Error
+                if (this.xhr.status === 404 || // Not Found
+                    this.xhr.status === 500) { // Internal Server Error
                     // Bad thing happend on server. 
                     // Return error and go to next request.
                     cb(true);
@@ -183,7 +182,7 @@ define(function() {
     }
 
     function preserve() {
-        localStorage.requests = JSON.stringify(this.requests);
+        localStorage._requests = JSON.stringify(this.requests);
     }
 
     function logResponse(url) {
@@ -200,18 +199,22 @@ define(function() {
         var maxResponseTextBeforeCollapse = 100;
         
         if (responseStatus === 500) {
-            console.error('GET ' + url + ' ' + (url.length > maxUrlLengthBeforeNewline ? '\r\n' : '') + 'SERVER FAILED [' + responseStatus + '] ("' + responseText + '")');
+            console.error('GET ' + url + ' ' + (url.length > maxUrlLengthBeforeNewline ? '\r\n' : '') +
+                'SERVER FAILED [' + responseStatus + '] ("' + responseText + '")');
             return;
         }
 
         var logHeader;
 
         if (responseText.length === 0) {
-            logHeader = 'GET ' + url + ' ' + (url.length > maxUrlLengthBeforeNewline ? '\r\n' : '') + 'DONE [' + responseStatus + '] (response empty)';
+            logHeader = 'GET ' + url + ' ' + (url.length > maxUrlLengthBeforeNewline ? '\r\n' : '') + 
+                'DONE [' + responseStatus + '] (response empty)';
         } else if (responseText.length <= maxResponseTextBeforeCollapse) {
-            logHeader = 'GET ' + url + ' ' + (url.length > maxUrlLengthBeforeNewline ? '\r\n' : '') + 'DONE [' + responseStatus + '] (response: ' + responseText + ')';
+            logHeader = 'GET ' + url + ' ' + (url.length > maxUrlLengthBeforeNewline ? '\r\n' : '') +
+                'DONE [' + responseStatus + '] (response: ' + responseText + ')';
         } else {
-            logHeader = 'GET ' + url + ' ' + (url.length > maxUrlLengthBeforeNewline ? '\r\n' : '') + 'DONE [' + responseStatus + '] (response length: ' + responseText.length + ')';
+            logHeader = 'GET ' + url + ' ' + (url.length > maxUrlLengthBeforeNewline ? '\r\n' : '') +
+                'DONE [' + responseStatus + '] (response length: ' + responseText.length + ')';
         }
 
         console.groupCollapsed(logHeader);

@@ -1,48 +1,57 @@
-define(['ko', 'lib/helpers', 'business/taskManager', 'viewmodels/TaskViewModel'],
-    function(ko, helpers, taskManager, TaskViewModel) {
+define(['ko', 'lib/messageBus', 'viewmodels/TaskViewModel', 'viewmodels/ProjectViewModel'],
+    function(ko, messageBus, TaskViewModel, ProjectViewModel) {
 
         /**
          * Task list view model.
          *
          * @constructor
          */
-        function TaskListViewModel() {
-            /**
-             * List of task view models
-             */
-            this.tasks = ko.observableArray([]);
-
-            /**
-             * Description of new-task
-             */
+        function TaskListViewModel(state) {
+            
+            this.state = state;
+            
+            this.active = ko.observable(false);
+            
+            /** Description of new task */
             this.newTaskDescription = ko.observable('');
+            
+            /** Project of new task */
+            this.newTaskProject = ko.observable(new ProjectViewModel());
+            
+            /** Project list for selection */
+            this.projectsToSelect = ko.computed({
+                read: function() {
+                    // Add empty project to tail
+                    // Since there is a chance to have no projects defined,
+                    // new tasks will have 'null' project anyway. We should 
+                    // reflect to that by allowing to set 'null' project explicitly.
+                    var projects = (this.state && this.state.projects().slice(0)) || [];
+                    var nullProject = new ProjectViewModel();
+                    projects.push(nullProject);
+                    return projects;
+                }.bind(this)
+            });
+            
+            this.inAddMode = ko.observable(false);
+            
+            messageBus.subscribe('projectsLoaded', onProjectsLoaded.bind(this));
         }
-
-        /**
-         * Updates list from storage.
-         */
-        TaskListViewModel.prototype.update = function () {
-            var tasks = taskManager.getTasks(updateTasks.bind(this));
-
-            updateTasks.call(this, tasks);
+        
+        TaskListViewModel.prototype.goProjects = function() {
+            messageBus.publish('switchingView', 'projectList');
         };
-
-        /**
-         * Removes tasks.
-         *
-         * @param {TaskViewModel} taskVM
-         */
-        TaskListViewModel.prototype.removeTask = function (taskVM) {
-            var tasks = taskManager.deleteTask(taskVM.id());
-
-            updateTasks.call(this, tasks);
+        
+        TaskListViewModel.prototype.toggleAddMode = function() {
+            this.emptyNewTask();
+            this.inAddMode(!this.inAddMode());
         };
-
+        
         /**
-         * Adds new task with new-task description.
+         * Adds new task.
          */
         TaskListViewModel.prototype.addTask = function () {
             var description = this.newTaskDescription();
+            var projectId = this.newTaskProject() && this.newTaskProject().id();
 
             // Validate new task.
             if (!description) {
@@ -51,14 +60,27 @@ define(['ko', 'lib/helpers', 'business/taskManager', 'viewmodels/TaskViewModel']
             }
 
             this.emptyNewTask();
-
-            var tasks = taskManager.addTask(description);
-
-            updateTasks.call(this, tasks);
+            
+            messageBus.publish('addingTask', {
+                description: description,
+                projectId: projectId
+            });
+            
+            this.toggleAddMode();
         };
 
         TaskListViewModel.prototype.emptyNewTask = function () {
             this.newTaskDescription('');
+            this.newTaskProject(this.state.projects()[0] || new ProjectViewModel());
+        };
+
+        /**
+         * Removes tasks.
+         *
+         * @param {TaskViewModel} taskVM
+         */
+        TaskListViewModel.prototype.removeTask = function (taskVM) {
+             messageBus.publish('deletingTask', { id: taskVM.id() });
         };
 
         /**
@@ -67,11 +89,13 @@ define(['ko', 'lib/helpers', 'business/taskManager', 'viewmodels/TaskViewModel']
          * @param {TaskViewModel} taskVM
          */
         TaskListViewModel.prototype.shiftTaskUp = function (taskVM) {
-            var currentPosition = this.tasks.indexOf(taskVM);
+            var currentPosition = this.state.tasks.indexOf(taskVM);
             var newPosition = currentPosition - 1;
             if (newPosition >= 0) {
-                var tasks = taskManager.moveTask(taskVM.id(), newPosition);
-                updateTasks.call(this, tasks);
+                messageBus.publish('movingTask', {
+                    id: taskVM.id(),
+                    position: newPosition
+                });
             }
         };
 
@@ -81,11 +105,13 @@ define(['ko', 'lib/helpers', 'business/taskManager', 'viewmodels/TaskViewModel']
          * @param {TaskViewModel} taskVM
          */
         TaskListViewModel.prototype.shiftTaskDown = function (taskVM) {
-            var currentPosition = this.tasks.indexOf(taskVM);
+            var currentPosition = this.state.tasks.indexOf(taskVM);
             var newPosition = currentPosition + 1;
-            if (newPosition < this.tasks().length) {
-                var tasks = taskManager.moveTask(taskVM.id(), newPosition);
-                updateTasks.call(this, tasks);
+            if (newPosition < this.state.tasks().length) {
+                messageBus.publish('movingTask', {
+                    id: taskVM.id(),
+                    position: newPosition
+                });
             }
         };
 
@@ -98,35 +124,33 @@ define(['ko', 'lib/helpers', 'business/taskManager', 'viewmodels/TaskViewModel']
         TaskListViewModel.prototype.dragTask = function (taskNode, newPosition) {
             var taskVM = ko.dataFor(taskNode);
 
-            var tasks = taskManager.moveTask(taskVM.id(), newPosition);
-
             // FIXME: dirty hack
             // After we messed up with DOM manually
             // by dragging element to another position,
-            // knockout (the cheif of the DOM) got confused,
+            // knockout (the Chief of the DOM) got confused,
             // and loses reference to this element. So even
             // if we would re-assign tasks to another array (or .removeAll()),
-            // the dragged element will stay in the DOM.
+            // the dragged element will stay in the DOM anyway.
             // Let's clean container directly for now.
-            this.tasks.removeAll();
+            this.state.tasks.removeAll();
             $('.task-list').empty();
 
-            updateTasks.call(this, tasks);
+            messageBus.publish('movingTask', {
+                    id: taskVM.id(),
+                    position: newPosition
+                });
         };
-
-        /**
-         * Updates task list.
-         * @param {Task[]} tasks - task models.
-         */
-        function updateTasks(tasks) {
-            var taskVMs = tasks.map(function (task) {
-                return new TaskViewModel(task);
-            });
-
-            // TODO: check for differences smartly
-
-            this.tasks(taskVMs);
+        
+        //region Handlers
+        
+        function onProjectsLoaded() {
+            if (this.state.projects().length > 0) {
+                // Set first project as default one for new tasks
+                this.newTaskProject(this.state.projects()[0]);
+            }
         }
-
+        
+        //endregion
+        
         return TaskListViewModel;
     });

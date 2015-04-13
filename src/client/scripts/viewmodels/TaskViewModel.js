@@ -1,31 +1,17 @@
-define(['ko', 'business/taskManager'], function(ko, taskManager) {
+define(['ko', 'lib/messageBus'], function(ko, messageBus) {
 
-    /** 
-     * Task view model.
-     * 
-     * @constructor
-     * @param {Task} task - task model.
-     */
-    function TaskViewModel (task) {
-        this.id = ko.observable(null);
-        this.description = ko.observable(null);
-        this.progress = ko.observable(null); // [0;1]
+    function TaskViewModel (state) {
+        this.state = state;
         
-        if (task) {
-            // Map from the model.
-            this.id(task.id);
-            this.description(task.description);
-            this.progress(task.progress);
-        }
-    
-        /**
-         * Indicates weither view model is currently in edit mode.
-         */
+        this.id = ko.observable('');
+        this.description = ko.observable('');
+        this.progress = ko.observable(0); // [0;1]
+        this.project = ko.observable(null); // ProjectViewModel
+        
+        /** Indicates weither view model is currently in edit mode. */
         this.inEditMode = ko.observable(false);
         
-        /**
-         * Indicates whether task is done.
-         */
+        /** Indicates whether task is fully done. */
         this.progressDone = ko.computed(
         {
             read: function () {
@@ -37,34 +23,48 @@ define(['ko', 'business/taskManager'], function(ko, taskManager) {
             }.bind(this)
         });
         
-        // Description saved before entering edit mode
-        this.descriptionBeforeEdit = this.description.peek();
+        /** State before entering edit mode */
+        this.stateBeforeEdit = { 
+            description: this.description.peek(),
+            project: this.project()
+        };
         
         // Save/restore description before/after editing
         this.inEditMode.subscribe(function(inEditMode) {
             if (inEditMode) {
-                this.descriptionBeforeEdit = this.description.peek();
+                this.stateBeforeEdit.description = this.description.peek();
+                this.stateBeforeEdit.project = this.project();
             } else {
-                this.description(this.descriptionBeforeEdit);
+                this.description(this.stateBeforeEdit.description);
+                this.project(this.stateBeforeEdit.project);
             }
         }.bind(this));
+        
+        this.projectColor = ko.computed({
+            read: function() {
+                return !!this.project() ? this.project().color() : '';
+            }.bind(this)
+        });
     }
     
     /**
      * Toggles edit/not-edit mode of the task view.
      */
     TaskViewModel.prototype.toggleEditMode = function() {
-            this.inEditMode(!this.inEditMode());
+        this.inEditMode(!this.inEditMode());
     };
     
-    /**
-     * Sends current task description to the server.
-     */
-    TaskViewModel.prototype.saveDescription = function() {
-        if (this.description() !== this.descriptionBeforeEdit) {
-            taskManager.updateTask(this.id(), {description: this.description()});
-
-            this.descriptionBeforeEdit = this.description.peek();
+    TaskViewModel.prototype.save = function() {
+        if (this.description() !== this.stateBeforeEdit.description ||
+            this.project() !== this.stateBeforeEdit.project) {
+            
+            messageBus.publish('updatingTask', {
+                    id: this.id(), 
+                    properties: { 
+                        description: this.description(),
+                        projectId: this.project() && this.project().id()
+                    }
+                });
         }
         
         this.toggleEditMode();
@@ -74,7 +74,10 @@ define(['ko', 'business/taskManager'], function(ko, taskManager) {
      * Sends current task progress to the server.
      */
     TaskViewModel.prototype.saveProgress = function () {
-        taskManager.updateTask(this.id(), {progress: this.progress()});
+        messageBus.publish('updatingTask', {
+            id: this.id(), 
+            properties: { progress: this.progress() }
+        });
     };
     
     return TaskViewModel;

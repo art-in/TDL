@@ -29,44 +29,97 @@
         display: flex;
         flex-direction: column;
     }
+    
+    .go-tasks {
+        border: 1px solid lightgrey;
+        width: 90px;
+        justify-content: center;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+    }
+    
+    .go-projects {
+        border: 1px solid lightgrey;
+        width: 90px;
+        justify-content: center;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+    }
+    
+    .add-button {
+        border: 1px solid lightgrey;
+        width: 130px;
+        text-align: center;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .add-button-image {
+        background-image: url("/images/add.png");
+        width: 26px;
+        height: 26px;
+        max-width: 26px;
+        flex: 1;
+    }
+
+    .add-button-label {
+        flex: 1;
+    }
+    
+    .cancel-button {
+        display: flex;
+        width: 90px;
+        border: 1px solid lightgrey;
+        align-items: center;
+        text-align: center;
+        justify-content: center;
+    }
+
+    /* Task List */
+    
+    .main-tasks .menu {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        min-height: 50px;
+    }
 
     .new-task {
         border: 1px solid lightpink;
         margin-bottom: 5px;
         display: flex;
-        flex-direction: row;
+        flex-direction: column;
     }
 
     .new-task-input {
         border: 1px solid deeppink;
-        padding: 5px;
+        padding: 10px;
         font-size: 24px;
         flex: 6;
         min-height: 38px;
     }
 
-    .add-new-task-button {
-        border: 1px solid lightgrey;
+    .new-task-buttons {
+          display: flex;
+          flex-direction: row;
+          justify-content: space-between;
+          min-height: 50px;
+    }
+    
+    .new-task select.projects {
         display: flex;
-        align-items: center;
-        width: 140px;
-        text-align: center;
+        flex-direction: row;
     }
-
-    .add-new-task-button-image {
-        background-image: url("/images/add.png");
-        width: 26px;
-        height: 26px;
-        max-width: 26px;
-        margin: 0 5px;
-        flex: 1;
+    
+    select.projects {
+        width: 110px;
+        border: 1px solid lightgray;
+        padding: 5px;
     }
-
-    .add-new-task-button-label {
-        flex: 1;
-        font-size: 22px;
-    }
-
+    
     .task-list {
         display: flex;
         flex-direction: column;
@@ -77,7 +130,7 @@
         margin-top: 10px;
         display: flex;
         flex-direction: row;
-        min-height: 45px;
+        min-height: 50px;
     }
     
     .task.done {
@@ -115,8 +168,11 @@
         display: flex;
         flex: 1;
         min-width: 192px;
-        max-width: 230px;
         max-height: 150px;
+    }
+    
+    .task.editing > .task-buttons {
+        flex: 2;
     }
 
     .task-edit {
@@ -212,5 +268,154 @@
         background-image: url("/images/down.png");
         width: 26px;
         height: 18px;
+    }
+    
+        /* Project List */
+    
+    .main-projects .menu {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        min-height: 50px;
+    }
+    
+    .new-project {
+        border: 1px solid lightpink;
+        margin-bottom: 5px;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .new-project-properties {
+        padding: 10px;
+        font-size: 17px;
+    }
+
+    .new-project-properties-item + .new-project-properties-item {
+        margin-top: 10px;
+    }
+    
+    .new-project-properties-item-name {
+        width: 85px;
+        display: inline-block;
+    }
+    
+    .new-project-properties-item-value {
+        border: 1px solid red;
+        display: inline-block;
+        width: 400px;
+        padding: 10px;
+        font-size: 24px;
+    }
+    
+    .new-project-buttons {
+          display: flex;
+          flex-direction: row;
+          justify-content: space-between;
+          min-height: 50px;
+    }
+    
+    .project-list {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .project {
+        border: 1px solid gray;
+        margin-top: 5px;
+        display: flex;
+        flex-direction: row;
+    }
+    
+    .project-properties {
+        flex: 4;
+        padding: 5px;
+    }
+    
+    .project-properties > div + div {
+        margin-top: 3px;
+    }
+    
+    .project.editing .project-properties > div + div {
+        margin-top: 20px;
+        font-size: 24px;
+    }
+    
+    .project-properties-value.name {
+        align-items: center;
+        font-size: 24px;
+        padding: 0 5px;
+        margin-bottom: 5px;
+    }
+    
+    .project-properties-value.tags {
+        font-size: 14px;
+        padding: 0 5px;
+        color: gray;
+    }
+    
+    .project-properties-value.color {
+        font-size: 14px;
+        padding: 0 5px;
+        color: gray;
+    }
+    
+    .project.editing > .project-properties {
+        border: 2px solid yellow;
+    }
+
+    .project-buttons {
+        border: 1px solid lightgrey;
+        flex: 1;
+        display: flex;
+        flex-direction: row;
+        max-height: 150px;
+    }
+    
+    .project-edit {
+        display: flex;
+        flex: 1;
+    }
+    
+    .project-edit-button {
+        display: flex;
+        flex: 1;
+    }
+    
+    .project-edit-save-button {
+        display: flex;
+        flex: 1;
+    }
+    
+    .project-edit-cancel-button {
+        display: flex;
+        flex: 1;
+    }
+    
+    .project-edit-button,
+    .project-edit-save-button,
+    .project-edit-cancel-button,
+    .project-remove-button {
+        border: 1px solid lightgrey;
+        align-items: center;
+        text-align: center;
+        justify-content: center;
+    }
+    
+    .project-remove-button {
+        display: flex;
+        flex: 1;
+    }
+
+    .project-remove-button-image {
+        background-image: url("/images/remove.png");
+        width: 26px;
+        height: 26px;
+        max-width: 26px;
+        flex: 1;
+    }
+
+    .project-remove-button-label {
+        flex: 1;
     }
 }

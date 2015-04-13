@@ -3,75 +3,157 @@
 <head>
     <title>TDL</title>
 
-    <meta charset="utf-8"/>
+    <meta charset='utf-8'/>
 
     <!-- Styles -->
-    <link rel="stylesheet" type="text/css" href="/styles/desktop.css">
-    <link rel="stylesheet" type="text/css" href="/styles/tablet.css">
-    <link rel="stylesheet" type="text/css" href="/styles/smartphone.css">
+    <link rel='stylesheet' type='text/css' href='/styles/reset.css' />
+    <link rel='stylesheet' type='text/css' href='/styles/desktop.css'>
+    <link rel='stylesheet' type='text/css' href='/styles/tablet.css'>
+    <link rel='stylesheet' type='text/css' href='/styles/smartphone.css'>
 
     <!-- Disable viewport scaling on mobile devices. -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0'>
 
     <!-- Scripts -->
-    <script src="scripts/lib/require.config.js"></script>
-    <script data-main="client" src="/scripts/lib/vendor/require.js"></script>
+    <script src='scripts/lib/require.config.js'></script>
+    <script data-main='client' src='/scripts/lib/vendor/require.js'></script>
 </head>
 <body>
 
-<div class="main">
+<div class='main' style='display:none'>
 
-    <div class="new-task">
-        <div id="tbNewTask" contenteditable="true" class="new-task-input"></div>
-        <div id="btnAddNewTask" class="add-new-task-button">
-            <div class="add-new-task-button-image"></div>
-            <div class="add-new-task-button-label">
-                add
+    <div class='main-tasks'>
+        <div class='action-bar'>
+            <div class='menu'>
+                <button class='add-button'>
+                    <div class='add-button-image'></div>
+                    <div class='add-button-label'>add task</div>
+                </button>
+                <button class='go-projects'>Projects</button>
             </div>
-        </div>
-    </div>
-
-    <div class="task-list" style="display:none">
-        <div class="task"> <!-- Task container -->
-            <label class="task-progress">
-                <input type="checkbox" class="task-progress-checkbox" />
-            </label>
-            <div class="task-description">
-            </div>
-            <div class="task-buttons">
-                <div class="task-edit">
-                    <div class="task-edit-button">
-                        <div>
-                            edit
+            <div class='new-task'>
+                <div class='new-task-input' contenteditable='true'></div>
+                <div class='new-task-buttons'>
+                    <button class='add-button'>
+                        <div class='add-button-image'></div>
+                        <div class='add-button-label'>
+                            add
                         </div>
-                    </div>
-                    <div class="task-edit-save-button">
-                        <div>save</div>
-                    </div>
-                    <div class="task-edit-cancel-button">
+                    </button>
+                    <select class='projects'>
+                        <option></option>
+                    </select>
+                    <button class='cancel-button'>
                         <div>cancel</div>
-                    </div>
+                    </button>
                 </div>
-                <div class="task-remove-button">
-                    <div class="task-remove-button-image"></div>
+            </div>
+        </div>
+        <div class='task-list'>
+            <div class='task'> <!-- Task container template -->
+                <label class='task-progress'>
+                    <input type='checkbox' class='task-progress-checkbox' />
+                </label>
+                <div class='task-description'>
                 </div>
-                <div class="task-shift">
-                    <div class="task-shift-up-button">
-                        <div class="task-shift-up-button-image"></div>
+                <div class='task-buttons'>
+                    <div class='task-edit'>
+                        <select class='projects'>
+                            <option></option>
+                        </select>
+                        <button class='task-edit-button'>
+                            <div>edit</div>
+                        </button>
+                        <button class='task-edit-save-button'>
+                            <div>save</div>
+                        </button>
+                        <button class='task-edit-cancel-button'>
+                            <div>cancel</div>
+                        </button>
                     </div>
-                    <div class="task-shift-down-button">
-                        <div class="task-shift-down-button-image"></div>
+                    <button class='task-remove-button'>
+                        <div class='task-remove-button-image'></div>
+                    </button>
+                    <div class='task-shift'>
+                        <button class='task-shift-up-button'>
+                            <div class='task-shift-up-button-image'></div>
+                        </button>
+                        <button class='task-shift-down-button'>
+                            <div class='task-shift-down-button-image'></div>
+                        </button>
                     </div>
-                </div>
-                <div class="task-drag-handle">
-                    <div class="task-drag-handle-image"></div>
+                    <div class='task-drag-handle'>
+                        <div class='task-drag-handle-image'></div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <div class='main-projects'>
+        <div class='action-bar'>
+            <div class='menu'>
+                <button class='add-button'>
+                    <div class='add-button-image'></div>
+                    <div class='add-button-label'>add project</div>
+                </button>
+                <button class='go-tasks'>Tasks</button>
+            </div>
+            <div class='new-project' >
+                <div class='new-project-properties'>
+                    <div class='new-project-properties-item'>
+                        <span class='new-project-properties-item-name'>Name:</span>
+                        <span class='new-project-properties-item-value name' contenteditable='true'></span>
+                    </div>
+                    <div class='new-project-properties-item'>
+                        <span class='new-project-properties-item-name'>Tags:</span>
+                        <span class='new-project-properties-item-value tags' contenteditable='true'></span>
+                    </div>
+                    <div class='new-project-properties-item'>
+                        <span class='new-project-properties-item-name'>Color:</span>
+                        <span class='new-project-properties-item-value color' contenteditable='true'></span>
+                    </div>
+                </div>
+                <div class='new-project-buttons'>
+                    <button class='add-button'>
+                        <div class='add-button-image'></div>
+                        <div class='add-button-label'>add</div>
+                    </button>
+                    <button class='cancel-button'>
+                        <div>cancel</div>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class='project-list'>
+            <div class='project'> <!-- Project container template -->
+                <div class='project-properties'>
+                    <div class='project-properties-value name'></div>
+                    <div class='project-properties-value tags'></div>
+                    <div class='project-properties-value color'></div>
+                </div>
+                <div class='project-buttons'>
+                    <div class='project-edit'>
+                        <button class='project-edit-button'>
+                            <div>edit</div>
+                        </button>
+                        <button class='project-edit-save-button'>
+                            <div>save</div>
+                        </button>
+                        <button class='project-edit-cancel-button'>
+                            <div>cancel</div>
+                        </button>
+                    </div>
+                    <button class='project-remove-button'>
+                        <div class='project-remove-button-image'></div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
 </div>
 
-<div class="screen-type"></div>
+<div class='screen-type'></div>
 </body>
 </html>

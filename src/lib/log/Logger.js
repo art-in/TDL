@@ -71,14 +71,7 @@ Logger.prototype.log = function (logMessage) {
                 case LogMessageTypes.AddTask:
                     message = util.format("New task added (%s)", logMessage.taskId);
                     break;
-                case LogMessageTypes.UpdateTaskEntirely:
-                    message = util.format("Task updated (%s) description = '%s', position = %s, progress = %s",
-                        logMessage.taskId, 
-                        logMessage.description, 
-                        logMessage.position,
-                        logMessage.progress);
-                    break;
-                case LogMessageTypes.UpdateTaskProperties:
+                case LogMessageTypes.UpdateTask:
                     message = util.format("Task updated (%s) description = '%s', position = %s, progress = %s",
                         logMessage.taskId,
                         logMessage.description,
@@ -93,6 +86,21 @@ Logger.prototype.log = function (logMessage) {
                         logMessage.startPosition, 
                         logMessage.endPosition, 
                         logMessage.shift);
+                    break;
+                    
+                case LogMessageTypes.GetProjects:
+                    message = util.format("Returning project count: %d", logMessage.projectCount);
+                    break;
+                case LogMessageTypes.AddProject:
+                    message = util.format("New project added (%s)", logMessage.projectId);
+                    break;
+                case LogMessageTypes.UpdateProject:
+                    message = util.format("Project updated (%s) name = '%s'",
+                        logMessage.projectId,
+                        logMessage.name);
+                    break;
+                case LogMessageTypes.DeleteProject:
+                    message = util.format("Project was removed (%s)", logMessage.projectId);
                     break;
                 default:
                     throw new Error('Unknown message type: ' + logMessage.type);

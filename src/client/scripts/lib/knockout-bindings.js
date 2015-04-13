@@ -49,26 +49,49 @@ define(['ko', 'Sortable', 'lib/helpers'], function (ko, Sortable, helpers) {
      * Usually used for contentEditables instead of default 'html'-binding,
      * because it syncs HTML changes immediately after each keyup.
      */
-    ko.bindingHandlers.editableHTML = {
-        init: function(element, valueAccessor) {
-            var $element = $(element);
-            var initialValue = ko.utils.unwrapObservable(valueAccessor());
-            $element.html(initialValue);
-            $element.on('keyup', function() {
+    ko.bindingHandlers.editableHTML = getEditableTextBinding(true);
+    
+    /**
+     * Synchronizes observable with inner text of the element.
+     * Usually used for contentEditables instead of default 'text'-binding,
+     * because it syncs text changes immediately after each keyup.
+     */
+    ko.bindingHandlers.editableText = getEditableTextBinding();
+    
+    /** 
+     * Returns binding that synchronizes observable with inner text or html of the element.
+     * @param {boolean} [html=false] - leave untouched HTML or sanitize to text
+     */
+    function getEditableTextBinding(html) {
+        return {
+            init: function(element, valueAccessor) {
+                
                 var observable = valueAccessor();
-                observable($element.html());
-            });
-        },
-        update: function(element, valueAccessor) {
-            var $element = $(element);
-            
-            var value = ko.unwrap(valueAccessor());
-            
-            if ($element.html() !== value) {
-                $element.html(value);
+                
+                if (!ko.isObservable(observable)) 
+                    throw new Error('Invalid target observable');
+                    
+                var $element = $(element);
+                var initialValue = ko.utils.unwrapObservable(observable);
+                
+                html ? $element.html(initialValue) : $element.text(initialValue);
+                $element.on('keyup', function() {
+                    var observable = valueAccessor();
+                    observable(html ? $element.html() : $element.text());
+                });
+            },
+            update: function(element, valueAccessor) {
+                var $element = $(element);
+                
+                var value = ko.unwrap(valueAccessor());
+                
+                var currentValue = html ? $element.html() : $element.text();
+                if (currentValue !== value) {
+                    html ? $element.html(value) : $element.text(value);
+                }
             }
-        }
-    };
+        };
+    }
     
     /**
      * Sets value of contentEditable attribute of target element.
@@ -170,6 +193,43 @@ define(['ko', 'Sortable', 'lib/helpers'], function (ko, Sortable, helpers) {
                     }
                 }
             });
+        }
+    };
+    
+    /**
+     * Synchronizes observable with bound view-model in selected option.
+     */
+    ko.bindingHandlers.selectedChildVM = {
+        init: function(element, valueAccessor) {
+            
+            var observable = valueAccessor();
+            
+            if (!ko.isObservable(observable)) 
+                throw new Error('Invalid target observable');
+            
+            $(element).change(function(e) {
+                var targetOption = e.target.options[e.target.selectedIndex];
+                var targetVM = ko.dataFor(targetOption);
+                observable(targetVM);
+            });
+            
+            if (observable() === undefined && element.options > 0) {
+                // Set default option's view model
+                element.selectedIndex = 0;
+                $(element).trigger('change');
+            }
+        },
+        update: function(element, valueAccessor) {
+            var vm = valueAccessor()();
+            
+            if (!vm) return;
+        
+            var optionVMs = $(element).find('option').toArray().map(function(option) {
+                return ko.dataFor(option);
+            });
+            var optionIndex = optionVMs.indexOf(vm);
+            
+            element.selectedIndex = optionIndex;
         }
     };
 });
