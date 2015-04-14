@@ -124,7 +124,6 @@
         width: 110px;
         border: 1px solid lightgray;
         padding: 5px;
-        height: 30px;
     }
     
     .task-list {
@@ -154,17 +153,28 @@
     .task-progress-checkbox-checked {
         background-color: lightgreen;
     }
-
-    .task-description {
-        border: 1px solid lightblue;
-        font-size: 22px;
-        padding: 0 5px;
+    
+    .task-properties {
+        border: 1px solid #add8e6;
         flex: 4;
-        align-items: center;
-        outline: none;
+        flex-direction: column;
+        padding: 5px;
     }
     
-    .task.editing > .task-description {
+    .task-properties-project-name {
+        font-size: 12px;
+        color: gray;
+        position: relative;
+        top: -3px;
+        height: 9px;
+    }
+    
+    .task-properties-description {
+        font-size: 22px;
+        outline: 0;
+    }
+    
+    .task.editing > .task-properties {
         border: 2px solid yellow;
     }
 

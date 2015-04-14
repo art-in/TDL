@@ -45,6 +45,12 @@ define(['ko', 'lib/messageBus'], function(ko, messageBus) {
                 return !!this.project() ? this.project().color() : '';
             }.bind(this)
         });
+        
+        this.projectName = ko.computed({
+            read: function() {
+                return !!this.project() ? this.project().name() : '';
+            }.bind(this)
+        });
     }
     
     /**

@@ -66,13 +66,15 @@ define(['jquery',
             $('.task-edit-save-button').dataBind({ click: 'task.save',
                                                    visible: 'task.inEditMode() && task.description()' });
             $('.task-edit-cancel-button').dataBind({ click: 'task.toggleEditMode',
-                                                     visible: 'task.inEditMode' });                                                   
-            $('.task-description').dataBind({ editableHTML: 'task.description',
+                                                     visible: 'task.inEditMode' });
+            $('.task-properties').dataBind({ style: { "'background-color'": 'task.projectColor' } });
+            $('.task-properties-project-name').dataBind({ visible: 'task.projectName',
+                                               html: 'task.projectName' });
+            $('.task-properties-description').dataBind({ editableHTML: 'task.description',
                                               contentEditable: 'task.inEditMode',
                                               returnKeyPress: 'task.save()',
                                               escapeKeyPress: 'task.toggleEditMode()',
-                                              contentSelect: 'task.inEditMode',
-                                              style: { "'background-color'": 'task.projectColor' }});
+                                              contentSelect: 'task.inEditMode' });
             
             // Project List                                  
                                               
