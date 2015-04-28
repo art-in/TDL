@@ -242,18 +242,6 @@
     }
 
     .task-drag-handle {
-        display: none;
-    }
-
-    .task-shift {
-        border: 1px solid lightgrey;
-        min-width: 50px;
-        display: flex;
-        flex: 1;
-        flex-direction: column;
-    }
-
-    .task-shift-up-button {
         border: 1px solid lightgrey;
         flex: 1;
         display: flex;
@@ -261,27 +249,19 @@
         justify-content: center;
     }
 
-    .task-shift-up-button-image {
-        background-image: url("/images/up.png");
-        width: 26px;
-        height: 18px;
+    .task-drag-handle-image {
+        background-image: url("/images/drag.png");
+        width: 15px;
+        height: 13px;
+        max-width: 15px;
     }
 
-    .task-shift-down-button {
-        border: 1px solid lightgrey;
-        flex: 1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+    .task-drag-ghost {
+        border: 2px solid red;
+        box-shadow: 0 0 5px red;
     }
 
-    .task-shift-down-button-image {
-        background-image: url("/images/down.png");
-        width: 26px;
-        height: 18px;
-    }
-    
-        /* Project List */
+    /* Project List */
     
     .main-projects .menu {
         display: flex;

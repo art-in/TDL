@@ -254,10 +254,7 @@
 
     .task-drag-ghost {
         border: 2px solid red;
-    }
-
-    .task-shift {
-        display: none;
+        box-shadow: 0 0 5px red;
     }
     
     /* Project List */

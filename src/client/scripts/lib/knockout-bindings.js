@@ -178,11 +178,12 @@ define(['ko', 'Sortable', 'lib/helpers'], function (ko, Sortable, helpers) {
             //noinspection JSUnusedGlobalSymbols
             new Sortable(container, {
                 group: element.id,
-                // Specifies which items inside the element should be sortable
                 draggable: '.' + params.draggableClass,
-                // Restricts sort start click/touch to the specified element
                 handle: '.' + params.handleClass,
                 ghostClass: params.ghostClass,
+                scroll: true,
+                scrollSensitivity: params.scrollSensitivity,
+                scrollSpeed: params.scrollSpeed,
                 onUpdate: function(e) {
                     if (params.onUpdate) {
                         var draggedElement = e.item;
