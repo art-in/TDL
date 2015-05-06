@@ -123,7 +123,11 @@ define(['ko', 'lib/messageBus', 'viewmodels/TaskViewModel', 'viewmodels/ProjectV
          */
         TaskListViewModel.prototype.dragTask = function (taskNode, newPosition) {
             var taskVM = ko.dataFor(taskNode);
-
+            
+            // Do nothing if position was not changed.
+            var currentPosition = this.state.tasks.indexOf(taskVM);
+            if (currentPosition === newPosition) { return; }
+            
             // FIXME: dirty hack
             // After we messed up with DOM manually
             // by dragging element to another position,
