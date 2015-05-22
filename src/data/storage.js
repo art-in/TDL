@@ -5,8 +5,7 @@ var MongoClient = require('../lib/node_modules/mongodb').MongoClient,
     DatabaseLM = require('../lib/log/messages/DatabaseLogMessage').message,
     DatabaseLMTypes = require('../lib/log/messages/DatabaseLogMessageTypes').types;
 
-var connectionString = config.get('database:connectionString'),
-    TASK_COLLECTION = "tasks",
+var TASK_COLLECTION = "tasks",
     PROJECT_COLLECTION = "projects";
 
 var db;
@@ -244,6 +243,12 @@ module.exports = {
 
 // Connect to database.
 (function () {
+    var connectionString = 
+        'mongodb://' + 
+        config.get('database:ip') + ':' +
+        config.get('database:port') + '/' + 
+        config.get('database:name');
+    
     MongoClient.connect(connectionString,
         function (err, dbContext) {
             if (err) throw err;

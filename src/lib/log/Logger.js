@@ -1,6 +1,7 @@
 var util = require('util'),
     chalk = require('../node_modules/chalk'),
-    LogMessageTypes = require('./messages/DatabaseLogMessageTypes').types;
+    LogMessageTypes = require('./messages/DatabaseLogMessageTypes').types,
+    config = require('../config').config;
 
 /** Console colors config */
 var REQUEST_LOG = chalk.bgRed.white.bold,
@@ -22,6 +23,8 @@ function Logger() {
  * @param {LogMessage} logMessage - typed log message.
  */
 Logger.prototype.log = function (logMessage) {
+    if (config.get('debug:quite')) return;
+    
     var messageType = logMessage.constructor.name;
 
     switch (messageType) {

@@ -4,6 +4,11 @@
         "port": 80
     },
     "database": {
-        "connectionString": "mongodb://127.0.0.1:27017/TDL"
+        "ip": "127.0.0.1",
+        "port": 27017,
+        "name": "TDL"
+    },
+    "debug": {
+        "quite": false
     }
 }

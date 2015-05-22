@@ -56,14 +56,18 @@ function respondWithFile (request, response, filePath, headers) {
                     
                     response.writeHead(200,
                         {
-                            'Content-Encoding': 'gzip',
-                            'Last-Modified': modifiedDate
+                            'Last-Modified': modifiedDate,
+                            'Content-Encoding': isGzipAccepted(request) ? 'gzip' : ''
                         });
                     
-                    // Compress
-                    zlib.gzip(data, function (_, result) {
-                        response.end(result);
-                    });
+                    // Compress if required
+                    if (isGzipAccepted(request)) {
+                        zlib.gzip(data, function (_, gzippedResult) {
+                            response.end(gzippedResult);
+                        });
+                    } else {
+                        response.end(data);
+                    }
                 }
 
                 logger.log(new ResponseLM(ResponseLMTypes.File,
@@ -81,7 +85,7 @@ function respondWithFile (request, response, filePath, headers) {
  * @param {string|boolean} error
  * @param {Object[]} data
  */
-function respondWithJson (response, apiPath, error, data) {
+function respondWithJson (request, response, apiPath, error, data) {
     if (error) {
         respondWithError(response, error);
         return;
@@ -90,17 +94,23 @@ function respondWithJson (response, apiPath, error, data) {
     response.writeHead(200,
         {
             'Content-Type': 'application/json',
-            'Content-Encoding': 'gzip',
-            'Cache-Control': 'no-cache'
+            'Cache-Control': 'no-cache',
+            'Content-Encoding': isGzipAccepted(request) ? 'gzip' : ''
         });
 
-    var responseString = JSON.stringify(data);
-
-    zlib.gzip(responseString, function (_, result) {
+    var result = JSON.stringify(data);
+    
+    // Compress if required
+    if (isGzipAccepted(request)) {
+        zlib.gzip(result, function (_, gzippedResult) {
+            response.end(gzippedResult);
+        });
+    } else {
         response.end(result);
-        logger.log(new ResponseLM(ResponseLMTypes.API,
-            {requestPath: apiPath, statusCode: response.statusCode}));
-    });
+    }
+    
+    logger.log(new ResponseLM(ResponseLMTypes.API,
+                {requestPath: apiPath, statusCode: response.statusCode}));
 }
 
 function respondWithError (response, error) {
@@ -125,6 +135,11 @@ function respondEmpty (response, apiPath, error) {
 
     logger.log(new ResponseLM(ResponseLMTypes.API,
         {requestPath: apiPath, statusCode: response.statusCode}));
+}
+
+function isGzipAccepted(request) {
+    return !!request.headers['accept-encoding'] &&
+             request.headers['accept-encoding'].search(/\bgzip\b/) !== -1;
 }
 
 module.exports = {

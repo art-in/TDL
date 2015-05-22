@@ -29,7 +29,7 @@ http.createServer(function (request, response) {
         switch (requestPath) {
         case '/api/getTasks':
             storage.getTasks(
-                helpers.respondWithJson.bind(null, response, requestPath)
+                helpers.respondWithJson.bind(null, request, response, requestPath)
             );
             break;
 
@@ -54,7 +54,7 @@ http.createServer(function (request, response) {
         
         case '/api/getProjects':
             storage.getProjects(
-                helpers.respondWithJson.bind(null, response, requestPath));
+                helpers.respondWithJson.bind(null, request, response, requestPath));
             break;
             
         case '/api/addProject':
@@ -113,3 +113,12 @@ http.createServer(function (request, response) {
     }
     //endregion
 }).listen(config.get('server:port'), config.get('server:ip'));
+
+logger.log('---');
+logger.log('Configuration:');
+logger.log('Server address: ' + config.get('server:ip') + ':' + 
+                                config.get('server:port'));
+logger.log('Database connection string: ' + config.get('database:ip') + ':' +
+                                            config.get('database:port') + '/' + 
+                                            config.get('database:name'));
+logger.log('---');
