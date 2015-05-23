@@ -242,7 +242,7 @@ module.exports = {
 //region Private methods
 
 // Connect to database.
-(function () {
+!function connect() {
     var connectionString = 
         'mongodb://' + 
         config.get('database:ip') + ':' +
@@ -255,7 +255,7 @@ module.exports = {
             // TODO: log connected to db
             db = dbContext;
         });
-})();
+}();
 
 /**
  * Adds DB job to the queue.

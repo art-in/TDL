@@ -43,8 +43,8 @@ paths.scripts = {
 
 paths.scripts.tests = {
     server: [
-        'server/basicTests.js',
-        'server/apiTests.js'
+        'server/tests/basicTests.js',
+        'server/tests/apiTests.js'
     ]
 };
 
@@ -95,12 +95,19 @@ gulp.task('prepare-torture-config', function() {
 });
 
 gulp.task('load-config', function() {
-    // Load config that will be used by tortured server to eastablish listening,
-    // and use it for targeting URL where we will send our requests to.
+    // Load config that will be used by tortured server,
     serverConfig.load(paths.torture.build + paths.config.server);
+
+    // and use it for targeting URL where we will send our requests to,
     serverConfig.set('serverUrl', 'http://' + 
                                     serverConfig.get('server:ip') + ':' + 
                                     serverConfig.get('server:port') + '/');
+
+    // and DB connection string to observe what happens in storage.
+    serverConfig.set('dbConnectionString', 'mongodb://' +
+                                            serverConfig.get('database:ip') + ':' +
+                                            serverConfig.get('database:port') + '/' +
+                                            serverConfig.get('database:name'));
 });
 
 gulp.task('database-start', function() {
