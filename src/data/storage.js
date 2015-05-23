@@ -269,6 +269,7 @@ module.exports = {
  * To be sure that each bunch update executed as one transaction
  * all db jobs should go through one queue and executed one after another.
  * TODO: probably it makes sense to create one queue per user.
+ * TODO: investigate mongodb atomic option for its operations (yes, such exists).
  * @param cb
  * @param jobDb
  */
