@@ -1,11 +1,11 @@
 {
     "server": {
-        "ip": "0.0.0.0",
-        "port": 1234
+        "ip": "127.0.0.1",
+        "port": 123
     },
     "database": {
         "ip": "127.0.0.1",
-        "port": 4321,
+        "port": 321,
         "name": "TDL_TEST"
     },
     "debug": {

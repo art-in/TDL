@@ -1,6 +1,8 @@
 build/bin/
 build/config.overrides.json
 
+test/torture/
+
 # Intellij
 .idea/
 *.iml

@@ -1,9 +1,9 @@
 var gulp = require('gulp'),
+    mkdirp = require('mkdirp'),
     runSequence = require('run-sequence'),
     del = require('del'),
     bg = require('gulp-bg'),
     wait = require('gulp-wait'),
-    shell = require('gulp-shell'),
     complexityConfig = require('./complexity-config.json'),
     complexity = require('gulp-complexity'),
     jshintConfig = require('./jshint-config.json'),
@@ -35,7 +35,7 @@ paths.config = {
 
 paths.scripts = {
     nonThirdPartyCodeMask: [
-        paths.src + '**/*.js', 
+        paths.src + '**/*.js',
         '!' + paths.src + '**/node_modules/**/*.js',
         '!' + paths.src + '**/vendor/**/*.js'
         ]
@@ -78,7 +78,9 @@ gulp.task('clean', function(cb) {
     del([paths.torturePath], {force: true},  cb);
 });
 
-gulp.task('prepare-torture-data', shell.task(['mkdir -p ' + paths.torture.data]));
+gulp.task('prepare-torture-data', function(cb) {
+    mkdirp(paths.torture.data, cb);
+});
 
 gulp.task('prepare-torture-build', function() {
     // Move build to temp folder for torture.
@@ -136,7 +138,7 @@ gulp.task('server-tests', function () {
 
 //region Helpers
 
-function seq(taskArray, cb) {
+function seq(taskArray) {
     return function(cb) {
         var args = taskArray;
         args.push(cb);
