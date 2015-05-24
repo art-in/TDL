@@ -38,9 +38,9 @@ function respondWithFile (request, response, filePath, headers) {
                 var modifiedDate = new Date(stats.mtime);
                 var requestModified = request.headers['if-modified-since'];
                 var requestModifiedDate = requestModified && new Date(requestModified);
-
+                
                 if (requestModifiedDate &&
-                   (modifiedDate.getTime() - requestModifiedDate.getTime() <= 1000)) {
+                   (modifiedDate.getTime() - requestModifiedDate.getTime() <= 999)) {
                     response.writeHead(304, {
                         'Last-Modified': modifiedDate.toUTCString()
                     });
