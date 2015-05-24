@@ -171,7 +171,7 @@ gulp.task('test-server', seq(['clean',
                               'database-start', 'wait',
                               'server-start', 'wait',
                               'server-tests',
-                              'server-database-stop',
+                              'server-database-stop', 'wait',
                               'clean']));
 
 gulp.task('test', seq(['test-static', 

@@ -290,7 +290,6 @@ function getTask(taskId, cb) {
             if (err) throw err;
             if (tasks.length === 0) {
                 var errorMessage = 'No task with such id found: ' + taskId;
-                console.warn(errorMessage);
                 cb(errorMessage);
                 return;
             }

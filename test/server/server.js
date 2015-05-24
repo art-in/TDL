@@ -5,7 +5,9 @@ exports.request = function(path) {
     if (typeof path === 'string') {
         return request(config.get('serverUrl') + path);
     } else {
-        return request(path);
+        var options = path;
+        options.path !== undefined && (options.uri = config.get('serverUrl') + options.path);
+        return request(options);
     }
 };
 

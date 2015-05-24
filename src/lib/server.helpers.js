@@ -35,12 +35,14 @@ function respondWithFile (request, response, filePath, headers) {
                 if (err) { throw err; }
                 
                 // Check if file was modified since last time browser loaded it.
-                var modifiedDate = stats.mtime.toUTCString();
-                var modifiedRequestDate = new Date(request.headers['if-modified-since']).toUTCString();
+                var modifiedDate = new Date(stats.mtime);
+                var requestModified = request.headers['if-modified-since'];
+                var requestModifiedDate = requestModified && new Date(requestModified);
 
-                if (modifiedDate == modifiedRequestDate) {
+                if (requestModifiedDate &&
+                   (modifiedDate.getTime() - requestModifiedDate.getTime() <= 1000)) {
                     response.writeHead(304, {
-                        'Last-Modified': modifiedDate
+                        'Last-Modified': modifiedDate.toUTCString()
                     });
                     response.end(); // Take it from cache.
                 }
@@ -80,6 +82,7 @@ function respondWithFile (request, response, filePath, headers) {
 /**
  * Writes compressed JSONified data to response stream.
  *
+ * @param {ClientRequest} request
  * @param {Object} response
  * @param {string} apiPath - requested API method
  * @param {string|boolean} error
@@ -119,6 +122,25 @@ function respondWithError (response, error) {
 }
 
 /**
+ * Respond error to response stream
+ * if one of arguments not specified.
+ * @param {ServerResponse} response
+ * @param {Object[]} args
+ * @param            args.arg - value of argument (should not be undefined)
+ * @param            args.message - error message if value is undefined
+ * @returns {boolean} true if arguments is ok.
+ */
+function checkArgs(response, args) {
+    return args.every(function (arg) {
+        if (arg.arg === undefined) {
+            respondWithError(response, arg.message);
+            return false;
+        }
+        return true;
+    });
+}
+
+/**
  * Ends response with no data.
  *
  * @param response
@@ -146,5 +168,6 @@ module.exports = {
     respondWithFile: respondWithFile,
     respondWithJson: respondWithJson,
     respondError: respondWithError,
-    respondEmpty: respondEmpty
+    respondEmpty: respondEmpty,
+    checkArgs: checkArgs
 };

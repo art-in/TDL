@@ -17,10 +17,10 @@ http.createServer(function (request, response) {
     logger.log(new RequestLM(request.url));
 
     var requestPath = url.parse(request.url).pathname;
-    var requestQuery = qs.parse(url.parse(request.url).query);
+    var query = qs.parse(url.parse(request.url).query);
 
-    Object.keys(requestQuery).forEach(function(paramName) {
-        requestQuery[paramName] = JSON.parse(requestQuery[paramName]);
+    Object.keys(query).forEach(function(paramName) {
+        query[paramName] = JSON.parse(query[paramName]);
     });
 
     //region API
@@ -34,21 +34,34 @@ http.createServer(function (request, response) {
             break;
 
         case '/api/addTask':
+            if (!helpers.checkArgs(response, [
+                { arg: query.newTask, message: 'New task should be specified' }
+            ])) return;
+
             storage.addTask(
-                requestQuery.newTask,
+                query.newTask,
                 helpers.respondEmpty.bind(null, response, requestPath));
             break;
 
         case '/api/updateTask':
+            if (!helpers.checkArgs(response, [
+                { arg: query.taskId, message: 'Task ID should be specified' },
+                { arg: query.properties, message: 'Properties should be specified' }
+            ])) return;
+
             storage.updateTask(
-                requestQuery.taskId,
-                requestQuery.properties,
+                query.taskId,
+                query.properties,
                 helpers.respondEmpty.bind(null, response, requestPath));
             break;
 
         case '/api/deleteTask':
+            if (!helpers.checkArgs(response, [
+                { arg: query.taskId, message: 'Task ID should be specified' }
+            ])) return;
+
             storage.deleteTask(
-                requestQuery.taskId,
+                query.taskId,
                 helpers.respondEmpty.bind(null, response, requestPath));
             break;
         
@@ -58,21 +71,34 @@ http.createServer(function (request, response) {
             break;
             
         case '/api/addProject':
+            if (!helpers.checkArgs(response, [
+                { arg: query.newProject, message: 'New project should be specified' }
+            ])) return;
+
             storage.addProject(
-                requestQuery.newProject,
+                query.newProject,
                 helpers.respondEmpty.bind(null, response, requestPath));
             break;
 
         case '/api/updateProject':
+            if (!helpers.checkArgs(response, [
+                { arg: query.projectId, message: 'Project ID should be specified' },
+                { arg: query.properties, message: 'Properties should be specified' }
+            ])) return;
+
             storage.updateProject(
-                requestQuery.projectId,
-                requestQuery.properties,
+                query.projectId,
+                query.properties,
                 helpers.respondEmpty.bind(null, response, requestPath));
             break;
 
         case '/api/deleteProject':
+            if (!helpers.checkArgs(response, [
+                { arg: query.projectId, message: 'Project ID should be specified' }
+            ])) return;
+
             storage.deleteProject(
-                requestQuery.projectId,
+                query.projectId,
                 helpers.respondEmpty.bind(null, response, requestPath));
             break;
         
