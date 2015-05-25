@@ -13,6 +13,8 @@ var gulp = require('gulp'),
     mocha = require('gulp-mocha'),
     serverConfig = require('./server/config');
 
+require("harmonize")();
+
 var mongoProcess,
     nodeProcess;
 
