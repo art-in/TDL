@@ -7,8 +7,7 @@ describe('Server', function() {
     it('should be alive', co.wrap(function*(){
             var data = yield server.request('');
             expect(data).not.to.be.empty;
-        })
-    );
+    }));
     
     context('should respond with status', function () {
 
@@ -88,7 +87,7 @@ describe('Server', function() {
             });
         }));
 
-        it('404 when requested resource is unknown', co.wrap(function*(){
+        it('404 when requested resource is not found', co.wrap(function*(){
             yield server.request({
                 path: 'some_strange_path',
                 resolveWithFullResponse: true

@@ -38,4 +38,15 @@ nconf.add('', {type: 'file', file:DEFAULT_CONFIG_PATH});
 env();
 cli();
 
+// Aliases
+
+nconf.set('server:url', 'http://' +
+                         nconf.get('server:ip') + ':' + 
+                         nconf.get('server:port'));
+
+nconf.set('database:connectionString', 'mongodb://' +
+                                        nconf.get('database:ip') + ':' +
+                                        nconf.get('database:port') + '/' + 
+                                        nconf.get('database:name'));
+
 exports.config = nconf;

@@ -55,6 +55,10 @@ Logger.prototype.log = function (logMessage) {
                     console.log(RESPONSE_SERVERERROR_LOG('<-XXX %s [%d - %s]'),
                         logMessage.requestPath,
                         logMessage.statusCode, 'Internal Server Error');
+                    if (logMessage.message) {
+                        console.log(RESPONSE_SERVERERROR_LOG('      "%s"'),
+                            logMessage.message instanceof Error ? logMessage.message.stack : logMessage.message);
+                    }
                     break;
 
                 default:

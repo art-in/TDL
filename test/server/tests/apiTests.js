@@ -116,19 +116,60 @@ describe('API', function() {
 
         it('should fail with status 500 if new task is not specified', co.wrap(function*(){
             yield server
-            .request({
-                path: 'api/addTask',
-                resolveWithFullResponse: true
-            })
-            .then(function (response) {
-                throw response;
-            })
-            .catch(function (response) {
-                expect(response.statusCode).to.equal(500);
-                expect(response.error).to.equal('New task should be specified');
-            });
+                .request({
+                    path: 'api/addTask',
+                    resolveWithFullResponse: true
+                })
+                .then(function (response) {
+                    throw response;
+                })
+                .catch(function (response) {
+                    expect(response.statusCode).to.equal(500);
+                    expect(response.error).to.equal('New task should be specified');
+                });
+            
+            yield server
+                .request({
+                    path: 'api/addTask?newTask=',
+                    resolveWithFullResponse: true
+                })
+                .then(function (response) {
+                    throw response;
+                })
+                .catch(function (response) {
+                    expect(response.statusCode).to.equal(500);
+                    expect(response.error).to.equal('New task should be specified');
+                });
+            
+            yield server
+                .request({
+                    path: 'api/addTask?newTask={}',
+                    resolveWithFullResponse: true
+                })
+                .then(function (response) {
+                    throw response;
+                })
+                .catch(function (response) {
+                    expect(response.statusCode).to.equal(500);
+                    expect(response.error).to.equal('New task should be specified');
+                });
         }));
-
+        
+        it('should fail with status 500 if invalid new task JSON specified', co.wrap(function*() {
+            yield server
+                .request({
+                    path: 'api/addTask?newTask={invalid_json_here}',
+                    resolveWithFullResponse: true
+                })
+                .then(function(response) {
+                    throw response;
+                })
+                .catch(function(response) {
+                    expect(response.statusCode).to.equal(500);
+                    expect(response.error).to.equal('Invalid argument specified');
+                })
+        }));
+        
         it('should shift existing tasks below one position down', co.wrap(function*(){
             var existingTasks = [
                 { id: 'task1', position: 0 },
@@ -436,6 +477,47 @@ describe('API', function() {
                     expect(response.statusCode).to.equal(500);
                     expect(response.error).to.equal('New project should be specified');
                 });
+            
+            yield server
+                .request({
+                    path: 'api/addProject?newProject=',
+                    resolveWithFullResponse: true
+                })
+                .then(function (response) {
+                    throw response;
+                })
+                .catch(function (response) {
+                    expect(response.statusCode).to.equal(500);
+                    expect(response.error).to.equal('New project should be specified');
+                });
+                
+            yield server
+                .request({
+                    path: 'api/addProject?newProject={}',
+                    resolveWithFullResponse: true
+                })
+                .then(function (response) {
+                    throw response;
+                })
+                .catch(function (response) {
+                    expect(response.statusCode).to.equal(500);
+                    expect(response.error).to.equal('New project should be specified');
+                });
+        }));
+        
+        it('should fail with status 500 if invalid argument JSON specified', co.wrap(function*() {
+            yield server
+                .request({
+                    path: 'api/addProject?newProject={invalid_json_here}',
+                    resolveWithFullResponse: true
+                })
+                .then(function(response) {
+                    throw response;
+                })
+                .catch(function(response) {
+                    expect(response.statusCode).to.equal(500);
+                    expect(response.error).to.equal('Invalid argument specified');
+                })
         }));
 
     });
