@@ -197,7 +197,29 @@ describe('API', function() {
             
             expect(tasks).to.deep.include.members(expectedTasks);
         }));
-
+        
+        context('when calling in parallel', function() {
+            
+            it('should not produce tasks with duplicate positions', co.wrap(function*() {
+                
+                yield Promise.all([
+                    server.request('api/addTask?newTask=' + encodeURIComponent(JSON.stringify({ position: 0 }))),
+                    server.request('api/addTask?newTask=' + encodeURIComponent(JSON.stringify({ position: 0 })))
+                ]);
+                
+                var col = yield dbContext.collection(db.taskCollection);
+                var tasks = yield col
+                    .find({}, {_id:0})
+                    .sort({position:1})
+                    .toArray();
+                
+                tasks.forEach(function (task, taskIdx) {
+                    expect(task.position).to.equal(taskIdx);
+                })
+            }));
+            
+        });
+        
     });
 
     context('updateTask', function () {
@@ -318,7 +340,42 @@ describe('API', function() {
             
             expect(tasks).to.deep.include.members(expectedTasks);
         }));
-
+        
+        context('when calling in parallel', function() {
+            
+            it('should not produce tasks with duplicate positions', co.wrap(function*() {
+                
+                var existingTasks = [];
+                for(var i=0; i<10; i++) {
+                    existingTasks.push({id: i, position: i});
+                }
+                
+                var col = yield dbContext.collection(db.taskCollection);
+                yield Promise.all(existingTasks.map(function(task) {
+                    return col.insert(task);
+                }))
+                
+                yield Promise.all([
+                    server.request('api/updateTask?' +
+                            'taskId=' + encodeURIComponent(JSON.stringify(existingTasks[0].id)) + '&' +
+                            'properties=' + encodeURIComponent(JSON.stringify({position: 5 }))),
+                    server.request('api/updateTask?' +
+                            'taskId=' + encodeURIComponent(JSON.stringify(existingTasks[1].id)) + '&' +
+                            'properties=' + encodeURIComponent(JSON.stringify({position: 5 })))
+                ]);
+                
+                var tasks = yield col
+                    .find({}, {_id:0})
+                    .sort({position:1})
+                    .toArray();
+                
+                tasks.forEach(function (task, taskIdx) {
+                    expect(task.position).to.equal(taskIdx);
+                })
+            }));
+            
+        });
+        
     });
 
     context('deleteTask', function () {

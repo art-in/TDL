@@ -11,14 +11,14 @@ var TASK_COLLECTION = "tasks",
 
 var db;
 
-var queue = new Queue();
+var jobQueue = new Queue();
 
 /**
  * Returns all tasks exist in the data storage.
  * @returns {Promise}
  */
 function getTasks () {
-    return co(function*() {
+    return queue(function*() {
         var col = yield db.collection(TASK_COLLECTION);
         var tasks = yield col
             .find({}, {_id:0})
@@ -39,7 +39,7 @@ function getTasks () {
  * @returns {Promise}
  */
 function addTask (newTask) {
-    return co(function*() {
+    return queue(function*() {
         
         yield shiftTaskPositions(newTask.position, null, 1);
         
@@ -59,11 +59,11 @@ function addTask (newTask) {
  * @returns {Promise}
  */
 function updateTask (taskId, properties) {
-    return co(function*() {
+    return queue(function*() {
         
         var task = yield getTask(taskId);
         
-        // If changing task position - first shift tasks below new position
+        // If changing task position - first shift tasks below
         if (properties.position !== undefined) {
             var newPosition = properties.position;
             var oldPosition = task.position;
@@ -92,7 +92,7 @@ function updateTask (taskId, properties) {
  * @returns {Promise}
  */
 function deleteTask (taskId) {
-    return co(function*() {
+    return queue(function*() {
 
         var task = yield getTask(taskId);
 
@@ -112,7 +112,7 @@ function deleteTask (taskId) {
  * @returns {Promise}
  */
 function getProjects () {
-    return co(function*() {
+    return queue(function*() {
         
         var col = yield db.collection(PROJECT_COLLECTION);
         var projects = yield col.find({}, {_id:0}).toArray();
@@ -131,7 +131,7 @@ function getProjects () {
  * @returns {Promise}
  */
 function addProject (newProject) {
-    return co(function*() {
+    return queue(function*() {
         
         var col = yield db.collection(PROJECT_COLLECTION);
         var records = yield col.insert(newProject);
@@ -149,7 +149,7 @@ function addProject (newProject) {
  * @returns {Promise}
  */
 function updateProject (projectId, properties) {
-    return co(function*() {
+    return queue(function*() {
         
         var col = yield db.collection(PROJECT_COLLECTION);
         yield col.update(
@@ -168,7 +168,7 @@ function updateProject (projectId, properties) {
  * @returns {Promise}
  */
 function deleteProject (projectId) {
-    return co(function*() {
+    return queue(function*() {
         
         var col = yield db.collection(PROJECT_COLLECTION);
         yield col.remove({id: projectId});
@@ -192,7 +192,7 @@ module.exports = {
 
 //region Private methods
 
-// Connect to database.
+// Connect to the database.
 co(function* connect() {
     db = yield MongoClient.connect(config.get('database:connectionString'));
 }).catch(function (e) { logger.log(e); });
@@ -201,20 +201,37 @@ co(function* connect() {
  * Adds DB job to the queue.
  *
  * Why self-made queue?
- * Because MongoDB supports transaction atomicity on document level only
+ * 1. Because MongoDB supports transaction atomicity on document level only
  * (not collection level). Updating bunch of documents in collection
  * can be mixed with other operations (insert/update/delete) by DB itself.
  * Sometimes such behaviour is not acceptable. E.g. when updating
  * existing documents in collection must precede adding new ones.
- * To be sure that each bunch update executed as one transaction
- * all db jobs should go through one queue and executed one after another.
+ * 2. More than that, sometimes we need atomisity not only on level of one operation,
+ * but on level of group of several operations. E.g. to make update, then insert,
+ * and to be sure no other operations injected between them.
+ * To make sure no operations are mixed up, all db jobs should go through one queue
+ * and to be executed one after another.
  * TODO: probably it makes sense to create one queue per user.
- * TODO: investigate mongodb atomic option for its operations (yes, such exists).
- * @param cb
- * @param jobDb
+ * @param {function*} job
+ * @return {Promise} that will be resolved when job done.
  */
-function queueDb(cb, jobDb) {
-    return queue.push.apply(queue, arguments);
+function queue(job) {
+    var resolve, reject;
+    
+    jobQueue.push(function(cb) {
+        co(job).then(function(result) {
+            resolve(result);
+            cb();
+        }).catch(function (error) {
+            reject(error);
+            cb();
+        });
+    });
+    
+    return new Promise(function(res, rej) {
+        resolve = res;
+        reject = rej;
+    });
 }
 
 /**
