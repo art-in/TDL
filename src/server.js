@@ -14,7 +14,7 @@ var http = require('http'),
  * Server with request routing (static files + API).
  */
 http.createServer(function (request, response) {
-    logger.log(new RequestLM(request.url));
+    logger.log(new RequestLM({ url: request.url }));
     
     var url = urlParser.parse(request.url);
     var query;

@@ -1,11 +1,9 @@
-var LogMessage = require('./LogMessage').message;
+var LogMessage = require('./LogMessage').message,
+    extend = require('../../node_modules/extend');
 
 function ResponseLogMessage (messageType, options) {
     this.type = messageType;
-
-    this.requestPath = options.requestPath;
-    this.statusCode = options.statusCode;
-    this.message = options.message;
+    extend(this, options);
 }
 
 ResponseLogMessage.prototype = new LogMessage();

@@ -3,7 +3,6 @@ var LogMessage = require('./LogMessage').message,
 
 function DatabaseLogMessage (messageType, options) {
     this.type = messageType;
-
     extend(this, options);
 }
 

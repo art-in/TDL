@@ -1,7 +1,8 @@
-var LogMessage = require('./LogMessage').message;
+var LogMessage = require('./LogMessage').message,
+    extend = require('../../node_modules/extend');
 
-function RequestLogMessage (url) {
-    this.url = url;
+function RequestLogMessage (options) {
+    extend(this, options);
 }
 
 RequestLogMessage.prototype = new LogMessage();
