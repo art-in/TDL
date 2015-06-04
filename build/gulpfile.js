@@ -1,13 +1,15 @@
 var gulp = require('gulp'),
+    util = require('gulp-util'),
     concat = require('gulp-concat'),
-    addsrc = require('gulp-add-src'),
     insert = require('gulp-insert'),
     uglify = require('gulp-uglify'),
     del = require('del'),
     minifyCSS = require('gulp-minify-css'),
     sprite = require('gulp-sprite-generator'),
     replace = require('gulp-replace'),
-    requirejs = require('gulp-requirejs');
+    requirejs = require('requirejs'),
+    esprima_harmony = require('esprima-harmony'),
+    es = require('event-stream');
 
 //region Paths
 
@@ -60,24 +62,47 @@ gulp.task('clean', function(cb) {
 });
 
 gulp.task('scripts', ['clean'], function() {
-    requirejs({
+    
+    // Redefine optimiser's normal esprisma reference
+    // to fork that supports Harmony features (like generators)
+    // https://github.com/jrburke/r.js/issues/769
+    // TODO: Generators should be added soon to original esprisma package (v2.3)
+    requirejs.define('esprima', [], function () {
+        return esprima_harmony;
+    });
+    
+    var stream = es.pause();
+    
+    requirejs.optimize({
         name: "client",
         baseUrl: paths.client.scripts.folder,
-        out: 'app.js',
         mainConfigFile: paths.client.scripts.folder + 'lib/require.config.js',
         paths: {
             requireLib: 'lib/vendor/require'
         },
-        include: ['requireLib']
-    })
-     .pipe(insert.append(';require(["client"]);'))
-     .pipe(uglify())
-     .pipe(gulp.dest(paths.client.target));
+        include: ['requireLib'],
+        out: function(text) {
+            stream.write(new util.File({
+                path: 'app.js',
+                contents: new Buffer(text)
+            }));
+        }
+    });
+    
+    stream
+        .pipe(insert.append(';require(["client"]);'))
+        // uglify does not support Harmony generators for now.
+        // TODO: Harmony features is handeled by
+        //       https://github.com/mishoo/UglifyJS2/issues/448
+        // .pipe(uglify())
+        .pipe(gulp.dest(paths.client.target));
+    
+    return stream;
 });
 
 gulp.task('styles', ['clean'], function() {
     return gulp.src(paths.client.styles.mask)
-        // Replace all url(/images/image.png) with url(image.png)
+        // Replace all 'url(/images/image.png)' with 'url(image.png)'
         .pipe(replace(/\/images\//g, ''))
         .pipe(concat('styles.css'))
         .pipe(gulp.dest(paths.client.target));

@@ -60,7 +60,6 @@ gulp.task('code-lines', function(){
 });
 
 gulp.task('code-complexity', function(){
-    // DISABLED (esprima does not support generators yet)
     return gulp.src(paths.scripts.nonThirdPartyCodeMask)
         .pipe(complexity(complexityConfig));
 });
@@ -162,10 +161,11 @@ gulp.task('wait', function() {
 
 //endregion
 
-gulp.task('test-static', seq(['code-lines',
+gulp.task('static', seq(['code-lines',
+                              'code-complexity',
                               'code-quality']));
 
-gulp.task('test-server', seq(['clean',
+gulp.task('server', seq(['clean',
                               'prepare-torture-data',
                               'prepare-torture-build', 
                               'prepare-torture-config',
@@ -176,7 +176,7 @@ gulp.task('test-server', seq(['clean',
                               'server-database-stop', 'wait',
                               'clean']));
 
-gulp.task('test', seq(['test-static', 
-                       'test-server']));
+gulp.task('test', seq(['static', 
+                       'server']));
 
 gulp.task('default', ['test']);

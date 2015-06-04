@@ -1,45 +1,48 @@
-define(['data/storage', 'mappers/modelMapper', 'business/projectManager', 'models/Task'],
-    function(storage, modelMapper, projectManager, Task) {
+define(['co', 'data/storage', 'mappers/modelMapper', 'business/projectManager', 'models/Task'],
+    function(co, storage, modelMapper, projectManager, Task) {
     
         //region Public
-    
+        
         /**
          * Gets tasks.
-         *
-         * @param {function} cb - first call is local state, second - server state.
+         * 
+         * @return {object} local and server state promises
          */
-        function getTasks (cb) {
-            storage.getTasks(function (error, taskDOs) {
-                if (error) { cb(error); return; }
-                
-                var tasks = modelMapper.mapTasks(taskDOs);
-                cb(false, tasks);
-            });
+        function getTasks () {
+            return {
+                local: co.wrap(function*() { 
+                    return storage.getTasksLocal().then(modelMapper.mapTasks);
+                }),
+                server: co.wrap(function*() {
+                    return storage.getTasks().then(modelMapper.mapTasks);
+                })
+            };
         }
-
+        
         /**
          * Adds new task.
          *
          * @param {string} description
          * @param {string} projectId
-         * @param {function} cb - delivers local state of tasks
+         * @return {Promise}
          */
-        function addTask (description, projectId, cb) {
-            if (!description)
-                throw new Error('Invalid description: ' + description);
-            
-            if (projectId === undefined) {
-                throw new Error('Invalid project ID: ' + projectId);
-            }
-            
-            var newTask = new Task();
-            newTask.description = description;
-            newTask.position = 0;
-            newTask.progress = 0;
-            
-            // Set project
-            projectManager.getProjects(true, function(error, projects) {
-                if (error) { cb(error); return; }
+        function addTask (description, projectId) {
+            return co(function*() {
+                
+                if (!description)
+                    throw new Error('Invalid description: ' + description);
+                
+                if (projectId === undefined) {
+                    throw new Error('Invalid project ID: ' + projectId);
+                }
+                
+                var newTask = new Task();
+                newTask.description = description;
+                newTask.position = 0;
+                newTask.progress = 0;
+                
+                // Set project
+                var projects = yield projectManager.getProjects().local();
                 
                 // Tags in task description has higher priority than selected project
                 var projectIdByDescription = getProjectIdByDescription(newTask.description, projects);
@@ -47,12 +50,7 @@ define(['data/storage', 'mappers/modelMapper', 'business/projectManager', 'model
                 
                 newTask.projectId = projectId;
                 
-                storage.addTask(newTask, function (error, taskDOs) {
-                    if (error) { cb(error); return; }
-                    
-                    var tasks = modelMapper.mapTasks(taskDOs);
-                    cb(false, tasks);
-                }); 
+                yield storage.addTask(newTask);
             });
         }
         
@@ -61,39 +59,34 @@ define(['data/storage', 'mappers/modelMapper', 'business/projectManager', 'model
          *
          * @param {string} taskId
          * @param {Object} properties
-         * @param {function} cb - delivers local state of tasks
+         * @return {Promise}
          */
-        function updateTask (taskId, properties, cb) {
-            if (!taskId) throw Error('Invalid task ID: ' + taskId);
-            
-            // Validate properties
-            var propertyNames = Object.getOwnPropertyNames(properties);
-            if (propertyNames.length === 0) {
-                throw Error('No task properties to update');
-            }
-
-            var validPropertyNames = Object.getOwnPropertyNames(new Task());
-            propertyNames.forEach(function (prop) {
-                if (validPropertyNames.indexOf(prop) === -1) {
-                    throw Error('Unknown property to update: ' + prop);
-                }
-            });
-            
-            // Assign project
-            projectManager.getProjects(true, function(error, projects) {
-                if (error) { cb(error); return; }
+        function updateTask (taskId, properties) {
+            return co(function*() {
+                if (!taskId) throw Error('Invalid task ID: ' + taskId);
                 
+                // Validate properties
+                var propertyNames = Object.getOwnPropertyNames(properties);
+                if (propertyNames.length === 0) {
+                    throw Error('No task properties to update');
+                }
+    
+                var validPropertyNames = Object.getOwnPropertyNames(new Task());
+                propertyNames.forEach(function (prop) {
+                    if (validPropertyNames.indexOf(prop) === -1) {
+                        throw Error('Unknown property to update: ' + prop);
+                    }
+                });
+                
+                // Assign project
+                var projects = yield projectManager.getProjects().local();
+                    
                 if (properties.description !== undefined) {
                     var projectIdByDescription = getProjectIdByDescription(properties.description, projects);
                     projectIdByDescription !== null && (properties.projectId = projectIdByDescription);
                 }
                 
-                storage.updateTask(taskId, properties, function(error, taskDOs) {
-                    if (error) { cb(error); return; }
-                    
-                    var tasks = modelMapper.mapTasks(taskDOs);
-                    cb(false, tasks);
-                });
+                yield storage.updateTask(taskId, properties);
             });
         }
         
@@ -102,31 +95,29 @@ define(['data/storage', 'mappers/modelMapper', 'business/projectManager', 'model
          *
          * @param {string} taskId
          * @param {number} newPosition
-         * @param {function} cb - delivers local state of tasks
+         * @return {Promise}
          */
-        function moveTask (taskId, newPosition, cb) {
-            if (!taskId) throw Error('Invalid task ID: ' + taskId);
-            
-            if (newPosition === undefined || typeof newPosition !== 'number')
-                throw new Error('Invalid new position: ' + newPosition);
-
-            storage.updateTask(taskId, {position: newPosition}, cb);
+        function moveTask (taskId, newPosition) {
+            return co(function*() {
+                if (!taskId) throw Error('Invalid task ID: ' + taskId);
+                
+                if (newPosition === undefined || typeof newPosition !== 'number')
+                    throw new Error('Invalid new position: ' + newPosition);
+    
+                yield storage.updateTask(taskId, {position: newPosition});
+            });
         }
 
         /**
          * Deletes task.
          *
          * @param {string} taskId
-         * @param {function} cb - delivers local state of tasks
+         * @return {Promise}
          */
-        function deleteTask (taskId, cb) {
-            if (!taskId) throw Error('Invalid task ID: ' + taskId);
-            
-            storage.deleteTask(taskId, function (error, taskDOs) {
-                if (error) { cb(error); return; }
-                
-                var tasks = modelMapper.mapTasks(taskDOs);
-                cb(false, tasks);
+        function deleteTask (taskId) {
+            return co(function*() {
+                if (!taskId) throw Error('Invalid task ID: ' + taskId);
+                yield storage.deleteTask(taskId);
             });
         }
 

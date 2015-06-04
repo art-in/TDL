@@ -1,21 +1,22 @@
-define(['data/storage', 'mappers/modelMapper', 'models/Project'],
-    function(storage, modelMapper, Project) {
+define(['co', 'data/storage', 'mappers/modelMapper', 'models/Project'],
+    function(co, storage, modelMapper, Project) {
 
+        //region Public
+        
         /**
          * Gets projects.
          *
-         * @param {boolean} [localOnly=false] - get local state only
-         * @param {function} callback - first call is local state, second - server state.
+         * @return {object} local and server state promises
          */
-        function getProjects (localOnly, cb) {
-            typeof localOnly === 'function' && (cb = localOnly, localOnly = false);
-            
-            storage.getProjects(localOnly, function(error, projectDOs) {
-                if (error) { cb(error); return; }
-                
-                var projects = modelMapper.mapProjects(projectDOs);
-                cb(false, projects);
-            });
+        function getProjects () {
+            return {
+                local: co.wrap(function*() { 
+                    return storage.getProjectsLocal().then(modelMapper.mapProjects);
+                }),
+                server: co.wrap(function*() {
+                    return storage.getProjects().then(modelMapper.mapProjects);
+                })
+            };
         }
         
         /**
@@ -24,29 +25,26 @@ define(['data/storage', 'mappers/modelMapper', 'models/Project'],
          * @param {string} name
          * @param {string[]} tags
          * @param {string} color
-         * @param {function} cb - delivers local state of projects
+         * @return {Promise}
          */
-        function addProject (name, tags, color, cb) {
-            if (!name)
-                throw new Error('Invalid name: ' + name);
-            
-            if (!tags || tags.length === undefined)
-                throw new Error('Invalid tags: ' + tags);
-            
-            if (!color)
-                throw new Error('Invalid color: ' + color);
-
-            var newProject = new Project();
-            newProject.name = name;
-            newProject.tags = tags || [];
-            newProject.color = color;
-            
-            storage.addProject(newProject, function (error, projectDOs) {
-                if (error) { cb(error); return; }
+        function addProject (name, tags, color) {
+            return co(function*() {
+                if (!name)
+                    throw new Error('Invalid name: ' + name);
                 
-                var projects = modelMapper.mapProjects(projectDOs);
-                cb(false, projects);
-            }); 
+                if (!tags || tags.length === undefined)
+                    throw new Error('Invalid tags: ' + tags);
+                
+                if (!color)
+                    throw new Error('Invalid color: ' + color);
+    
+                var newProject = new Project();
+                newProject.name = name;
+                newProject.tags = tags || [];
+                newProject.color = color;
+                
+                yield storage.addProject(newProject);
+            });
         }
         
         /**
@@ -54,29 +52,26 @@ define(['data/storage', 'mappers/modelMapper', 'models/Project'],
          *
          * @param {string} projectId
          * @param {Object} properties
-         * @param {function} cb - delivers local state of projects
+         * @return {Promise}
          */
-        function updateProject (projectId, properties, cb) {
-            if (!projectId) throw Error('Invalid project ID: ' + projectId);
-            
-            // Validate properties
-            var propertyNames = Object.getOwnPropertyNames(properties);
-            if (propertyNames.length === 0) {
-                throw Error('No project properties to update');
-            }
-
-            var validPropertyNames = Object.getOwnPropertyNames(new Project());
-            propertyNames.forEach(function (prop) {
-                if (validPropertyNames.indexOf(prop) === -1) {
-                    throw Error('Unknown property to update: ' + prop);
-                }
-            });
-            
-            storage.updateProject(projectId, properties, function(error, projectDOs) {
-                if (error) { cb(error); return; }
+        function updateProject (projectId, properties) {
+            return co(function*() {
+                if (!projectId) throw Error('Invalid project ID: ' + projectId);
                 
-                var projects = modelMapper.mapProjects(projectDOs);
-                cb(false, projects);
+                // Validate properties
+                var propertyNames = Object.getOwnPropertyNames(properties);
+                if (propertyNames.length === 0) {
+                    throw Error('No project properties to update');
+                }
+    
+                var validPropertyNames = Object.getOwnPropertyNames(new Project());
+                propertyNames.forEach(function (prop) {
+                    if (validPropertyNames.indexOf(prop) === -1) {
+                        throw Error('Unknown property to update: ' + prop);
+                    }
+                });
+                
+                yield storage.updateProject(projectId, properties);
             });
         }
         
@@ -84,18 +79,16 @@ define(['data/storage', 'mappers/modelMapper', 'models/Project'],
          * Deletes project.
          *
          * @param {string} projectId
-         * @param {function} cb - delivers local state of projects
+         * @return {Promise}
          */
-        function deleteProject (projectId, cb) {
-            if (!projectId) throw Error('Invalid project ID: ' + projectId);
-            
-            storage.deleteProject(projectId, function (error, projectDOs) {
-                if (error) { cb(error); return; }
-                
-                var projects = modelMapper.mapProjects(projectDOs);
-                cb(false, projects);
+        function deleteProject (projectId) {
+            return co(function*() {
+                if (!projectId) throw Error('Invalid project ID: ' + projectId);
+                yield storage.deleteProject(projectId);
             });
         }
+        
+        //endregion
 
         return {
             getProjects: getProjects,

@@ -1,4 +1,5 @@
 var MongoClient = require('../lib/node_modules/mongodb-promise').MongoClient,
+    Promise = require('../lib/node_modules/bluebird').Promise,
     co = require('../lib/node_modules/co'),
     Queue = require('../lib/Queue').Queue,
     config = require('../lib/config').config,
@@ -210,7 +211,7 @@ co(function* connect() {
  * but on level of group of several operations. E.g. to make update, then insert,
  * and to be sure no other operations injected between them.
  * To make sure no operations are mixed up, all db jobs should go through one queue
- * and to be executed one after another.
+ * and be executed one after another.
  * TODO: probably it makes sense to create one queue per user.
  * @param {function*} job
  * @return {Promise} that will be resolved when job done.

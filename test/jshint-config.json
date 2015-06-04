@@ -1,4 +1,10 @@
 {
     "expr": true,
-    "esnext": true
+    "esnext": true,
+    "noyield": true,
+    
+    "globals": {
+        "Promise": true,
+        "Promise_note": "TODO: remove it when I can update nodejs and use native Promises instead of bluebird polifyl"
+    }
 }

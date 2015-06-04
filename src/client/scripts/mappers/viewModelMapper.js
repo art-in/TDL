@@ -29,7 +29,7 @@ define(['models/Task', 'viewmodels/TaskViewModel',
                         taskVM.project(projectVM);
                     } else {
                         // If no project was found for task - set null project viewmodel.
-                        taskVM.project(new ProjectVM());
+                        taskVM.project((new ProjectVM()).id(task.projectId));
                     }
                 }
                 

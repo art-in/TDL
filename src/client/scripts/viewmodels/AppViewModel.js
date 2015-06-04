@@ -28,10 +28,6 @@ define(['ko',
             messageBus.subscribe('switchingView', switchingView.bind(this));
         }
         
-        AppViewModel.prototype.loadState = function () {
-             messageBus.publish('loadingState');
-        };
-        
         //region Functions
         
         function setCurrentView(view) {

@@ -1,6 +1,6 @@
 CACHE MANIFEST #version:VERSION
 
-favicon.ico
+favicon.ico?v=1
 app.js
 sprite.png
 styles.css

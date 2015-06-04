@@ -3,10 +3,11 @@
  */
 define('client', 
       ['ko',
+       'lib/messageBus',
        'viewmodels/binder',
        'viewmodels/gate',
        'viewmodels/AppViewModel'], 
-    function (ko, binder, gate, AppViewModel) {
+    function (ko, messageBus, binder, gate, AppViewModel) {
     
     // Create root view model
     var appVM = new AppViewModel();
@@ -14,7 +15,7 @@ define('client',
     binder.setupBindings();
     gate.setupHandlers(appVM.state);
     
-    appVM.loadState();
+    messageBus.publish('loading');
     
     ko.applyBindings(appVM);
 });

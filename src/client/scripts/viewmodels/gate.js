@@ -1,6 +1,6 @@
 /** The gate between business and view-model layers. */
 define(['business/business', 'lib/messageBus', 'mappers/viewModelMapper'],
-    function(business, messageBus, vmMapper) {
+    function(business, messageBus, mapper) {
     
     /** View model data state (tasks, projects) */
     var vmState;
@@ -13,7 +13,7 @@ define(['business/business', 'lib/messageBus', 'mappers/viewModelMapper'],
         
         vmState = state;
         
-        messageBus.subscribe('loadingState', onLoadingState);
+        messageBus.subscribe('loading', onLoading);
         
         messageBus.subscribe('addingTask', onAddingTask);
         messageBus.subscribe('updatingTask', onUpdatingTask);
@@ -29,76 +29,85 @@ define(['business/business', 'lib/messageBus', 'mappers/viewModelMapper'],
     
     //region Handlers
     
-    function onLoadingState() {
-        var projectVMs;
-        business.getProjects(function(error, projects) {
-            projectVMs = vmMapper.mapProjects(projects);
-            vmState.projects(projectVMs);
-            messageBus.publish('projectsLoaded');
-        }.bind(this));
-        
-        business.getTasks(function(error, tasks) {
-           updateTasksInState(tasks);
-        }.bind(this));
+    function onLoading() {
+        Promise.race([
+            loadLocalState(),
+            loadServerState()
+        ])
+        .then(messageBus.publish.bind(messageBus, 'projectsLoaded'));
     }
     
     function onAddingTask(data) {
-        business.addTask(data.description, data.projectId, function(error, tasks) {
-            updateTasksInState(tasks);
-        });
+        business
+            .addTask(data.description, data.projectId)
+            .then(loadLocalState);
     }
     
     function onUpdatingTask(data) {
-        business.updateTask(data.id, data.properties, function(error, tasks) {
-            updateTasksInState(tasks);
-        });
+        business
+            .updateTask(data.id, data.properties)
+            .then(loadLocalState);
     }
     
     function onMovingTask(data) {
-        business.moveTask(data.id, data.position, function(error, tasks) {
-            updateTasksInState(tasks);
-        });
+        business
+            .moveTask(data.id, data.position)
+            .then(loadLocalState);
     }
     
     function onDeletingTask(data) {
-        business.deleteTask(data.id, function(error, tasks) {
-            updateTasksInState(tasks);
-        });
+        business
+            .deleteTask(data.id)
+            .then(loadLocalState);
     }
     
     function onAddingProject(data) {
-        business.addProject(data.name, data.tags, data.color, function(error, projects) {
-            updateProjectsInState(projects);
-        });
+        business
+            .addProject(data.name, data.tags, data.color)
+            .then(loadLocalState);
     }
     
     function onUpdatingProject(data) {
-        business.updateProject(data.id, data.properties, function(error, projects) {
-            updateProjectsInState(projects);
-        });
+        business
+            .updateProject(data.id, data.properties)
+            .then(loadLocalState);
     }
     
     function onDeletingProject(data) {
-        business.deleteProject(data.id, function(error, projects) {
-            updateProjectsInState(projects);
-        });
+        business
+            .deleteProject(data.id)
+            .then(loadLocalState);
     }
     
     //endregion
     
     //region Private
     
+    function updateProjectsInState(projects) {
+        var projectVMs = mapper.mapProjects(projects);
+        projectVMs.forEach(function(projectVM) { projectVM.state = vmState; });
+        vmState.projects(projectVMs);
+        mapper.assignProjectsToTasks(vmState.tasks(), vmState.projects());
+    }
+    
     function updateTasksInState(tasks) {
-        var taskVMs = vmMapper.mapTasks(tasks, vmState.projects());
+        var taskVMs = mapper.mapTasks(tasks, vmState.projects());
         taskVMs.forEach(function(taskVM) { taskVM.state = vmState; });
         vmState.tasks(taskVMs);
     }
     
-    function updateProjectsInState(projects) {
-        var projectVMs = vmMapper.mapProjects(projects);
-        projectVMs.forEach(function(projectVM) { projectVM.state = vmState; });
-        vmState.projects(projectVMs);
-        vmMapper.assignProjectsToTasks(vmState.tasks(), vmState.projects());
+    function loadLocalState() {
+        return Promise.all([
+            business.getProjects().local().then(updateProjectsInState),
+            business.getTasks().local().then(updateTasksInState)
+        ]);
+    }
+    
+    function loadServerState() {
+        return Promise.all([
+            business.getProjects().server().then(updateProjectsInState),
+            business.getTasks().server().then(updateTasksInState)
+        ]);
     }
     
     //endregion
