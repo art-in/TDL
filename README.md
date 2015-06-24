@@ -5,14 +5,11 @@ TODO List (TDL)
 
 **Purpose:** quick and handy work with tasks.
 
-**TODO:**
-- [x] task editing
-- [x] task reordering
-- [x] task progress
+**Features:**
+- [x] task editing (+ reordering)
 - [ ] sub-tasking
 - [x] projects (i.e. sports, music, craft, etc.)
 - [ ] estimation / actual time for performing task
-- [ ] similar-task detection
 - [ ] history of completed tasks
 - [ ] history analysis (total time spent on project/task per time period)
 - [x] mobile devices
