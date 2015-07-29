@@ -6,10 +6,12 @@ define(['ko', 'lib/messageBus'], function(ko, messageBus) {
         
         this.newProjectName = ko.observable('');
         this.newProjectTags = ko.observable('');
-        this.newProjectColor = ko.observable('');
+        this.newProjectColor = ko.observable(defaultColor);
         
         this.inAddMode = ko.observable(false);
     }
+    
+    var defaultColor = '#d3eef8';
     
     ProjectListViewModel.prototype.goTasks = function() {
         messageBus.publish('switchingView', 'taskList');
@@ -61,7 +63,7 @@ define(['ko', 'lib/messageBus'], function(ko, messageBus) {
     ProjectListViewModel.prototype.emptyNewProject = function () {
         this.newProjectName('');
         this.newProjectTags('');
-        this.newProjectColor('');
+        this.newProjectColor(defaultColor);
     };
     
     ProjectListViewModel.prototype.removeProject = function (projectVM) {

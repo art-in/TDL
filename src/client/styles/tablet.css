@@ -332,6 +332,10 @@
         font-size: 24px;
     }
     
+    .project.editing .project-properties > div + input {
+        margin-top: 20px;
+    }
+    
     .project-properties-value.name {
         align-items: center;
         font-size: 24px;
@@ -345,10 +349,8 @@
         color: gray;
     }
     
-    .project-properties-value.color {
-        font-size: 14px;
-        padding: 0 5px;
-        color: gray;
+    .project-properties input.color {
+        height: 40px;
     }
     
     .project.editing > .project-properties {

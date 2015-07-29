@@ -95,9 +95,7 @@ define(['jquery',
             $('.new-project-properties-item-value.tags').dataBind({ editableText: '$root.views.projectList.newProjectTags',
                                                                returnKeyPress: '$root.views.projectList.addProject()',
                                                                escapeKeyPress: '$root.views.projectList.toggleAddMode()' });
-            $('.new-project-properties-item-value.color').dataBind({ editableText: '$root.views.projectList.newProjectColor',
-                                                               returnKeyPress: '$root.views.projectList.addProject()',
-                                                               escapeKeyPress: '$root.views.projectList.toggleAddMode()' });
+            $('.new-project-properties-item input.color').dataBind({ value: '$root.views.projectList.newProjectColor' });
             
             $('.new-project .add-button').dataBind({ click: '$root.views.projectList.addProject.bind($root.views.projectList)' });
             $('.new-project .cancel-button').dataBind({ click: '$root.views.projectList.toggleAddMode.bind($root.views.projectList)' });
@@ -124,10 +122,8 @@ define(['jquery',
                                                            contentEditable: 'project.inEditMode',
                                                            returnKeyPress: 'project.save()',
                                                            escapeKeyPress: 'project.toggleEditMode()' });
-            $('.project-properties-value.color').dataBind({ editableText: 'project.color',
-                                                            contentEditable: 'project.inEditMode',
-                                                            returnKeyPress: 'project.save()',
-                                                            escapeKeyPress: 'project.toggleEditMode()' });
+            $('.project-properties input.color').dataBind({ value: 'project.color',
+                                                            visible: 'project.inEditMode' });
         }
         
         return {
