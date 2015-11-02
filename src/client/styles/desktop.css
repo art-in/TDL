@@ -142,6 +142,10 @@
         opacity: 0.4;
     }
 
+    .task.done .task-properties-description {
+        text-decoration: line-through;
+    }
+
     .task-progress {
         display: flex;
         justify-content: center;
