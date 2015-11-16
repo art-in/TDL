@@ -51,14 +51,20 @@ define(['jquery',
                                          "'done'": 'task.progressDone' }});
             $('.task-shift-up-button').dataBind({ click: '$root.views.taskList.shiftTaskUp.bind($root.views.taskList)' });
             $('.task-shift-down-button').dataBind({ click: '$root.views.taskList.shiftTaskDown.bind($root.views.taskList)' });
-            $('.task-remove-button').dataBind({ click: '$root.views.taskList.removeTask.bind($root.views.taskList)',
-                                                visible: '!task.inEditMode()' });
+            $('.task-remove').dataBind({ visible: '!task.inEditMode()' });
+            $('.task-remove-button').dataBind({ click: 'task.toggleRemoveMode.bind(task)',
+                                         visible: '!task.inRemoveMode()' });
+            $('.task-remove-confirm-button').dataBind({ click: '$root.views.taskList.removeTask.bind($root.views.taskList)',
+                                                visible: 'task.inRemoveMode()' });
+            $('.task-remove-cancel-button').dataBind({ click: 'task.toggleRemoveMode.bind(task)',
+                                                visible: 'task.inRemoveMode()' });
             
             $('.task-progress').dataBind({ css: { "'task-progress-checkbox-checked'": 'task.progressDone' }});
             $('.task-progress-checkbox').dataBind({ checked: 'task.progressDone' });
             $('.task-shift').dataBind({ visible: '!task.inEditMode()' });
-            $('.task-drag-handle').dataBind({ visible: '!task.inEditMode()' });
-            
+            $('.task-drag-handle').dataBind({ visible: '!task.inEditMode() && !task.inRemoveMode()' });
+
+            $('.task-edit').dataBind({ visible: '!task.inRemoveMode()' });
             $('.task-edit select.projects').dataBind({ visible: 'task.inEditMode()',
                                                        foreach: "{ data: $root.views.taskList.projectsToSelect, as: 'project' }",
                                                        enable : '$root.views.taskList.projectsToSelect().length > 1',

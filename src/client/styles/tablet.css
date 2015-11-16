@@ -210,13 +210,21 @@
     
     .task-edit-button,
     .task-edit-save-button,
-    .task-edit-cancel-button {
+    .task-edit-cancel-button,
+    .task-remove-button,
+    .task-remove-confirm-button,
+    .task-remove-cancel-button {
         border: 1px solid lightgrey;
         align-items: center;
         text-align: center;
         justify-content: center;
     }
-    
+
+    .task-remove {
+        display: flex;
+        flex: 1;
+    }
+
     .task-remove-button {
         border: 1px solid lightgrey;
         display: flex;
@@ -239,6 +247,16 @@
 
     .task-remove-button-label {
         display: none;
+    }
+
+    .task-remove-confirm-button {
+        display: flex;
+        flex: 1;
+    }
+
+    .task-remove-cancel-button {
+        display: flex;
+        flex: 2.5;
     }
 
     .task-drag-handle {

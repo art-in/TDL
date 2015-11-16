@@ -205,13 +205,20 @@
     
     .task-edit-button,
     .task-edit-save-button,
-    .task-edit-cancel-button {
+    .task-edit-cancel-button,
+    .task-remove-button,
+    .task-remove-confirm-button,
+    .task-remove-cancel-button {
         border: 1px solid lightgrey;
         align-items: center;
         text-align: center;
         justify-content: center;
     }
-    
+
+    .task-remove {
+        display: flex;
+        flex: 1;
+    }
     
     .task-remove-button {
         border: 1px solid lightgrey;
@@ -230,6 +237,16 @@
         width: 26px;
         height: 26px;
         max-width: inherit;
+    }
+
+    .task-remove-confirm-button {
+        display: flex;
+        flex: 1;
+    }
+
+    .task-remove-cancel-button {
+        display: flex;
+        flex: 1;
     }
 
     .task-drag-handle {
