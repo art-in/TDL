@@ -399,13 +399,20 @@
     .project-edit-button,
     .project-edit-save-button,
     .project-edit-cancel-button,
-    .project-remove-button {
+    .project-remove-button,
+    .project-remove-confirm-button,
+    .project-remove-cancel-button {
         border: 1px solid lightgrey;
         align-items: center;
         text-align: center;
         justify-content: center;
     }
-    
+
+    .project-remove {
+        display: flex;
+        flex: 1;
+    }
+
     .project-remove-button {
         display: flex;
         flex: 1;
@@ -420,6 +427,16 @@
     }
 
     .project-remove-button-label {
+        flex: 1;
+    }
+
+    .project-remove-confirm-button {
+        display: flex;
+        flex: 1;
+    }
+
+    .project-remove-cancel-button {
+        display: flex;
         flex: 1;
     }
 }

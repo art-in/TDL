@@ -27,6 +27,8 @@ define(['ko', 'lib/messageBus'], function(ko, messageBus) {
                 this.color(this.stateBeforeEdit.color);
             }
         }.bind(this));
+
+        this.inRemoveMode = ko.observable(false);
     }
     
     ProjectViewModel.prototype.toggleEditMode = function() {
@@ -75,6 +77,10 @@ define(['ko', 'lib/messageBus'], function(ko, messageBus) {
         }
         
         this.toggleEditMode();
+    };
+
+    ProjectViewModel.prototype.toggleRemoveMode = function() {
+        this.inRemoveMode(!this.inRemoveMode());
     };
     
     return ProjectViewModel;

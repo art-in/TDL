@@ -109,9 +109,16 @@ define(['jquery',
             $('.project-list').dataBind({ foreach: "{ data: $root.state.projects, as: 'project' }" });
             
             $('.project').dataBind({ css: { "'editing'": 'project.inEditMode' }});
-            $('.project-remove-button').dataBind({ click: '$root.views.projectList.removeProject.bind($root.views.projectList)',
-                                                   visible: '!project.inEditMode()' });
-            
+            $('.project-remove').dataBind({ visible: '!project.inEditMode()' });
+            $('.project-remove-button').dataBind({ click: 'project.toggleRemoveMode.bind(project)',
+                                                   visible: '!project.inRemoveMode()'});
+            $('.project-remove-confirm-button').dataBind({ click: '$root.views.projectList.removeProject.bind($root.views.projectList)',
+                                                           visible: 'project.inRemoveMode()' });
+            $('.project-remove-cancel-button').dataBind({ click: 'project.toggleRemoveMode',
+                                                          visible: 'project.inRemoveMode'});
+
+
+            $('.project-edit').dataBind({ visible: '!project.inRemoveMode()' });
             $('.project-edit-button').dataBind({ click: 'project.toggleEditMode',
                                                  visible: '!project.inEditMode()' });
             $('.project-edit-save-button').dataBind({ click: 'project.save',
