@@ -32,8 +32,28 @@
                     <div class='add-button-image'></div>
                     <div class='add-button-label'>add task</div>
                 </button>
+                <button class='filter-button'>filter</button>
                 <button class='go-projects'>Projects</button>
             </div>
+            <fieldset class="filter">
+                <div class="filter-row">
+                    <label>
+                        <input class="filter-show-done" type="checkbox">
+                        show done
+                    </label>
+                    <label>
+                        <select class="filter-show-done-since">
+                            <option value="week">last week</option>
+                            <option value="month">last month</option>
+                            <option value="year">last year</option>
+                            <option value="beginning">since beginning of time</option>
+                        </select>
+                    </label>
+                </div>
+                <footer class="status">
+                    shown <label class="filter-shown-count"></label> of <label class="filter-total-count"></label> tasks
+                </footer>
+            </fieldset>
             <div class='new-task'>
                 <div class='new-task-input' contenteditable='true'></div>
                 <div class='new-task-buttons'>
@@ -59,6 +79,7 @@
                 </label>
                 <div class='task-properties'>
                     <div class='task-properties-project-name'></div>
+                    <div class='task-properties-progress-doneon'></div>
                     <div class='task-properties-description'></div>
                 </div>
                 <div class='task-buttons'>

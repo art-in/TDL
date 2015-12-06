@@ -1,11 +1,13 @@
-define(['ko', 'lib/messageBus'], function(ko, messageBus) {
+define(['ko', 'moment', 'lib/messageBus'], function(ko, moment, messageBus) {
 
     function TaskViewModel (state) {
         this.state = state;
 
         this.id = ko.observable('');
         this.description = ko.observable('');
+        this.position = ko.observable(null); // Int
         this.progress = ko.observable(0); // [0;1]
+        this.progressDoneOn = ko.observable(null); // Date
         this.project = ko.observable(null); // ProjectViewModel
 
         /** Indicates weither view model is currently in edit mode. */
@@ -19,6 +21,7 @@ define(['ko', 'lib/messageBus'], function(ko, messageBus) {
             }.bind(this),
             write: function(checked) {
               this.progress(checked ? 1 : 0);
+              this.progressDoneOn(checked ? new Date() : null);
               this.saveProgress();
             }.bind(this)
           });
@@ -54,6 +57,12 @@ define(['ko', 'lib/messageBus'], function(ko, messageBus) {
 
         /** Indicates weither view model is currently in remove mode. */
         this.inRemoveMode = ko.observable(false);
+
+        this.progressDoneOnString = ko.computed({
+          read: function() {
+            return moment(this.progressDoneOn()).format('MMMM Do YYYY') + ' (done)';
+          }.bind(this)
+        });
     }
     
     /**
@@ -85,7 +94,10 @@ define(['ko', 'lib/messageBus'], function(ko, messageBus) {
     TaskViewModel.prototype.saveProgress = function () {
         messageBus.publish('updatingTask', {
             id: this.id(), 
-            properties: { progress: this.progress() }
+            properties: {
+              progress: this.progress(),
+              progressDoneOn: this.progressDoneOn()
+            }
         });
     };
 

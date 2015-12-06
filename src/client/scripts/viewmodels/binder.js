@@ -20,11 +20,22 @@ define(['jquery',
             $('.main-tasks').dataBind({ visible: '$root.views.taskList.active' });
             
             $('.main-tasks .action-bar .add-button').dataBind({ click: '$root.views.taskList.toggleAddMode.bind($root.views.taskList)' });
-            $('.go-projects').dataBind({ click: '$root.views.taskList.goProjects' });
-            
+            $('.main-tasks .action-bar .go-projects').dataBind({ click: '$root.views.taskList.goProjects' });
+            $('.main-tasks .action-bar .filter-button').dataBind({ click: '$root.views.taskList.toggleFilterPanel.bind($root.views.taskList)' });
+
             $('.main-tasks .action-bar .menu').dataBind({ visible: '!$root.views.taskList.inAddMode()' });
             $('.main-tasks .action-bar .new-task').dataBind({ visible: '$root.views.taskList.inAddMode' });
-            
+            $('.main-tasks .action-bar .filter').dataBind({ visible: '$root.views.taskList.filterPanelShown' });
+
+            $('.main-tasks .filter .filter-show-done').dataBind({ checked: '$root.views.taskList.filter.showDone' });
+            $('.main-tasks .filter .filter-show-done-since').dataBind({
+              enable: '$root.views.taskList.filter.showDone',
+              value: '$root.views.taskList.filter.showDoneSince'
+            });
+
+            $('.main-tasks .filter .filter-shown-count').dataBind({ html: '$root.views.taskList.filter.shownCount' });
+            $('.main-tasks .filter .filter-total-count').dataBind({ html: '$root.views.taskList.filter.totalCount' });
+
             $('.new-task-input').dataBind({ editableHTML: '$root.views.taskList.newTaskDescription',
                                             returnKeyPress: '$root.views.taskList.addTask()',
                                             escapeKeyPress: '$root.views.taskList.toggleAddMode()',
@@ -39,7 +50,7 @@ define(['jquery',
                                             
             $('select.projects option').dataBind({ text: 'project.name' });
             
-            $('.task-list').dataBind({ foreach: "{ data: $root.state.tasks, as: 'task' }",
+            $('.task-list').dataBind({ foreach: "{ data: $root.views.taskList.tasks, as: 'task' }",
                                        sortable: "{ draggableClass: 'task'," +
                                                  "  handleClass: 'task-drag-handle'," +
                                                  "  ghostClass: 'task-drag-ghost'," + 
@@ -83,6 +94,10 @@ define(['jquery',
                                               returnKeyPress: 'task.save()',
                                               escapeKeyPress: 'task.toggleEditMode()',
                                               contentSelect: 'task.inEditMode' });
+            $('.task-properties-progress-doneon').dataBind({
+              visible: 'task.progressDoneOn',
+              html: 'task.progressDoneOnString'
+            });
             
             // Project List                                  
                                               

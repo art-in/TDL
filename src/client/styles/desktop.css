@@ -28,37 +28,32 @@
         display: flex;
         flex-direction: column;
     }
-    
-    .go-tasks {
+
+    .action-bar button {
         border: 1px solid lightgrey;
-        width: 90px;
-        height: 30px;
-        justify-content: center;
-        align-self: flex-start;
+        align-self: flex-end;
         display: flex;
         flex-direction: row;
         align-items: center;
+        height: 30px;
     }
-    
-    .go-projects {
-        border: 1px solid lightgrey;
+
+    .go-tasks {
         width: 90px;
         height: 30px;
         justify-content: center;
         align-self: flex-start;
-        display: flex;
-        flex-direction: row;
-        align-items: center;
+    }
+
+    .go-projects {
+        width: 90px;
+        justify-content: center;
     }
 
     .add-button {
         border: 1px solid lightgrey;
         width: 130px;
         text-align: center;
-        align-self: flex-end;
-        display: flex;
-        flex-direction: row;
-        align-items: center;
     }
 
     .add-button-image {
@@ -81,7 +76,33 @@
         text-align: center;
         justify-content: center;
     }
-    
+
+    .main-tasks .filter {
+        position: relative;
+        margin-top: 5px;
+        padding-bottom: 30px;
+        font-size: 16px;
+        background-color: #F1F1F1;
+        border: 1px solid lightgray;
+    }
+
+    .main-tasks .filter .filter-row {
+        margin: 10px 0 10px;
+    }
+
+    .main-tasks .filter select {
+        font-size: 16px;
+        position: relative;
+        top: 1px;
+    }
+
+    .main-tasks .filter .status {
+        position: absolute;
+        bottom: 5px;
+        left: 10px;
+        color: gray;
+    }
+
     /* Task List */
     
     .main-tasks .menu {
@@ -167,6 +188,11 @@
         position: relative;
         top: -3px;
         height: 9px;
+    }
+
+    .task-properties-progress-doneon {
+        font-size: 12px;
+        color: gray;
     }
     
     .task-properties-description {

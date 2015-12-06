@@ -1,5 +1,5 @@
-define(['ko', 'lib/messageBus', 'viewmodels/TaskViewModel', 'viewmodels/ProjectViewModel'],
-    function(ko, messageBus, TaskViewModel, ProjectViewModel) {
+define(['ko', 'moment', 'lib/messageBus', 'viewmodels/TaskViewModel', 'viewmodels/ProjectViewModel'],
+    function(ko, moment, messageBus, TaskViewModel, ProjectViewModel) {
 
         /**
          * Task list view model.
@@ -7,17 +7,17 @@ define(['ko', 'lib/messageBus', 'viewmodels/TaskViewModel', 'viewmodels/ProjectV
          * @constructor
          */
         function TaskListViewModel(state) {
-            
+
             this.state = state;
-            
+
             this.active = ko.observable(false);
-            
+
             /** Description of new task */
             this.newTaskDescription = ko.observable('');
-            
+
             /** Project of new task */
             this.newTaskProject = ko.observable(new ProjectViewModel());
-            
+
             /** Project list for selection */
             this.projectsToSelect = ko.computed({
                 read: function() {
@@ -31,9 +31,90 @@ define(['ko', 'lib/messageBus', 'viewmodels/TaskViewModel', 'viewmodels/ProjectV
                     return projects;
                 }.bind(this)
             });
-            
+
             this.inAddMode = ko.observable(false);
-            
+
+            // Setup filters
+
+            this.filterPanelShown = ko.observable(false);
+
+            if (!localStorage.taskFilter) {
+                var filterDefaults = {
+                    showDone: true,
+                    showDoneSince: 'week'
+                };
+
+                localStorage.taskFilter = JSON.stringify(filterDefaults);
+            }
+
+            var filterSettings = JSON.parse(localStorage.taskFilter);
+
+            this.filter = {
+                showDone: ko.observable(filterSettings.showDone),
+                showDoneSince: ko.observable(filterSettings.showDoneSince)
+            };
+
+            this.tasks = ko.computed({
+                read: function() {
+                    var tasks = this.state.tasks();
+
+                    // Apply filters
+
+                    if (this.filter.showDone()) {
+                        tasks = tasks.filter(function(task) {
+                            var sinceDate;
+                            var sinceType = this.filter.showDoneSince();
+                            switch (sinceType) {
+                                case 'week':
+                                    sinceDate = moment().subtract(1, 'weeks');
+                                    break;
+                                case 'month':
+                                    sinceDate = moment().subtract(1, 'months');
+                                    break;
+                                case 'year':
+                                    sinceDate = moment().subtract(1, 'years');
+                                    break;
+                                case 'beginning':
+                                    break;
+                                default:
+                                    throw Error('unknown since date');
+                            }
+
+                            // get tasks which is undone or done since ...
+                            return task.progress() !== 1 ||
+                                sinceType === 'beginning' ||
+                                (task.progress() === 1 &&
+                                task.progressDoneOn() > sinceDate);
+                        }.bind(this));
+                    } else {
+                        tasks = tasks.filter(function(task) {
+                            // get tasks which is undone
+                            return task.progress() !== 1;
+                        }.bind(this));
+                    }
+
+                    // Save filter settings
+                    localStorage.taskFilter = JSON.stringify({
+                        showDone: this.filter.showDone(),
+                        showDoneSince: this.filter.showDoneSince()
+                    });
+
+                    return tasks;
+                }.bind(this)
+            });
+
+            this.filter.shownCount = ko.computed({
+                read: function() {
+                    return this.tasks().length;
+                }.bind(this)
+            });
+            this.filter.totalCount = ko.computed({
+                read: function() {
+                    return this.state.tasks().length;
+                }.bind(this)
+            });
+
+            // Set handlers
             messageBus.subscribe('projectsLoaded', onProjectsLoaded.bind(this));
         }
         
@@ -42,6 +123,7 @@ define(['ko', 'lib/messageBus', 'viewmodels/TaskViewModel', 'viewmodels/ProjectV
         };
         
         TaskListViewModel.prototype.toggleAddMode = function() {
+            this.filterPanelShown(false);
             this.emptyNewTask();
             this.inAddMode(!this.inAddMode());
         };
@@ -119,13 +201,27 @@ define(['ko', 'lib/messageBus', 'viewmodels/TaskViewModel', 'viewmodels/ProjectV
          * Moves task to new position.
          *
          * @param {HTMLElement} taskNode
-         * @param {number} newPosition
+         * @param {HTMLElement} prevTaskNode
          */
-        TaskListViewModel.prototype.dragTask = function (taskNode, newPosition) {
+        TaskListViewModel.prototype.dragTask = function (taskNode, prevTaskNode) {
             var taskVM = ko.dataFor(taskNode);
-            
+            var currentPosition = taskVM.position();
+
+            // calc new position relatively to task afore
+            // (necessary because some of tasks can be filtered out)
+            var newPosition;
+            if (prevTaskNode) {
+                var prevTaskVM = ko.dataFor(prevTaskNode);
+                var prevTaskPosition = prevTaskVM.position();
+
+                newPosition = prevTaskPosition > currentPosition
+                    ? prevTaskPosition
+                    : prevTaskPosition + 1;
+            } else {
+                newPosition = 0;
+            }
+
             // Do nothing if position was not changed.
-            var currentPosition = this.state.tasks.indexOf(taskVM);
             if (currentPosition === newPosition) { return; }
             
             // FIXME: dirty hack
@@ -143,6 +239,10 @@ define(['ko', 'lib/messageBus', 'viewmodels/TaskViewModel', 'viewmodels/ProjectV
                     id: taskVM.id(),
                     position: newPosition
                 });
+        };
+
+        TaskListViewModel.prototype.toggleFilterPanel = function() {
+            this.filterPanelShown(!this.filterPanelShown());
         };
         
         //region Handlers

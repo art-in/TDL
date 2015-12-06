@@ -187,10 +187,9 @@ define(['ko', 'Sortable', 'lib/helpers'], function (ko, Sortable, helpers) {
                 onUpdate: function(e) {
                     if (params.onUpdate) {
                         var draggedElement = e.item;
-                        //noinspection JSCheckFunctionSignatures
-                        var newPosition = helpers.getChildNodeIndex(container, draggedElement, params.draggableClass);
+                        var prevElement = draggedElement.previousElementSibling;
                         
-                        params.onUpdate(draggedElement, newPosition);
+                        params.onUpdate(draggedElement, prevElement);
                     }
                 }
             });

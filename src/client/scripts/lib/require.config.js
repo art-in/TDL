@@ -9,7 +9,8 @@ var require = {
         'ko': 'lib/vendor/knockout-3.3.0',
         'unobtrusive-knockout': 'lib/vendor/jquery.unobtrusive-knockout',
         'Sortable': 'lib/vendor/Sortable',
-        'co': 'lib/vendor/co'
+        'co': 'lib/vendor/co',
+        'moment': 'lib/vendor/moment'
     },
     shim: {
         'jquery': {

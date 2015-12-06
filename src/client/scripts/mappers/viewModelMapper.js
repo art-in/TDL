@@ -17,7 +17,9 @@ define(['models/Task', 'viewmodels/TaskViewModel',
                 
                 taskVM.id(task.id);
                 taskVM.description(task.description);
+                taskVM.position(task.position);
                 taskVM.progress(task.progress);
+                taskVM.progressDoneOn(task.progressDoneOn);
                 taskVM.project(null);
                 
                 if (projectVMs) {

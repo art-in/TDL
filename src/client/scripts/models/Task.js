@@ -11,6 +11,7 @@ define(['lib/helpers'], function(helpers) {
         this.description = '';
         this.position = 0; // Int
         this.progress = 0; // Float [0;1]
+        this.progressDoneOn = null; // Date
         this.projectId = null; // string
     }
 
