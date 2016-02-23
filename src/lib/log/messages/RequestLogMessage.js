@@ -9,5 +9,6 @@ RequestLogMessage.prototype = new LogMessage();
 RequestLogMessage.prototype.constructor = RequestLogMessage;
 
 RequestLogMessage.prototype.url = 'UNKNOWN URL';
+RequestLogMessage.prototype.method = 'UNKNOWN METHOD';
 
 exports.message = RequestLogMessage;

@@ -1,7 +1,13 @@
 {
     "server": {
         "ip": "0.0.0.0",
-        "port": 80
+        "port": 443,
+        "portRedirect": null,
+        "tls": {
+            "cert": "../../cert/test.crt",
+            "key": "../../cert/test.key",
+            "ca": []
+        }
     },
     "database": {
         "ip": "127.0.0.1",

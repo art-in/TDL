@@ -28,6 +28,17 @@
         border: 1px solid lightgray;
         display: flex;
         flex-direction: column;
+        position: relative;
+    }
+
+    a.logout {
+        color: gray;
+        text-decoration: initial;
+        text-transform: lowercase;
+        position: absolute;
+        bottom: -35px;
+        right: 5px;
+        padding: 10px 0;
     }
 
     .action-bar button {

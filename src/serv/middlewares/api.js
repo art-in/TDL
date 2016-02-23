@@ -1,22 +1,26 @@
-var storage = require('./data/storage'),
-    co = require('./lib/node_modules/co');
+var logger = require('../../lib/log/Logger').logger,
+    storage = require('../../data/storage'),
+    co = require('../../lib/node_modules/co/index'),
+    helpers = require('../../lib/server.helpers.js');
 
-function request(requestPath, query) {
+function request(request, response, url) {
     return co(function*() {
-        
-        switch (requestPath) {
+
+        var query = url.query;
+
+        switch (url.pathname) {
         case '/api/getTasks':
             return yield storage.getTasks();
     
         case '/api/addTask':
-            checkArgs([
+            helpers.checkArgs([
                 { val: query.newTask, message: 'New task should be specified' }
             ]);
             
             return yield storage.addTask(query.newTask);
     
         case '/api/updateTask':
-            checkArgs([
+            helpers.checkArgs([
                 { val: query.taskId, message: 'Task ID should be specified' },
                 { val: query.properties, message: 'Properties should be specified' }
             ]);
@@ -24,7 +28,7 @@ function request(requestPath, query) {
             return yield storage.updateTask(query.taskId, query.properties);
     
         case '/api/deleteTask':
-            checkArgs([
+            helpers.checkArgs([
                 { val: query.taskId, message: 'Task ID should be specified' }
             ]);
             
@@ -34,14 +38,14 @@ function request(requestPath, query) {
             return yield storage.getProjects();
             
         case '/api/addProject':
-            checkArgs([
+            helpers.checkArgs([
                 { val: query.newProject, message: 'New project should be specified' }
             ]);
             
             return yield storage.addProject(query.newProject);
     
         case '/api/updateProject':
-            checkArgs([
+            helpers.checkArgs([
                 { val: query.projectId, message: 'Project ID should be specified' },
                 { val: query.properties, message: 'Properties should be specified' }
             ]);
@@ -49,7 +53,7 @@ function request(requestPath, query) {
             return yield storage.updateProject(query.projectId, query.properties);
     
         case '/api/deleteProject':
-            checkArgs([
+            helpers.checkArgs([
                 { val: query.projectId, message: 'Project ID should be specified' }
             ]);
             
@@ -58,26 +62,16 @@ function request(requestPath, query) {
         default:
             throw "Not Found";
         }
-    });  
+    })
+    .then(function(result) {
+        if (result) {
+            helpers.respondWithJson(request, response, url.pathname, result);
+        } else {
+            helpers.respond(response, url.pathname);
+        }
+    });
 }
 
 module.exports = {
     request: request
 };
-
-/**
- * Throws error if one of arguments is not specified (undefined, '', {}).
- * 
- * @param {ServerResponse} response
- * @param {Object[]} args
- * @param            args.val - value of argument (should not be undefined)
- * @param            args.message - error message if value is undefined
- */
-function checkArgs(args) {
-    args.forEach(function (arg) {
-        if (arg.val === undefined || arg.val === '' ||
-           (typeof arg.val === 'object' && Object.keys(arg.val).length === 0)) {
-           throw arg.message; 
-        }
-    });
-}

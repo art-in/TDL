@@ -1,5 +1,7 @@
 var path = require('path'),
     co = require('co'),
+    urlParser = require('url'),
+    cookieParser = require('./node_modules/cookie'),
     fs = require('bluebird').Promise.promisifyAll(require('fs')),
     zlib = require('bluebird').Promise.promisifyAll(require('zlib')),
     qs = require('../lib/node_modules/qs');
@@ -128,6 +130,23 @@ function respondWithJson (request, response, requestPath, data) {
     });
 }
 
+/**
+ * Sends redirect response.
+ * @param response
+ * @param location
+ */
+function redirect (response, location) {
+    response.writeHead(302, {
+        'Location': location
+    });
+    response.end('Found');
+}
+
+/**
+ * Parses request query
+ * @param queryString
+ * @returns {*}
+ */
 function parseQuery (queryString) {
     var query = qs.parse(queryString);
     
@@ -142,11 +161,50 @@ function parseQuery (queryString) {
     return query;
 }
 
+function parseUrl (request) {
+    var url = urlParser.parse(request.url);
+    url.query = parseQuery(url.query);
+    if (!url.query) {
+        throw Error('Invalid argument specified');
+    }
+    return url;
+}
+
+/**
+ * Throws error if one of arguments is not specified (undefined, '', {}).
+ *
+ * @param {ServerResponse} response
+ * @param {Object[]} args
+ * @param            args.val - value of argument (should not be undefined)
+ * @param            args.message - error message if value is undefined
+ */
+function checkArgs(args) {
+    args.forEach(function (arg) {
+        if (arg.val === undefined || arg.val === '' ||
+            (typeof arg.val === 'object' && Object.keys(arg.val).length === 0)) {
+            throw arg.message;
+        }
+    });
+}
+
+/**
+ * Resolves path relative to app root.
+ * @param {string} targetPath - relative or absolute path
+ * @returns {string} path
+ */
+function resolvePath(targetPath) {
+    return path.resolve(__dirname + '/../', targetPath);
+}
+
 module.exports = {
     respond: respond,
     respondWithFile: respondWithFile,
     respondWithJson: respondWithJson,
-    parseQuery: parseQuery
+    redirect: redirect,
+    parseQuery: parseQuery,
+    parseUrl: parseUrl,
+    checkArgs: checkArgs,
+    resolvePath: resolvePath
 };
 
 function isGzipAccepted(request) {

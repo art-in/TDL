@@ -1,3 +1,14 @@
 {
-    "_note_" : "put any production-specific config values here to override defaults"
+    "server": {
+        "port": 443,
+		"tls": {
+			"cert": "../_cert/artins_tk.crt",
+			"key": "../_cert/artins_tk.key",
+			"ca": [
+				"../_cert/ca/cross_Intermediate.crt",
+				"../_cert/ca/issuer_Intermediate.crt",
+				"../_cert/ca/root.crt"
+			]
+		}
+    }
 }

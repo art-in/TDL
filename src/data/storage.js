@@ -7,12 +7,30 @@ var MongoClient = require('../lib/node_modules/mongodb-promise').MongoClient,
     DatabaseLM = require('../lib/log/messages/DatabaseLogMessage').message,
     DatabaseLMTypes = require('../lib/log/messages/DatabaseLogMessageTypes').types;
 
-var TASK_COLLECTION = "tasks",
+var USER_COLLECTION = "users",
+    TASK_COLLECTION = "tasks",
     PROJECT_COLLECTION = "projects";
 
 var db;
 
 var jobQueue = new Queue();
+
+function getUser (userName) {
+    return queue(function*() {
+        var col = yield db.collection(USER_COLLECTION);
+        var user = yield col
+            .findOne({name: userName}, {_id:0});
+
+        if (!user) {
+            throw Error('No user with such name found: ' + userName)
+        }
+
+        logger.log(new DatabaseLM(DatabaseLMTypes.GetUser,
+            {user: JSON.stringify(user, ['name'])}));
+
+        return user;
+    });
+}
 
 /**
  * Returns all tasks exist in the data storage.
@@ -180,6 +198,8 @@ function deleteProject (projectId) {
 }
 
 module.exports = {
+    getUser: getUser,
+
     getTasks: getTasks,
     addTask: addTask,
     updateTask: updateTask,

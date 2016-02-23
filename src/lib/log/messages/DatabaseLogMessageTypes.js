@@ -9,5 +9,7 @@ exports.types = {
     GetProjects: 7,
     AddProject: 8,
     UpdateProject: 9,
-    DeleteProject: 10
+    DeleteProject: 10,
+
+    GetUser: 11
 };

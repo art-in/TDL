@@ -1,15 +1,20 @@
 var util = require('util'),
     chalk = require('../node_modules/chalk'),
-    LogMessageTypes = require('./messages/DatabaseLogMessageTypes').types,
+    DatabaseLogMessageTypes = require('./messages/DatabaseLogMessageTypes').types,
+    AuthLogMessageTypes = require('./messages/AuthLogMessageTypes').types,
     config = require('../config').config;
 
 /** Console colors config */
-var REQUEST_LOG = chalk.bgRed.white.bold,
+var REQUEST_LOG = chalk.bgRed.bold,
     RESPONSE_SUCCESS_LOG = chalk.bgBlack.green.bold,
     RESPONSE_NOTMODIFIED_LOG = chalk.bgBlack.yellow,
+    RESPONSE_FOUND_LOG = chalk.bgBlack.yellow,
     RESPONSE_NOTFOUND_LOG = chalk.bgBlack.red.bold,
+    RESPONSE_BADREQUEST_LOG = chalk.bgBlack.red.bold,
+    RESPONSE_UNAUTHORIZED_LOG = chalk.bgBlack.red.bold,
     RESPONSE_SERVERERROR_LOG = chalk.bgBlack.red.bold,
-    DB_LOG = chalk.magenta;
+    DB_LOG = chalk.magenta,
+    AUTH_LOG = chalk.yellow;
 
 /**
  * The logger.
@@ -24,12 +29,16 @@ function Logger() {
  */
 Logger.prototype.log = function (logMessage) {
     if (config.get('debug:quite')) return;
-    
-    var messageType = logMessage.constructor.name;
+
+    if (!logMessage) return;
+
+    var messageType = logMessage.constructor && logMessage.constructor.name;
 
     switch (messageType) {
         case 'RequestLogMessage':
-            console.log(REQUEST_LOG('====> %s'), logMessage.url);
+            console.log(REQUEST_LOG('====> %s %s'),
+                logMessage.method,
+                logMessage.url);
             break;
 
         case 'ResponseLogMessage':
@@ -39,10 +48,28 @@ Logger.prototype.log = function (logMessage) {
                         logMessage.requestPath,
                         logMessage.statusCode, 'OK');
                     break;
+                case 302:
+                    console.log(RESPONSE_FOUND_LOG('<---- %s (goto: "%s") [%d - %s]'),
+                        logMessage.requestPath,
+                        logMessage.response.getHeader('Location'),
+                        logMessage.statusCode, 'Found');
+                    break;
                 case 304:
                     console.log(RESPONSE_NOTMODIFIED_LOG('<---- %s [%d - %s]'),
                         logMessage.requestPath,
                         logMessage.statusCode, 'Not Modified');
+                    break;
+
+                case 400:
+                    console.log(RESPONSE_BADREQUEST_LOG('<--XX %s [%d - %s]'),
+                        logMessage.requestPath,
+                        logMessage.statusCode, 'Bad Request');
+                    break;
+
+                case 401:
+                    console.log(RESPONSE_UNAUTHORIZED_LOG('<--XX %s [%d - %s]'),
+                        logMessage.requestPath,
+                        logMessage.statusCode, 'Unauthorized');
                     break;
 
                 case 404:
@@ -69,51 +96,94 @@ Logger.prototype.log = function (logMessage) {
         case 'DatabaseLogMessage':
             var message;
             switch (logMessage.type) {
-                case LogMessageTypes.GetTasks:
-                    message = util.format("Returning tasks count: %d", logMessage.taskCount);
+                case DatabaseLogMessageTypes.GetUser:
+                    message = util.format("getting user: %s", logMessage.user);
                     break;
-                case LogMessageTypes.GetTask:
-                    message = util.format("Returning task (%s)", logMessage.taskId);
+
+                case DatabaseLogMessageTypes.GetTasks:
+                    message = util.format("returning tasks count: %d", logMessage.taskCount);
                     break;
-                case LogMessageTypes.AddTask:
-                    message = util.format("New task added (%s)", logMessage.taskId);
+                case DatabaseLogMessageTypes.GetTask:
+                    message = util.format("returning task (%s)", logMessage.taskId);
                     break;
-                case LogMessageTypes.UpdateTask:
-                    message = util.format("Task updated (%s) description = '%s', position = %s, progress = %s",
+                case DatabaseLogMessageTypes.AddTask:
+                    message = util.format("new task added (%s)", logMessage.taskId);
+                    break;
+                case DatabaseLogMessageTypes.UpdateTask:
+                    message = util.format("task updated (%s) description = '%s', position = %s, progress = %s",
                         logMessage.taskId,
                         logMessage.description,
                         logMessage.position,
                         logMessage.progress);
                     break;
-                case LogMessageTypes.DeleteTask:
-                    message = util.format("Task was removed (%s)", logMessage.taskId);
+                case DatabaseLogMessageTypes.DeleteTask:
+                    message = util.format("task was removed (%s)", logMessage.taskId);
                     break;
-                case LogMessageTypes.ShiftTaskPositions:
-                    message = util.format("Tasks in range [%d ; %d] was shifted to %d position(s)",
+                case DatabaseLogMessageTypes.ShiftTaskPositions:
+                    message = util.format("tasks in range [%d ; %d] was shifted to %d position(s)",
                         logMessage.startPosition, 
                         logMessage.endPosition, 
                         logMessage.shift);
                     break;
                     
-                case LogMessageTypes.GetProjects:
-                    message = util.format("Returning project count: %d", logMessage.projectCount);
+                case DatabaseLogMessageTypes.GetProjects:
+                    message = util.format("returning project count: %d", logMessage.projectCount);
                     break;
-                case LogMessageTypes.AddProject:
-                    message = util.format("New project added (%s)", logMessage.projectId);
+                case DatabaseLogMessageTypes.AddProject:
+                    message = util.format("new project added (%s)", logMessage.projectId);
                     break;
-                case LogMessageTypes.UpdateProject:
-                    message = util.format("Project updated (%s) name = '%s'",
+                case DatabaseLogMessageTypes.UpdateProject:
+                    message = util.format("project updated (%s) name = '%s'",
                         logMessage.projectId,
                         logMessage.name);
                     break;
-                case LogMessageTypes.DeleteProject:
-                    message = util.format("Project was removed (%s)", logMessage.projectId);
+                case DatabaseLogMessageTypes.DeleteProject:
+                    message = util.format("project was removed (%s)", logMessage.projectId);
                     break;
                 default:
                     throw new Error('Unknown message type: ' + logMessage.type);
             }
 
-            console.log(DB_LOG(message));
+            console.log(DB_LOG('DB: ' + message));
+            break;
+
+        case 'AuthLogMessage':
+            var authMessage;
+            switch (logMessage.type) {
+                case AuthLogMessageTypes.Login:
+                    authMessage = util.format('login for user "%s"',
+                        logMessage.userName);
+                    break;
+                case AuthLogMessageTypes.LoginSuccess:
+                    authMessage = util.format('login succeed\n' +
+                        '      request IP: %s\n' +
+                        '      headers: %s',
+                        logMessage.request.connection.remoteAddress,
+                        JSON.stringify(logMessage.request.headers, null, 8)
+                    );
+                    break;
+                case AuthLogMessageTypes.LoginFail:
+                    authMessage = util.format('login failed. invalid password specified\n' +
+                        '      request IP: %s\n' +
+                        '      headers: %s',
+                        logMessage.request.connection.remoteAddress,
+                        JSON.stringify(logMessage.request.headers, null, 8)
+                    );
+                    break;
+                case AuthLogMessageTypes.Logout:
+                    authMessage = util.format('logout');
+                    break;
+                case AuthLogMessageTypes.AuthCheckFailed:
+                    authMessage = util.format('auth check failed');
+                    break;
+                case AuthLogMessageTypes.UserNotFound:
+                    authMessage = util.format('user was not found');
+                    break;
+                default:
+                    throw new Error('Unknown message type: ' + logMessage.type);
+            }
+
+            console.log(AUTH_LOG('AUTH: ' + authMessage));
             break;
 
         default :

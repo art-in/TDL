@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <style>
+        fieldset.auth {border: 1px solid lightgray; display: inline-block; font-size: 1.5rem}
+        fieldset.auth input {font-size: 1.5rem}
+    </style>
+</head>
+<body>
+    <form action="/auth/login" method="post">
+        <fieldset class="auth">
+            <legend>login</legend>
+            <input type="password" name="pass" autofocus />
+        </fieldset>
+    </form>
+</body>
+</html>

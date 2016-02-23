@@ -10,6 +10,7 @@ DatabaseLogMessage.prototype = new LogMessage();
 DatabaseLogMessage.prototype.constructor = DatabaseLogMessage;
 
 DatabaseLogMessage.prototype.type = -1;
+DatabaseLogMessage.prototype.user = null; // obj
 DatabaseLogMessage.prototype.taskId = 'UNDEFINED';
 DatabaseLogMessage.prototype.taskCount = -1;
 DatabaseLogMessage.prototype.description = 'UNDEFINED';

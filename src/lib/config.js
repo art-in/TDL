@@ -1,4 +1,5 @@
 var path  = require('path'),
+    helpers = require('./server.helpers'),
     nconf = require('./node_modules/nconf/lib/nconf'),
     cliArgs = require('argv')
             .option([{name: 'ip', type: 'string'}, 
@@ -40,13 +41,45 @@ cli();
 
 // Aliases
 
-nconf.set('server:url', 'http://' +
-                         nconf.get('server:ip') + ':' + 
-                         nconf.get('server:port'));
-
 nconf.set('database:connectionString', 'mongodb://' +
                                         nconf.get('database:ip') + ':' +
                                         nconf.get('database:port') + '/' + 
                                         nconf.get('database:name'));
 
-exports.config = nconf;
+/**
+ * Logs current configuration
+ */
+function log() {
+  var logger = require('./log/Logger').logger;
+
+  logger.log(
+      '--------------\n' +
+      'Configuration:\n' +
+      '\n  Server address:' +
+      '\n  %s\n' +
+      '\n  Server cert:' +
+      '\n  %s\n' +
+      '\n  Server cert key:' +
+      '\n  %s\n' +
+      '\n  Server cert authorities:' +
+      '\n  [%s]\n' +
+      '\n  Database connection string:' +
+      '\n  %s\n' +
+      '--------------',
+
+      'https://' + nconf.get('server:ip') + ':' + nconf.get('server:port') +
+        (nconf.get('server:portRedirect') ?
+          '(redirect:' + nconf.get('server:portRedirect') + ')' : ''),
+      helpers.resolvePath(nconf.get('server:tls:cert')),
+      helpers.resolvePath(nconf.get('server:tls:key')),
+      nconf.get('server:tls:ca').map(function(caItem) {
+        return helpers.resolvePath(caItem);
+      }).join(', '),
+      nconf.get('database:connectionString')
+  );
+}
+
+module.exports = {
+  config: nconf,
+  log: log
+};

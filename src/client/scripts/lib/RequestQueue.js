@@ -136,10 +136,17 @@ define(function() {
                     setTimeout(trySend.bind(this), this.retryDelay);
                     return;
                 }
-                
-                if (this.xhr.status === 404 || // Not Found
+
+                if (this.xhr.status === 401) { // Unauthorized
+                    window.location = '/login';
+                    // Retry after login.
+                    return;
+                }
+
+                if (this.xhr.status === 400 || // Client error
+                    this.xhr.status === 404 || // Not Found
                     this.xhr.status === 500) { // Internal Server Error
-                    // Bad thing happend on server. 
+                    // No reason to retry that.
                     // Return error and go to next request.
                     cb(new Error(this.xhr.responseText+' ['+this.xhr.status+']'));
                     return;
