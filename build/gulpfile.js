@@ -53,6 +53,11 @@ paths.client.views = {
     mask: paths.client.src + '*.html'
 };
 
+paths.ignore = [
+    '**/placeholder',
+    '**/*.log'
+];
+
 //endregion
 
 //region Presentation
@@ -163,9 +168,14 @@ gulp.task('client', ['scripts', 'styles', 'images', 'sprites', 'manifest', 'view
 //region Backend
 
 gulp.task('backend', ['clean'], function() {
-    // Copy everything except client folder
-    return gulp.src([paths.src + '**/*', '!' + paths.client.src + '**/*'])
-        .pipe(gulp.dest(paths.target));
+    // Copy everything except client folder and other ignored resources
+    return gulp.src([
+        paths.src + '**/*',
+        '!' + paths.client.src + '**/*'
+    ].concat(paths.ignore.map(function(ignorePath) {
+            return '!' + paths.src + ignorePath
+        }))
+    ).pipe(gulp.dest(paths.target));
 });
 
 //endregion

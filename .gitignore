@@ -3,6 +3,8 @@ build/config.overrides.json
 
 test/torture/
 
+*.log
+
 # Intellij
 .idea/
 *.iml

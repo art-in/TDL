@@ -1,8 +1,18 @@
 var util = require('util'),
+    path = require('path'),
     chalk = require('../node_modules/chalk'),
     DatabaseLogMessageTypes = require('./messages/DatabaseLogMessageTypes').types,
     AuthLogMessageTypes = require('./messages/AuthLogMessageTypes').types,
-    config = require('../config').config;
+    config = require('../config').config,
+    log4js = require('log4js'),
+    stripAnsiEscapeCodes = require('strip-ansi');
+
+log4js.configure(config.get('log'), {
+    cwd: path.resolve(__dirname, '../../')
+});
+
+var loggerWithColors = log4js.getLogger("with-colors");
+var loggerWithoutColors = log4js.getLogger("without-colors");
 
 /** Console colors config */
 var REQUEST_LOG = chalk.bgRed.bold,
@@ -33,10 +43,11 @@ Logger.prototype.log = function (logMessage) {
     if (!logMessage) return;
 
     var messageType = logMessage.constructor && logMessage.constructor.name;
+    var message;
 
     switch (messageType) {
         case 'RequestLogMessage':
-            console.log(REQUEST_LOG('====> %s %s'),
+            message = util.format(REQUEST_LOG('====> %s %s'),
                 logMessage.method,
                 logMessage.url);
             break;
@@ -44,46 +55,46 @@ Logger.prototype.log = function (logMessage) {
         case 'ResponseLogMessage':
             switch (logMessage.statusCode) {
                 case 200:
-                    console.log(RESPONSE_SUCCESS_LOG('<==== %s [%d - %s]'),
+                    message = util.format(RESPONSE_SUCCESS_LOG('<==== %s [%d - %s]'),
                         logMessage.requestPath,
                         logMessage.statusCode, 'OK');
                     break;
                 case 302:
-                    console.log(RESPONSE_FOUND_LOG('<---- %s (goto: "%s") [%d - %s]'),
+                    message = util.format(RESPONSE_FOUND_LOG('<---- %s (goto: "%s") [%d - %s]'),
                         logMessage.requestPath,
                         logMessage.response.getHeader('Location'),
                         logMessage.statusCode, 'Found');
                     break;
                 case 304:
-                    console.log(RESPONSE_NOTMODIFIED_LOG('<---- %s [%d - %s]'),
+                    message = util.format(RESPONSE_NOTMODIFIED_LOG('<---- %s [%d - %s]'),
                         logMessage.requestPath,
                         logMessage.statusCode, 'Not Modified');
                     break;
 
                 case 400:
-                    console.log(RESPONSE_BADREQUEST_LOG('<--XX %s [%d - %s]'),
+                    message = util.format(RESPONSE_BADREQUEST_LOG('<--XX %s [%d - %s]'),
                         logMessage.requestPath,
                         logMessage.statusCode, 'Bad Request');
                     break;
 
                 case 401:
-                    console.log(RESPONSE_UNAUTHORIZED_LOG('<--XX %s [%d - %s]'),
+                    message = util.format(RESPONSE_UNAUTHORIZED_LOG('<--XX %s [%d - %s]'),
                         logMessage.requestPath,
                         logMessage.statusCode, 'Unauthorized');
                     break;
 
                 case 404:
-                    console.log(RESPONSE_NOTFOUND_LOG('<---X %s [%d - %s]'),
+                    message = util.format(RESPONSE_NOTFOUND_LOG('<---X %s [%d - %s]'),
                         logMessage.requestPath,
                         logMessage.statusCode, 'Not Found');
                     break;
 
                 case 500:
-                    console.log(RESPONSE_SERVERERROR_LOG('<-XXX %s [%d - %s]'),
+                    message = util.format(RESPONSE_SERVERERROR_LOG('<-XXX %s [%d - %s]'),
                         logMessage.requestPath,
                         logMessage.statusCode, 'Internal Server Error');
                     if (logMessage.message) {
-                        console.log(RESPONSE_SERVERERROR_LOG('      "%s"'),
+                        message += util.format(RESPONSE_SERVERERROR_LOG('\r\n"%s"'),
                             logMessage.message instanceof Error ? logMessage.message.stack : logMessage.message);
                     }
                     break;
@@ -94,7 +105,6 @@ Logger.prototype.log = function (logMessage) {
             break;
 
         case 'DatabaseLogMessage':
-            var message;
             switch (logMessage.type) {
                 case DatabaseLogMessageTypes.GetUser:
                     message = util.format("getting user: %s", logMessage.user);
@@ -144,18 +154,17 @@ Logger.prototype.log = function (logMessage) {
                     throw new Error('Unknown message type: ' + logMessage.type);
             }
 
-            console.log(DB_LOG('DB: ' + message));
+            message = DB_LOG('DB: ' + message);
             break;
 
         case 'AuthLogMessage':
-            var authMessage;
             switch (logMessage.type) {
                 case AuthLogMessageTypes.Login:
-                    authMessage = util.format('login for user "%s"',
+                    message = util.format('login for user "%s"',
                         logMessage.userName);
                     break;
                 case AuthLogMessageTypes.LoginSuccess:
-                    authMessage = util.format('login succeed\n' +
+                    message = util.format('login succeed\n' +
                         '      request IP: %s\n' +
                         '      headers: %s',
                         logMessage.request.connection.remoteAddress,
@@ -163,7 +172,7 @@ Logger.prototype.log = function (logMessage) {
                     );
                     break;
                 case AuthLogMessageTypes.LoginFail:
-                    authMessage = util.format('login failed. invalid password specified\n' +
+                    message = util.format('login failed. invalid password specified\n' +
                         '      request IP: %s\n' +
                         '      headers: %s',
                         logMessage.request.connection.remoteAddress,
@@ -171,24 +180,27 @@ Logger.prototype.log = function (logMessage) {
                     );
                     break;
                 case AuthLogMessageTypes.Logout:
-                    authMessage = util.format('logout');
+                    message = util.format('logout');
                     break;
                 case AuthLogMessageTypes.AuthCheckFailed:
-                    authMessage = util.format('auth check failed');
+                    message = util.format('auth check failed');
                     break;
                 case AuthLogMessageTypes.UserNotFound:
-                    authMessage = util.format('user was not found');
+                    message = util.format('user was not found');
                     break;
                 default:
                     throw new Error('Unknown message type: ' + logMessage.type);
             }
 
-            console.log(AUTH_LOG('AUTH: ' + authMessage));
+            message = AUTH_LOG('AUTH: ' + message);
             break;
 
         default :
-            console.log.apply(null, arguments);
+            message = util.format.apply(null, arguments);
     }
+
+    loggerWithColors.info(message);
+    loggerWithoutColors.info(stripAnsiEscapeCodes(message));
 };
 
 exports.logger = new Logger();

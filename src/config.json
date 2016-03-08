@@ -16,5 +16,25 @@
     },
     "debug": {
         "quite": false
+    },
+    "log": {
+        "appenders": [{
+            "category": "with-colors",
+            "type": "console",
+            "layout": {
+                "type": "pattern",
+                "pattern": "%d{ABSOLUTE} | %m"
+            }
+        }, {
+            "category": "without-colors",
+            "type": "dateFile",
+            "filename": "log/tdl.log",
+            "pattern": "-yyyy-MM-dd",
+            "alwaysIncludePattern": false,
+            "layout": {
+                "type": "pattern",
+                "pattern": "%d | %m"
+            }
+        }]
     }
 }

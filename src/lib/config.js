@@ -53,7 +53,7 @@ function log() {
   var logger = require('./log/Logger').logger;
 
   logger.log(
-      '--------------\n' +
+      '\n--------------\n' +
       'Configuration:\n' +
       '\n  Server address:' +
       '\n  %s\n' +
