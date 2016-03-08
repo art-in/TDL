@@ -28,7 +28,10 @@ paths.client = {
     target: paths.target + 'client/'
 };
 
-paths.client.manifest = 'client.appcache';
+paths.client.serviceWorkers = [
+    'sw/sw-init.js',
+    'sw/sw-cache.js'
+];
 
 paths.client.scripts = {
     folder: paths.client.src + 'scripts/',
@@ -138,30 +141,31 @@ gulp.task('sprites', ['clean', 'styles', 'images'], function() {
     del([paths.client.images.targetMask, '!**/' + spriteName], {force: true});
 });
 
-gulp.task('manifest', ['clean'], function() {
-   return  gulp.src(paths.client.manifest)
-        .pipe(replace(/VERSION/, Date.now()))
+gulp.task('service-workers', ['clean'], function() {
+   return  gulp.src(paths.client.serviceWorkers)
         .pipe(gulp.dest(paths.client.target));
 });
 
 gulp.task('views', ['clean'], function() {
     return gulp.src(paths.client.views.mask)
-        // Set cache manifest
-        .pipe(replace('<html>', '<html manifest="' + paths.client.manifest +'">'))
+
         // Replace all style links with singe link with reference to combined css
         .pipe(replace(/<link rel='stylesheet'.*>/, '#FIRSTSTYLETAG#'))
         .pipe(replace(/<link rel='stylesheet'.*>/g, ''))
         .pipe(replace(/#FIRSTSTYLETAG#/,
             "<link rel='stylesheet' type='text/css' href='styles.css'>"))
+
         // Replace all script tags with single tag with reference to combined js
         .pipe(replace(/<script.*script>/, '#FIRSTSCRIPTTAG#'))
         .pipe(replace(/<script.*script>/g, ''))
         .pipe(replace(/#FIRSTSCRIPTTAG#/,
+            "<script type='text/javascript' src='sw-init.js'></script>\r\n" +
             "<script type='text/javascript' src='app.js'></script>"))
+
         .pipe(gulp.dest(paths.client.target));
 });
 
-gulp.task('client', ['scripts', 'styles', 'images', 'sprites', 'manifest', 'views']);
+gulp.task('client', ['scripts', 'styles', 'images', 'sprites', 'service-workers', 'views']);
 
 //endregion
 
