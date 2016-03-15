@@ -191,6 +191,7 @@
         flex: 4;
         flex-direction: column;
         padding: 5px;
+        overflow: hidden;
     }
     
     .task-properties-project-name {
