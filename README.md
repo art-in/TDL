@@ -14,3 +14,4 @@ TODO List (TDL)
 - [ ] history analysis (total time spent on project/task per time period)
 - [x] mobile devices
 - [x] offline ready
+- [x] secure (https)
