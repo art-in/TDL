@@ -58,7 +58,7 @@ paths.client.views = {
 
 paths.ignore = [
     '**/placeholder',
-    '**/*.log'
+    '**/*.log*'
 ];
 
 //endregion
@@ -143,6 +143,7 @@ gulp.task('sprites', ['clean', 'styles', 'images'], function() {
 
 gulp.task('service-workers', ['clean'], function() {
    return  gulp.src(paths.client.serviceWorkers)
+        .pipe(replace(/#CACHE_VERSION/, new Date().toISOString()))
         .pipe(gulp.dest(paths.client.target));
 });
 

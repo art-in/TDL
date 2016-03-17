@@ -1,7 +1,6 @@
-var CACHE_VERSION = 6;
-var CACHE_NAME = 'cache-v' + CACHE_VERSION;
+var CACHE_NAME = 'cache-#CACHE_VERSION';
 
-// Files to be chached immediately on worker installation.
+// Files to be cached immediately on worker installation.
 // Other files can still be cached lazily later.
 var PRE_CACHE_FILES = [
   '/',
@@ -52,25 +51,27 @@ this.addEventListener('fetch', function(event) {
     event.request.url.includes('/api/') ?
 
       // do not cache api calls
-      fetch(event.request, {credentials: 'same-origin'}) :
+      fetch(event.request) :
 
       // check cache
       caches.match(event.request)
         .then(function(response) {
           if (!response) {
             // cache fail
-            return fetch(event.request, {credentials: 'same-origin'});
+            return fetch(event.request)
+              .then(function (response) {
+                // lazily add to cache
+                caches.open(CACHE_NAME)
+                  .then(function(cache) {
+                    cache.put(event.request, response);
+                  });
+
+                return response.clone();
+              });
           }
 
           // cache hit
           return response;
-        }).then(function(response) {
-          // add to cache (may be already there)
-          caches.open(CACHE_NAME)
-            .then(function(cache) {
-              cache.put(event.request, response);
-            });
-          return response.clone();
         })
   );
 });
