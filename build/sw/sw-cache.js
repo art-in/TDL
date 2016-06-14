@@ -47,8 +47,8 @@ this.addEventListener('activate', function(event) {
 
 this.addEventListener('fetch', function(event) {
 	event.respondWith(
-
-    event.request.url.includes('/api/') ?
+    (event.request.url.includes('/api/') ||
+     event.request.url.includes('/auth/')) ?
 
       // do not cache api calls
       fetch(event.request) :
