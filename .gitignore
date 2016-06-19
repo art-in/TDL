@@ -4,6 +4,7 @@ build/config.overrides.json
 test/torture/
 
 *.log
+*.log-*
 
 # Intellij
 .idea/
@@ -13,3 +14,6 @@ test/torture/
 # Cloud9
 .c9/
 c9/
+
+# VS Code
+.vscode/
