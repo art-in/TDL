@@ -10,7 +10,7 @@ TODO List (TDL)
 - [ ] sub-tasking
 - [x] projects (i.e. sports, music, craft, etc.)
 - [ ] estimation / actual time for performing task
-- [ ] history of completed tasks
+- [x] history of completed tasks
 - [ ] history analysis (total time spent on project/task per time period)
 - [x] mobile devices
 - [x] offline ready
