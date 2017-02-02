@@ -1,4 +1,4 @@
-var MongoClient = require('../lib/node_modules/mongodb-promise').MongoClient,
+var MongoClient = require('../lib/node_modules/mongodb').MongoClient,
     Promise = require('../lib/node_modules/bluebird').Promise,
     co = require('../lib/node_modules/co'),
     Queue = require('../lib/Queue').Queue,
@@ -16,9 +16,9 @@ var db;
 var jobQueue = new Queue();
 
 function getUser (userName) {
-    return queue(function*() {
-        var col = yield db.collection(USER_COLLECTION);
-        var user = yield col
+    return queue(async function() {
+        var col = await db.collection(USER_COLLECTION);
+        var user = await col
             .findOne({name: userName}, {_id:0});
 
         if (!user) {
@@ -37,9 +37,9 @@ function getUser (userName) {
  * @returns {Promise}
  */
 function getTasks () {
-    return queue(function*() {
-        var col = yield db.collection(TASK_COLLECTION);
-        var tasks = yield col
+    return queue(async function() {
+        var col = await db.collection(TASK_COLLECTION);
+        var tasks = await col
             .find({}, {_id:0})
             .sort({position: 1})
             .toArray();
@@ -58,15 +58,15 @@ function getTasks () {
  * @returns {Promise}
  */
 function addTask (newTask) {
-    return queue(function*() {
+    return queue(async function() {
         
-        yield shiftTaskPositions(newTask.position, null, 1);
+        await shiftTaskPositions(newTask.position, null, 1);
         
-        var col = yield db.collection(TASK_COLLECTION);
-        var records = yield col.insert(newTask);
-                
+        var col = await db.collection(TASK_COLLECTION);
+        var res = await col.insert(newTask);
+
         logger.log(new DatabaseLM(DatabaseLMTypes.AddTask,
-            {taskId: records[0].id}));
+            {taskId: res.ops[0].id}));
     });
 }
 
@@ -78,9 +78,9 @@ function addTask (newTask) {
  * @returns {Promise}
  */
 function updateTask (taskId, properties) {
-    return queue(function*() {
+    return queue(async function() {
         
-        var task = yield getTask(taskId);
+        var task = await getTask(taskId);
         
         // If changing task position - first shift tasks below
         if (properties.position !== undefined) {
@@ -88,14 +88,14 @@ function updateTask (taskId, properties) {
             var oldPosition = task.position;
             var movedDown = newPosition > oldPosition;
 
-            yield shiftTaskPositions(
+            await shiftTaskPositions(
                 movedDown ? oldPosition + 1 : newPosition,
                 movedDown ? newPosition : oldPosition - 1,
                 movedDown ? -1 : 1);
         }
 
-        var col = yield db.collection(TASK_COLLECTION);
-        yield col.update(
+        var col = await db.collection(TASK_COLLECTION);
+        await col.update(
             {id: taskId},
             {$set: properties});
             
@@ -111,15 +111,15 @@ function updateTask (taskId, properties) {
  * @returns {Promise}
  */
 function deleteTask (taskId) {
-    return queue(function*() {
+    return queue(async function() {
 
-        var task = yield getTask(taskId);
+        var task = await getTask(taskId);
 
         // Shift positions or all tasks below one position up
-        yield shiftTaskPositions(task.position, null, -1);
+        await shiftTaskPositions(task.position, null, -1);
         
-        var col = yield db.collection(TASK_COLLECTION);
-        yield col.remove({id: taskId});
+        var col = await db.collection(TASK_COLLECTION);
+        await col.remove({id: taskId});
 
         logger.log(new DatabaseLM(DatabaseLMTypes.DeleteTask,
             {taskId: taskId}));
@@ -131,10 +131,10 @@ function deleteTask (taskId) {
  * @returns {Promise}
  */
 function getProjects () {
-    return queue(function*() {
+    return queue(async function() {
         
-        var col = yield db.collection(PROJECT_COLLECTION);
-        var projects = yield col.find({}, {_id:0}).toArray();
+        var col = await db.collection(PROJECT_COLLECTION);
+        var projects = await col.find({}, {_id:0}).toArray();
 
         logger.log(new DatabaseLM(DatabaseLMTypes.GetProjects,
                  {projectCount: projects.length}));
@@ -150,13 +150,13 @@ function getProjects () {
  * @returns {Promise}
  */
 function addProject (newProject) {
-    return queue(function*() {
+    return queue(async function() {
         
-        var col = yield db.collection(PROJECT_COLLECTION);
-        var records = yield col.insert(newProject);
+        var col = await db.collection(PROJECT_COLLECTION);
+        var res = await col.insert(newProject);
         
         logger.log(new DatabaseLM(DatabaseLMTypes.AddProject,
-            {projectId: records[0].id}));
+            {projectId: res.ops[0].id}));
     });
 }
 
@@ -168,10 +168,10 @@ function addProject (newProject) {
  * @returns {Promise}
  */
 function updateProject (projectId, properties) {
-    return queue(function*() {
+    return queue(async function() {
         
-        var col = yield db.collection(PROJECT_COLLECTION);
-        yield col.update(
+        var col = await db.collection(PROJECT_COLLECTION);
+        await col.update(
             {id: projectId},
             {$set: properties});
             
@@ -187,10 +187,10 @@ function updateProject (projectId, properties) {
  * @returns {Promise}
  */
 function deleteProject (projectId) {
-    return queue(function*() {
+    return queue(async function() {
         
-        var col = yield db.collection(PROJECT_COLLECTION);
-        yield col.remove({id: projectId});
+        var col = await db.collection(PROJECT_COLLECTION);
+        await col.remove({id: projectId});
             
         logger.log(new DatabaseLM(DatabaseLMTypes.DeleteProject,
             {projectId: projectId}));
@@ -214,9 +214,9 @@ module.exports = {
 //region Private methods
 
 // Connect to the database.
-co(function* connect() {
-    db = yield MongoClient.connect(config.get('database:connectionString'));
-}).catch(function (e) { logger.log(e); });
+(async function connect() {
+    db = await MongoClient.connect(config.get('database:connectionString'));
+})();
 
 /**
  * Adds DB job to the queue.
@@ -233,14 +233,14 @@ co(function* connect() {
  * To make sure no operations are mixed up, all db jobs should go through one queue
  * and be executed one after another.
  * TODO: probably it makes sense to create one queue per user.
- * @param {function*} job
+ * @param {async function} job
  * @return {Promise} that will be resolved when job done.
  */
 function queue(job) {
     var resolve, reject;
     
     jobQueue.push(function(cb) {
-        co(job).then(function(result) {
+        job().then(function(result) {
             resolve(result);
             cb();
         }).catch(function (error) {
@@ -259,25 +259,22 @@ function queue(job) {
  * Gets existing task by id.
  *
  * @param taskId
- * @returns {Promise}
+ * @return {promise.<Task>}
  */
-function getTask(taskId) {
-    return co(function*(){
+async function getTask(taskId) {
+    var col = await db.collection(TASK_COLLECTION);
+    var tasks = await col
+        .find({id: taskId})
+        .toArray();
     
-        var col = yield db.collection(TASK_COLLECTION);
-        var tasks = yield col
-            .find({id: taskId})
-            .toArray();
+    if (tasks.length === 0) {
+        throw 'No task with such id found: ' + taskId;
+    }
+
+    logger.log(new DatabaseLM(DatabaseLMTypes.GetTask,
+        {taskId: taskId}));
         
-        if (tasks.length === 0) {
-            throw 'No task with such id found: ' + taskId;
-        }
-    
-        logger.log(new DatabaseLM(DatabaseLMTypes.GetTask,
-            {taskId: taskId}));
-            
-        return tasks[0];
-    });
+    return tasks[0];
 }
 
 /**
@@ -287,23 +284,21 @@ function getTask(taskId) {
  * @param {number} endPosition
  * @param {number} shift - number of positions to move
  *                         positive number to move up, negavive - to move down
- * @returns {Promise}
+ * @returns {promise}
  */
-function shiftTaskPositions(startPosition, endPosition, shift) {
-    return co(function*(){
-        startPosition = startPosition !== null ? startPosition : 0;
-        endPosition = endPosition !== null ? endPosition : Number.MAX_VALUE;
-        
-        var col = yield db.collection(TASK_COLLECTION);
-        
-        yield col.update(
-            {position: {$gte: startPosition, $lte: endPosition}},
-            {$inc: {position: shift}},
-            {multi: true});
-        
-        logger.log(new DatabaseLM(DatabaseLMTypes.ShiftTaskPositions,
-            {startPosition: startPosition, endPosition: endPosition, shift: shift}));
-    });
+async function shiftTaskPositions(startPosition, endPosition, shift) {
+    startPosition = startPosition !== null ? startPosition : 0;
+    endPosition = endPosition !== null ? endPosition : Number.MAX_VALUE;
+    
+    var col = await db.collection(TASK_COLLECTION);
+    
+    await col.update(
+        {position: {$gte: startPosition, $lte: endPosition}},
+        {$inc: {position: shift}},
+        {multi: true});
+    
+    logger.log(new DatabaseLM(DatabaseLMTypes.ShiftTaskPositions,
+        {startPosition: startPosition, endPosition: endPosition, shift: shift}));
 }
 
 //endregion

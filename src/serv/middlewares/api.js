@@ -3,73 +3,79 @@ var logger = require('../../lib/log/Logger').logger,
     co = require('../../lib/node_modules/co/index'),
     helpers = require('../../lib/server.helpers.js');
 
-function request(request, response, url) {
-    return co(function*() {
+async function request(request, response, url) {
+    
+    var query = url.query;
+    var result;
 
-        var query = url.query;
+    switch (url.pathname) {
+    case '/api/getTasks':
+        result = await storage.getTasks();
+        break;
 
-        switch (url.pathname) {
-        case '/api/getTasks':
-            return yield storage.getTasks();
-    
-        case '/api/addTask':
-            helpers.checkArgs([
-                { val: query.newTask, message: 'New task should be specified' }
-            ]);
-            
-            return yield storage.addTask(query.newTask);
-    
-        case '/api/updateTask':
-            helpers.checkArgs([
-                { val: query.taskId, message: 'Task ID should be specified' },
-                { val: query.properties, message: 'Properties should be specified' }
-            ]);
-            
-            return yield storage.updateTask(query.taskId, query.properties);
-    
-        case '/api/deleteTask':
-            helpers.checkArgs([
-                { val: query.taskId, message: 'Task ID should be specified' }
-            ]);
-            
-            return yield storage.deleteTask(query.taskId);
+    case '/api/addTask':
+        helpers.checkArgs([
+            { val: query.newTask, message: 'New task should be specified' }
+        ]);
         
-        case '/api/getProjects':
-            return yield storage.getProjects();
-            
-        case '/api/addProject':
-            helpers.checkArgs([
-                { val: query.newProject, message: 'New project should be specified' }
-            ]);
-            
-            return yield storage.addProject(query.newProject);
-    
-        case '/api/updateProject':
-            helpers.checkArgs([
-                { val: query.projectId, message: 'Project ID should be specified' },
-                { val: query.properties, message: 'Properties should be specified' }
-            ]);
-            
-            return yield storage.updateProject(query.projectId, query.properties);
-    
-        case '/api/deleteProject':
-            helpers.checkArgs([
-                { val: query.projectId, message: 'Project ID should be specified' }
-            ]);
-            
-            return yield storage.deleteProject(query.projectId);
+        result = await storage.addTask(query.newTask);
+        break;
+
+    case '/api/updateTask':
+        helpers.checkArgs([
+            { val: query.taskId, message: 'Task ID should be specified' },
+            { val: query.properties, message: 'Properties should be specified' }
+        ]);
         
-        default:
-            throw "Not Found";
-        }
-    })
-    .then(function(result) {
-        if (result) {
-            helpers.respondWithJson(request, response, url.pathname, result);
-        } else {
-            helpers.respond(response, url.pathname);
-        }
-    });
+        result = await storage.updateTask(query.taskId, query.properties);
+        break;
+
+    case '/api/deleteTask':
+        helpers.checkArgs([
+            { val: query.taskId, message: 'Task ID should be specified' }
+        ]);
+        
+        result = await storage.deleteTask(query.taskId);
+        break;
+    
+    case '/api/getProjects':
+        result = await storage.getProjects();
+        break;
+        
+    case '/api/addProject':
+        helpers.checkArgs([
+            { val: query.newProject, message: 'New project should be specified' }
+        ]);
+        
+        result = await storage.addProject(query.newProject);
+        break;
+
+    case '/api/updateProject':
+        helpers.checkArgs([
+            { val: query.projectId, message: 'Project ID should be specified' },
+            { val: query.properties, message: 'Properties should be specified' }
+        ]);
+        
+        result = await storage.updateProject(query.projectId, query.properties);
+        break;
+
+    case '/api/deleteProject':
+        helpers.checkArgs([
+            { val: query.projectId, message: 'Project ID should be specified' }
+        ]);
+        
+        result = await storage.deleteProject(query.projectId);
+        break;
+    
+    default:
+        throw "Not Found";
+    }
+
+    if (result) {
+        helpers.respondWithJson(request, response, url.pathname, result);
+    } else {
+        helpers.respond(response, url.pathname);
+    }
 }
 
 module.exports = {

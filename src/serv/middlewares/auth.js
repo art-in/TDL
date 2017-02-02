@@ -10,10 +10,10 @@ var crypto = require('crypto'),
     AuthLMTypes = require('../../lib/log/messages/AuthLogMessageTypes').types,
     ResponseLM = require('../../lib/log/messages/ResponseLogMessage').message;
 
-function request(request, response, url) {
-  return co(function*() {
+async function request(request, response, url) {
 
     switch (url.pathname) {
+    
       case '/auth/login':
         logger.log(new AuthLogMessage(AuthLMTypes.Login, {userName: 'admin'}));
 
@@ -31,7 +31,7 @@ function request(request, response, url) {
 
         // get body
         var body = '';
-        yield toPromise(request).then(function (chunk) {
+        await toPromise(request).then(function (chunk) {
           body += chunk;
         });
 
@@ -39,7 +39,7 @@ function request(request, response, url) {
 
         try {
           // note: single user mode for now
-          var user = yield storage.getUser('admin');
+          var user = await storage.getUser('admin');
         } catch(error) {
           logger.log(new AuthLogMessage(AuthLMTypes.UserNotFound));
           helpers.respond(response, url.pathname, 401, 'User not found');
@@ -80,39 +80,36 @@ function request(request, response, url) {
           statusCode: response.statusCode
         }));
     }
-  });
 }
 
-function checkAuth (request, response, url) {
-  return co(function*() {
+async function checkAuth (request, response, url) {
 
     var cookie = cookieParser.parse(request.headers.cookie || '');
 
     try {
-      // note: single user mode for now
-      var user = yield storage.getUser('admin');
+        // note: single user mode for now
+        var user = await storage.getUser('admin');
     } catch(error) {
-      logger.log(new AuthLogMessage(AuthLMTypes.UserNotFound));
-      helpers.respond(response, url.pathname, 401, 'User not found');
-      return;
+        logger.log(new AuthLogMessage(AuthLMTypes.UserNotFound));
+        helpers.respond(response, url.pathname, 401, 'User not found');
+        return;
     }
 
     var valid = cookie && (user.passHash === cookie.session);
 
     if (valid || url.pathname === '/login') {
-      return true;
+        return true;
     }
 
     logger.log(new AuthLogMessage(AuthLMTypes.AuthCheckFailed));
 
     if (url.pathname === '/') {
-      helpers.redirect(response, '/login');
+        helpers.redirect(response, '/login');
     } else {
-      helpers.respond(response, url.pathname, 401, 'Unauthorized');
+        helpers.respond(response, url.pathname, 401, 'Unauthorized');
     }
 
     return false;
-  });
 }
 
 module.exports = {

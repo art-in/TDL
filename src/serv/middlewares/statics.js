@@ -3,13 +3,12 @@ var helpers = require('../../lib/server.helpers.js'),
     logger = require('../../lib/log/Logger').logger,
     ResponseLM = require('../../lib/log/messages/ResponseLogMessage').message;
 
-function request(request, response, url) {
-  return co(function*() {
+async function request(request, response, url) {
 
       if (url.pathname === '/') url.pathname += 'index.html';
       if (url.pathname === '/login') url.pathname += '.html';
 
-      return yield helpers
+      return await helpers
           .respondWithFile(
           request,
           response,
@@ -25,8 +24,6 @@ function request(request, response, url) {
               message: error
           }));
       });
-
-  });
 }
 
 module.exports = {

@@ -13,15 +13,14 @@ var path = require('path'),
  * @param {string} requestPath
  * @param {number} [statusCode=200]
  * @param {string} [message]
+ * 
+ * @return {promise}
  */
-function respond (response, requestPath, statusCode, message) {
-    return co(function*() {
-        
-        if (statusCode === undefined) statusCode = 200;
-        
-        response.writeHead(statusCode);
-        response.end(message && message.toString());
-    });
+async function respond (response, requestPath, statusCode, message) {
+    if (statusCode === undefined) statusCode = 200;
+    
+    response.writeHead(statusCode);
+    response.end(message && message.toString());
 }
 
 /**
@@ -33,70 +32,67 @@ function respond (response, requestPath, statusCode, message) {
  * @param {ServerResponse} response
  * @param {string} filePath - path relative to 'src' folder
  */
-function respondWithFile (request, response, filePath) {
-    return co(function*() {
-        
-        // Load file
-        var fullPath = path.join(__dirname, '../' + filePath);
-    
-        var data = yield fs.readFileAsync(fullPath);
-        var stats = yield fs.statAsync(fullPath);
-        
-        // Define response headers
-        var headers = {};
-        var fileExtension = filePath.split('.').pop();
+async function respondWithFile (request, response, filePath) {
+    // Load file
+    var fullPath = path.join(__dirname, '../' + filePath);
 
-        switch (fileExtension) {
-            case 'html': headers.mime = 'text/html'; break;
-            case 'ico': headers.mime = 'image/x-icon'; break;
-            case 'css': headers.mime = 'text/css'; break;
-            case 'js': headers.mime = 'application/javascript'; break;
-            case 'png': headers.mime = 'image/png'; break;
-            case 'appcache': 
-                headers.mime = 'text/cache-manifest'; 
-                headers.maxAge = 0;
-                break;
-            default: headers.mime = '';
+    var data = await fs.readFileAsync(fullPath);
+    var stats = await fs.statAsync(fullPath);
+    
+    // Define response headers
+    var headers = {};
+    var fileExtension = filePath.split('.').pop();
+
+    switch (fileExtension) {
+        case 'html': headers.mime = 'text/html'; break;
+        case 'ico': headers.mime = 'image/x-icon'; break;
+        case 'css': headers.mime = 'text/css'; break;
+        case 'js': headers.mime = 'application/javascript'; break;
+        case 'png': headers.mime = 'image/png'; break;
+        case 'appcache': 
+            headers.mime = 'text/cache-manifest'; 
+            headers.maxAge = 0;
+            break;
+        default: headers.mime = '';
+    }
+    
+    // Check if file was modified since last time browser loaded it.
+    var modifiedDate = new Date(stats.mtime);
+    var requestModified = request.headers['if-modified-since'];
+    var requestModifiedDate = requestModified && new Date(requestModified);
+    
+    if (requestModifiedDate &&
+        (modifiedDate.getTime() - requestModifiedDate.getTime() <= 999)) {
+            
+        response.writeHead(304, {
+            'Last-Modified': modifiedDate.toUTCString()
+        });
+        response.end(); // Take it from cache.
+    } else {
+        
+        // Set headers
+        if (headers.maxAge !== undefined) {
+            response.setHeader('Cache-Control', 'max-age=' + headers.maxAge);
         }
         
-        // Check if file was modified since last time browser loaded it.
-        var modifiedDate = new Date(stats.mtime);
-        var requestModified = request.headers['if-modified-since'];
-        var requestModifiedDate = requestModified && new Date(requestModified);
+        if (headers.mime !== undefined) {
+            response.setHeader('Content-Type', headers.mime);
+        }
         
-        if (requestModifiedDate &&
-           (modifiedDate.getTime() - requestModifiedDate.getTime() <= 999)) {
-               
-            response.writeHead(304, {
-                'Last-Modified': modifiedDate.toUTCString()
+        response.writeHead(200,
+            {
+                'Last-Modified': modifiedDate,
+                'Content-Encoding': isGzipAccepted(request) ? 'gzip' : ''
             });
-            response.end(); // Take it from cache.
+        
+        // Compress if accepted
+        if (isGzipAccepted(request)) {
+            var gzippedData = await zlib.gzipAsync(data);
+            response.end(gzippedData);
         } else {
-            
-            // Set headers
-            if (headers.maxAge !== undefined) {
-                response.setHeader('Cache-Control', 'max-age=' + headers.maxAge);
-            }
-            
-            if (headers.mime !== undefined) {
-                response.setHeader('Content-Type', headers.mime);
-            }
-            
-            response.writeHead(200,
-                {
-                    'Last-Modified': modifiedDate,
-                    'Content-Encoding': isGzipAccepted(request) ? 'gzip' : ''
-                });
-            
-            // Compress if accepted
-            if (isGzipAccepted(request)) {
-                var gzippedData = yield zlib.gzipAsync(data);
-                response.end(gzippedData);
-            } else {
-                response.end(data);
-            }
+            response.end(data);
         }
-    });
+    }
 }
 
 /**
@@ -108,26 +104,23 @@ function respondWithFile (request, response, filePath) {
  * @param {string|boolean} error
  * @param data
  */
-function respondWithJson (request, response, requestPath, data) {
-    return co(function*() {
-        
-        response.writeHead(200,
-            {
-                'Content-Type': 'application/json',
-                'Cache-Control': 'no-cache',
-                'Content-Encoding': isGzipAccepted(request) ? 'gzip' : ''
-            });
-        
-        data = JSON.stringify(data);
-        
-        // Compress if client accepted
-        if (isGzipAccepted(request)) {
-            var gzippedData = yield zlib.gzipAsync(data);
-            response.end(gzippedData);
-        } else {
-            response.end(data);
-        }
-    });
+async function respondWithJson (request, response, requestPath, data) {
+    response.writeHead(200,
+        {
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache',
+            'Content-Encoding': isGzipAccepted(request) ? 'gzip' : ''
+        });
+    
+    data = JSON.stringify(data);
+    
+    // Compress if client accepted
+    if (isGzipAccepted(request)) {
+        var gzippedData = await zlib.gzipAsync(data);
+        response.end(gzippedData);
+    } else {
+        response.end(data);
+    }
 }
 
 /**

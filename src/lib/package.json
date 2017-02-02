@@ -1,0 +1,27 @@
+{
+  "name": "lib",
+  "version": "1.0.0",
+  "main": "Queue.js",
+  "dependencies": {
+    "argv": "^0.0.2",
+    "co": "^4.6.0",
+    "bluebird": "^2.9.26",
+    "extend": "^2.0.0",
+    "harmonize": "^1.4.2",
+    "cookie": "^0.2.3",
+    "log4js": "^0.6.32",
+    "mongodb-promise": "^0.0.4",
+    "nconf": "^0.7.1",
+    "qs": "^0.6.6",
+    "chalk": "^0.5.1",
+    "stream-to-promise": "^1.1.0",
+    "strip-ansi": "^3.0.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}
