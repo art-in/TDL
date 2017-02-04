@@ -4,8 +4,8 @@
         "port": 443,
         "portRedirect": null,
         "tls": {
-            "cert": "../../cert/test.crt",
-            "key": "../../cert/test.key",
+            "cert": "../../../cert/test.crt",
+            "key": "../../../cert/test.key",
             "ca": []
         }
     },

@@ -1,13 +1,3 @@
 {
-  "server": {
-    "tls": {
-      "cert": "../_cert/artins_space.crt",
-      "key": "../_cert/csr/artins_serv.key",
-      "ca": [
-        "../_cert/ca/cross_Intermediate.crt",
-        "../_cert/ca/issuer_Intermediate.crt",
-        "../_cert/ca/root.crt"
-      ]
-    }
-  }
+  "_note_" : "put any production-specific config values here to override defaults"
 }
