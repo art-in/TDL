@@ -3,8 +3,10 @@ var CACHE_NAME = 'cache-#CACHE_VERSION';
 // Files to be cached immediately on worker installation.
 // Other files can still be cached lazily later.
 var PRE_CACHE_FILES = [
+  'manifest.json',
   '/',
   'favicon.ico',
+  'favicon.png',
   'app.js',
   'sprite.png',
   'styles.css'

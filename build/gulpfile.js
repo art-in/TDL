@@ -28,6 +28,8 @@ paths.client = {
     target: paths.target + 'client/'
 };
 
+paths.client.manifest = 'manifest.json';
+
 paths.client.serviceWorkers = [
     'sw/sw-init.js',
     'sw/sw-cache.js'
@@ -122,6 +124,7 @@ gulp.task('images', ['clean'], function() {
 });
 
 gulp.task('sprites', ['clean', 'styles', 'images'], function() {
+
     var spriteName = 'sprite.png';
     var spriteOutput = gulp.src(paths.client.styles.targetMask)
         .pipe(sprite({
@@ -131,14 +134,36 @@ gulp.task('sprites', ['clean', 'styles', 'images'], function() {
             padding: 2 // prevent overlapping when zooming (Chrome)
         }));
 
-    spriteOutput.css
-        .pipe(minifyCSS({keepBreaks:true}))
+    var cssPromise = new Promise((resolve, reject) => {
+        spriteOutput.css
+            .pipe(minifyCSS({keepBreaks:true}))
+            .pipe(gulp.dest(paths.client.target))
+            .on('end', resolve)
+            .on('error', reject);
+    });
+    
+    var spritePromise = new Promise((resolve, reject) => {
+        spriteOutput.img.pipe(gulp.dest(paths.client.target))
+            .on('end', resolve)
+            .on('error', reject);
+    });
+    
+    // wait sprite output
+    return Promise.all([cssPromise, spritePromise])
+        .then(function() {
+
+            // delete all sprited images
+            del([
+                paths.client.images.targetMask,
+                '!' + paths.client.target + spriteName,
+                '!' + paths.client.target + 'favicon*',
+            ], {force: true});
+        });
+});
+
+gulp.task('manifest', ['clean'], function() {
+    return gulp.src(paths.client.manifest)
         .pipe(gulp.dest(paths.client.target));
-
-    spriteOutput.img.pipe(gulp.dest(paths.client.target));
-
-    // Delete all images except sprite.
-    del([paths.client.images.targetMask, '!**/' + spriteName], {force: true});
 });
 
 gulp.task('service-workers', ['clean'], function() {
@@ -166,7 +191,15 @@ gulp.task('views', ['clean'], function() {
         .pipe(gulp.dest(paths.client.target));
 });
 
-gulp.task('client', ['scripts', 'styles', 'images', 'sprites', 'service-workers', 'views']);
+gulp.task('client', [
+    'scripts', 
+    'styles', 
+    'images', 
+    'sprites', 
+    'manifest', 
+    'service-workers', 
+    'views'
+]);
 
 //endregion
 
