@@ -5,6 +5,9 @@ define(['business/business', 'lib/messageBus', 'mappers/viewModelMapper'],
     /** View model data state (tasks, projects) */
     var vmState;
     
+    // updating local state from server
+    var isUpdatingState = false;
+
     //region Public
     
     function setupHandlers(state) {
@@ -13,7 +16,8 @@ define(['business/business', 'lib/messageBus', 'mappers/viewModelMapper'],
         
         vmState = state;
         
-        messageBus.subscribe('loading', onLoading);
+        messageBus.subscribe('appInit', onAppInit);
+        messageBus.subscribe('appShown', onAppShown);
         
         messageBus.subscribe('addingTask', onAddingTask);
         messageBus.subscribe('updatingTask', onUpdatingTask);
@@ -29,12 +33,16 @@ define(['business/business', 'lib/messageBus', 'mappers/viewModelMapper'],
     
     //region Handlers
     
-    function onLoading() {
+    function onAppInit() {
         Promise.race([
             loadLocalState(),
             loadServerState()
         ])
         .then(messageBus.publish.bind(messageBus, 'projectsLoaded'));
+    }
+
+    function onAppShown() {
+        loadServerState();
     }
     
     function onAddingTask(data) {
@@ -104,10 +112,26 @@ define(['business/business', 'lib/messageBus', 'mappers/viewModelMapper'],
     }
     
     function loadServerState() {
+
+        // do not request server state
+        // several times in a row
+        if (isUpdatingState) {
+            // update already in process
+            return;
+        }
+
+        isUpdatingState = true;
+
         return Promise.all([
             business.getProjects().server().then(updateProjectsInState),
             business.getTasks().server().then(updateTasksInState)
-        ]);
+        ])
+            .then(function() {
+                isUpdatingState = false;
+            })
+            .catch(function() {
+                isUpdatingState = false;
+            });
     }
     
     //endregion

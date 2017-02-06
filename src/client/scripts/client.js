@@ -9,13 +9,21 @@ define('client',
        'viewmodels/AppViewModel'], 
     function (ko, messageBus, binder, gate, AppViewModel) {
     
-    // Create root view model
+    // create root view model
     var appVM = new AppViewModel();
     
+    // setup handlers
     binder.setupBindings();
     gate.setupHandlers(appVM.state);
     
-    messageBus.publish('loading');
+    document.addEventListener('visibilitychange', function() {
+        if (!document.hidden) {
+            messageBus.publish('appShown');
+        }
+    });
+
+    // init
+    messageBus.publish('appInit');
     
     ko.applyBindings(appVM);
 });

@@ -27,7 +27,7 @@ define(function() {
         next.call(this);
     }
 
-    RequestQueue.prototype.retryDelay = 300000; // 5 minutes
+    RequestQueue.prototype.retryDelay = 10000; // 10 sec
 
     /**
      * Pushes request to the queue.
@@ -78,6 +78,7 @@ define(function() {
     };
 
     function next () {
+        // already processing request
         if (this.currentRequest !== null) return;
 
         if (this.requests.length === 0) {
@@ -92,6 +93,18 @@ define(function() {
 
     function trySend() {
         if (this.currentRequest === null) throw new Error('Current request is empty');
+
+        // only make requests when app tab is visible,
+        // because it may be battery costly on mobiles
+        // to retry failed requests by interval in background.
+        // also its hard to make some state change without
+        // server request
+        // (ie. create new task and immediately minimize -
+        // request will go to server anyway)
+        if (document.hidden) {
+            setTimeout(trySend.bind(this), this.retryDelay);
+            return;
+        }
 
         if (this.currentRequest.tail && this.requests.length > 0 &&
             !this.requests.every(function(r) { return r.tail; })) {
@@ -159,7 +172,7 @@ define(function() {
                         JSON.parse(responseText);
                     } catch (e) {
                         // Response corrupted. Retry now.
-                        console.log('Response corrupted. Retring now.');
+                        console.error('Response corrupted. Retring now.');
                         setTimeout(trySend.bind(this), 1);
                         return;
                     }
