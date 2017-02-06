@@ -9,6 +9,9 @@ define('client',
        'viewmodels/AppViewModel'], 
     function (ko, messageBus, binder, gate, AppViewModel) {
     
+    // config
+    ko.options.deferUpdates = true;
+
     // create root view model
     var appVM = new AppViewModel();
     

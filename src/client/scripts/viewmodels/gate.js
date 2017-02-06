@@ -92,14 +92,14 @@ define(['business/business', 'lib/messageBus', 'mappers/viewModelMapper'],
     //region Private
     
     function updateProjectsInState(projects) {
-        var projectVMs = mapper.mapProjects(projects);
+        var projectVMs = mapper.mapProjects(projects, vmState.projects());
         projectVMs.forEach(function(projectVM) { projectVM.state = vmState; });
         vmState.projects(projectVMs);
         mapper.assignProjectsToTasks(vmState.tasks(), vmState.projects());
     }
     
     function updateTasksInState(tasks) {
-        var taskVMs = mapper.mapTasks(tasks, vmState.projects());
+        var taskVMs = mapper.mapTasks(tasks, vmState.tasks(), vmState.projects());
         taskVMs.forEach(function(taskVM) { taskVM.state = vmState; });
         vmState.tasks(taskVMs);
     }

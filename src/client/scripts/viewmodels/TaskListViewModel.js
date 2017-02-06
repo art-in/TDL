@@ -232,6 +232,7 @@ define(['ko', 'moment', 'lib/messageBus', 'viewmodels/TaskViewModel', 'viewmodel
             // if we would re-assign tasks to another array (or .removeAll()),
             // the dragged element will stay in the DOM anyway.
             // Let's clean container directly for now.
+            // #84: causes recreation of all VMs (performance gap)
             this.state.tasks.removeAll();
             $('.task-list').empty();
 

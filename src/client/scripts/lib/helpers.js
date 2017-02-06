@@ -46,11 +46,24 @@ define(function() {
     function uid () {
         return guid().split('-').shift();
     }
+
+    /**
+     * Compares date objects
+     * Note: useful because date objects compared by reference by default
+     * 
+     * @param {Date} dateA
+     * @param {Date} dateB
+     * @return {boolean} true if dates are equal, false - otherwise
+     */
+    function datesEqual(dateA, dateB) {
+        return (dateA || '').toString() === (dateB || '').toString();
+    }
     
     return {
         getChildNodeIndex: getChildNodeIndex,
         arrayMoveItem: arrayMoveItem,
         guid: guid,
-        uid: uid
+        uid: uid,
+        datesEqual: datesEqual
     };
 });
