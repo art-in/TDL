@@ -1,8 +1,8 @@
 TODO List (TDL) - lightweight task tracker for daily life.
 
 **Why not use existing solution (handreds of them)?**  
-Todo lists is kinda private-everyday-tool that should be just perfect (100%).  
-This is personal project - everything here is the way I want it to be.  
+Todo lists is kinda private-everyday-tools that should be just perfect (100%).  
+This is personal handmade tool. Everything about it is exactly the way I want it to be.  
 With external tools you do not have that level of control.
 
 **General design idea**  
