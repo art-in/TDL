@@ -15,6 +15,8 @@ Sufficient minimalism.
 - [ ] estimation / actual time for performing task
 - [x] history of completed tasks
 - [ ] history analysis (total time spent on project/task per time period)
+- [ ] keyboard navigation
+- [ ] deadline notifications
 - [x] mobile devices
 - [x] offline ready (pwa)
 - [x] secure (https)
