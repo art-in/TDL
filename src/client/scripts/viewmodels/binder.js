@@ -55,7 +55,7 @@ define(['jquery',
                                        sortable: "{ draggableClass: 'task'," +
                                                  "  handleClass: 'task-drag-handle'," +
                                                  "  ghostClass: 'task-drag-ghost'," + 
-                                                 "  scrollSensitivity: 60," + 
+                                                 "  scrollSensitivity: 100," + 
                                                  "  scrollSpeed: 15," + 
                                                  "  onUpdate: $root.views.taskList.dragTask.bind($root.views.taskList) }"});
             

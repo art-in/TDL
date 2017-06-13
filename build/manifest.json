@@ -1,6 +1,7 @@
 {
     "name": "TDL",
     "short_name": "TDL",
+    "description": "Lightweight task tracker",
     "start_url": "/",
     "display": "standalone",
     "icons": [{
