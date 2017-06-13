@@ -72,10 +72,8 @@ define(['ko', 'Sortable', 'lib/helpers'], function (ko, Sortable, helpers) {
                     throw new Error('Invalid target observable');
                     
                 var $element = $(element);
-                var initialValue = ko.utils.unwrapObservable(observable);
-                
-                html ? $element.html(initialValue) : $element.text(initialValue);
-                $element.on('keyup', function() {
+
+                $element.on('keyup blur', function() {
                     var observable = valueAccessor();
                     observable(html ? $element.html() : $element.text());
                 });
@@ -84,10 +82,16 @@ define(['ko', 'Sortable', 'lib/helpers'], function (ko, Sortable, helpers) {
                 var $element = $(element);
                 
                 var value = ko.unwrap(valueAccessor());
-                
                 var currentValue = html ? $element.html() : $element.text();
-                if (currentValue !== value) {
-                    html ? $element.html(value) : $element.text(value);
+                
+                // check if actual HTML content and observable value are different,
+                // otherwise value reset will also reset input caret
+                if (currentValue !== value) {                 
+                    if (html) {
+                        $element.html(value);
+                    } else {
+                        $element.text(value);
+                    }
                 }
             }
         };
@@ -230,6 +234,82 @@ define(['ko', 'Sortable', 'lib/helpers'], function (ko, Sortable, helpers) {
             var optionIndex = optionVMs.indexOf(vm);
             
             element.selectedIndex = optionIndex;
+        }
+    };
+
+    /**
+     * Prevents dangerous HTML to be injected into
+     * target contenteditable element
+     */
+    ko.bindingHandlers.sanitizeHtml = {
+        init: function(element) {
+
+            // ways for user to inject HTML into contenteditable element
+            // 1. edit shortcuts (ctrl+b for <b>, ctrl+i for <i>) 
+            // 2. new line shortcut (ctrl+enter) - custom behavior adds <br>
+            // 3. copy-paste
+            // any manually written HTML will be auto-escaped.
+            // edit/new line shortcuts cannot do any harm, so we only need
+            // to rewrite pasting behavior
+            document.addEventListener('paste', function(e) {
+                
+                // do not affect other elements
+                if (!$(e.target).closest(element).length) return;
+
+                // extract no-dangerous plain text from clipboard
+                // note: this will loose href from links and get link text,
+                // but I assume it is better then manual regex extraction
+                var data = e.clipboardData.getData('text/plain');
+
+                // insert data
+                helpers.insertTextToCaret(data);
+                
+                e.preventDefault();
+            });
+        }
+    };
+
+    /**
+     * Replaces plain text URLs in contents of element
+     * with HTML links
+     * 
+     * Binding properties:
+     * @param {boolean} wrapUrls - wrap urls to links, otherwice - unwrap
+     */
+    ko.bindingHandlers.wrapUrls = {
+        init: function(element, valueAccessor) {
+
+            ko.bindingHandlers.wrapUrls.toggleWrap(element, valueAccessor);
+
+            // monitor node changes in case inner HTML changed
+            // without changing observable 'wrap' flag
+            // eg. after saving task, it is remapped from business model
+            new MutationObserver(function() {
+                ko.bindingHandlers.wrapUrls.toggleWrap(element, valueAccessor);
+            }).observe(element, {childList: true, subtree: true});
+        },
+        update: function(element, valueAccessor) {
+            ko.bindingHandlers.wrapUrls.toggleWrap(element, valueAccessor);
+        },
+        toggleWrap(element, valueAccessor) {
+
+            var observable = valueAccessor();
+            var wrap = ko.unwrap(valueAccessor());
+            
+            var $element = $(element);
+            var value = $element.html();
+
+            if (wrap) {
+                var wrapped = helpers.wrapUrls(value);
+                if (value !== wrapped) {
+                    $element.html(wrapped);
+                }
+            } else {
+                var unwrapped = helpers.unwrapUrls(value);
+                if (value !== unwrapped) {
+                    $element.html(unwrapped);
+                }
+            }
         }
     };
 });

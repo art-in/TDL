@@ -37,6 +37,7 @@ define(['jquery',
             $('.main-tasks .filter .filter-total-count').dataBind({ html: '$root.views.taskList.filter.totalCount' });
 
             $('.new-task-input').dataBind({ editableHTML: '$root.views.taskList.newTaskDescription',
+                                            sanitizeHtml: 'true',
                                             returnKeyPress: '$root.views.taskList.addTask()',
                                             escapeKeyPress: '$root.views.taskList.toggleAddMode()',
                                             contentSelect: '$root.views.taskList.inAddMode' });
@@ -90,6 +91,8 @@ define(['jquery',
             $('.task-properties-project-name').dataBind({ visible: 'task.projectName',
                                                html: 'task.projectName' });
             $('.task-properties-description').dataBind({ editableHTML: 'task.description',
+                                              sanitizeHtml: 'true',
+                                              wrapUrls: '!task.inEditMode()',
                                               contentEditable: 'task.inEditMode',
                                               returnKeyPress: 'task.save()',
                                               escapeKeyPress: 'task.toggleEditMode()',
@@ -110,10 +113,12 @@ define(['jquery',
             $('.main-projects .action-bar .new-project').dataBind({ visible: '$root.views.projectList.inAddMode' });
             
             $('.new-project-properties-item-value.name').dataBind({ editableText: '$root.views.projectList.newProjectName',
+                                                               sanitizeHtml: 'true',
                                                                returnKeyPress: '$root.views.projectList.addProject()',
                                                                escapeKeyPress: '$root.views.projectList.toggleAddMode()',
                                                                contentSelect: '$root.views.projectList.inAddMode' });
             $('.new-project-properties-item-value.tags').dataBind({ editableText: '$root.views.projectList.newProjectTags',
+                                                               sanitizeHtml: 'true',
                                                                returnKeyPress: '$root.views.projectList.addProject()',
                                                                escapeKeyPress: '$root.views.projectList.toggleAddMode()' });
             $('.new-project-properties-item input.color').dataBind({ value: '$root.views.projectList.newProjectColor' });
@@ -142,11 +147,14 @@ define(['jquery',
                                                         visible: 'project.inEditMode' });                                                   
             $('.project-properties').dataBind({ style: { "'background-color'": 'project.color' }});
             $('.project-properties-value.name').dataBind({ editableText: 'project.name',
+                                                           sanitizeHtml: 'true',
+                                                           wrapUrls: '!project.inEditMode()',
                                                            contentEditable: 'project.inEditMode',
                                                            returnKeyPress: 'project.save()',
                                                            escapeKeyPress: 'project.toggleEditMode()',
                                                            contentSelect: 'project.inEditMode' });
             $('.project-properties-value.tags').dataBind({ editableText: 'project.tags',
+                                                           sanitizeHtml: 'true',
                                                            contentEditable: 'project.inEditMode',
                                                            returnKeyPress: 'project.save()',
                                                            escapeKeyPress: 'project.toggleEditMode()' });

@@ -208,6 +208,7 @@
     .task-properties-description {
         font-size: 25px;
         outline: none;
+        word-wrap: break-word;
     }
 
     .task.editing > .task-properties {

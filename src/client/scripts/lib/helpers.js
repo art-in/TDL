@@ -59,11 +59,92 @@ define(function() {
         return (dateA || '').toString() === (dateB || '').toString();
     }
     
+    /**
+     * Replaces plain text URL substrings with HTML links
+     * 
+     * @example
+     * wrapUrls('See http://example.com')
+     * // 'See <a href="http://example.com">example.com</a>'
+     * 
+     * @param {string} input
+     * @return {string} resulting string
+     */
+    function wrapUrls(input) {
+        var result = input;
+
+        // remove unicode spaces to not break regexes
+        result = result.replace(/&nbsp;/g, ' ');
+
+        // unwrap URLs from input links (if any)
+        // making sure to not wrap link into another link,
+        // by the way clearing attributes junk from original link
+        result = unwrapUrls(result);
+
+        // wrap URLs into links
+        var urlRegex = /https?:\/\/((www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*))/g;
+        result = result.replace(urlRegex, function(url, urlWithoutScheme) {
+
+            var innerText = urlWithoutScheme;
+
+            // remove terminating slash as visual junk
+            if (innerText[innerText.length - 1] === '/') {
+                innerText = innerText.slice(0, innerText.length - 1);
+            }
+
+            // shorten long URL text by replacing center part with dots
+            if (innerText.length > 50) {
+                innerText =
+                    innerText.slice(0, 23) +
+                    '...' +
+                    innerText.slice(innerText.length - 24, innerText.length);
+            }
+
+            return `<a href="${url}" target="_blank">${innerText}</a>`;
+        });
+
+        return result;
+    }
+
+    /**
+     * Replaces HTML links with plain text URLs
+     * 
+     * @example
+     * unwrapUrls('See <a href="http://example.com">example.com</a>')
+     * // 'See http://example.com'
+     * 
+     * @param {string} input
+     * @return {string} resulting string
+     */
+    function unwrapUrls(input) {
+        var anchorRegex = /<a .*?href="(.*?)".*?a>/g;
+        return input.replace(anchorRegex, function(match, url) {
+            return url;
+        });
+    }
+    
+    /**
+     * Inserts text to current caret position
+     * @param {string} text
+     */
+    function insertTextToCaret(text) {
+        var sel = window.getSelection();
+        var range = sel.getRangeAt(0); 
+        range.deleteContents();
+        var textNode = document.createTextNode(text);
+        range.insertNode(textNode);
+        range.setStartAfter(textNode);
+        sel.removeAllRanges();
+        sel.addRange(range);
+    }
+
     return {
         getChildNodeIndex: getChildNodeIndex,
         arrayMoveItem: arrayMoveItem,
         guid: guid,
         uid: uid,
-        datesEqual: datesEqual
+        datesEqual: datesEqual,
+        wrapUrls: wrapUrls,
+        unwrapUrls: unwrapUrls,
+        insertTextToCaret: insertTextToCaret
     };
 });
