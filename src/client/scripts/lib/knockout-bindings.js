@@ -110,19 +110,19 @@ define(['ko', 'Sortable', 'lib/helpers'], function (ko, Sortable, helpers) {
     
     /**
      * Calls function when 'Return'-key pressed on target element.
-     * 'Return + CTRL' adds new line.
+     * 'Return + shift' adds new line.
      */
     ko.bindingHandlers.returnKeyPress = {
         init: function(element, valueAccessor) {
             $(element).on('keydown', function(e) {
                 // 'Return'
-                if (e.keyCode == 13 && !e.ctrlKey) {
+                if (e.keyCode == 13 && !e.shiftKey) {
                     valueAccessor();
                     e.preventDefault();
                 }
     
-                // 'Return + CTRL'
-                if (e.keyCode == 13 && e.ctrlKey) {
+                // 'Return + shift'
+                if (e.keyCode == 13 && e.shiftKey) {
                     document.execCommand('insertHTML', false, '<br><br>');
                     e.preventDefault();
                 }
