@@ -87,7 +87,13 @@ define(['jquery',
                                                    visible: 'task.inEditMode() && task.description()' });
             $('.task-edit-cancel-button').dataBind({ click: 'task.toggleEditMode',
                                                      visible: 'task.inEditMode' });
-            $('.task-properties').dataBind({ style: { "'background-color'": 'task.projectColor' } });
+            $('.task-properties').dataBind({ style: { "'background-color'": 'task.projectColor' },
+                                             css: {"'expanded'": 'task.expanded'},
+                                             // observe properties block and not description block,
+                                             // because resize sensor will not work inside contenteditable div
+                                             contentFits: "task.fits",
+                                             height: 'task.height',
+                                             animationInProgress: 'task.expandAnimationInProgress' });
             $('.task-properties-project-name').dataBind({ visible: 'task.projectName',
                                                html: 'task.projectName' });
             $('.task-properties-description').dataBind({ editableHTML: 'task.description',
@@ -95,11 +101,18 @@ define(['jquery',
                                               wrapUrls: '!task.inEditMode()',
                                               contentEditable: 'task.inEditMode',
                                               returnKeyPress: 'task.save()',
-                                              escapeKeyPress: 'task.toggleEditMode()',
-                                              contentSelect: 'task.inEditMode' });
+                                              escapeKeyPress: 'task.toggleEditMode()' });
             $('.task-properties-progress-doneon').dataBind({
               visible: 'task.progressDoneOn',
               html: 'task.progressDoneOnString'
+            });
+            $('.task-properties-collapse').dataBind({
+                click: 'task.collapse',
+                visible: 'task.expanded() && !task.inEditMode() && !task.fitsInCollapsed()'
+            });
+            $('.task-properties-expand').dataBind({
+                click: 'task.expand',
+                visible: '!task.expanded() && !task.inEditMode() && !task.fitsInCollapsed()'
             });
             
             // Project List                                  

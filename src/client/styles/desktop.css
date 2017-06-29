@@ -192,27 +192,59 @@
         flex-direction: column;
         padding: 5px;
         overflow: hidden;
+        position: relative;
+        max-height: 55px;
+        transition: max-height 0.5s;
+        transition-timing-function: ease-out;
+    }
+
+    .task-properties.expanded {
+        max-height: 1000px;
     }
     
     .task-properties-project-name {
         font-size: 12px;
         color: gray;
-        position: relative;
-        top: -3px;
-        height: 9px;
+        display: inline-block;
     }
 
     .task-properties-progress-doneon {
         font-size: 12px;
         color: gray;
+        display: inline-block;
+    }
+    .task-properties-progress-doneon:before {
+        content: ' - ';
     }
     
     .task-properties-description {
         font-size: 22px;
         outline: 0;
         word-wrap: break-word;
+        line-height: 28px;
     }
     
+    .task-properties-expand,
+    .task-properties-collapse {
+        position: absolute;
+        top: 0;
+        right: 0;
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        user-select: none;
+        width: 80px;
+        height: 100%;
+        padding-left: 10px;
+        background: linear-gradient(
+            -90deg, 
+            rgba(0, 0, 0, 0.1), 
+            rgba(255, 255, 255, 0));
+    }
+
     .task.editing > .task-properties {
         border: 2px solid yellow;
     }

@@ -63,6 +63,86 @@ define(['ko', 'moment', 'lib/messageBus'], function(ko, moment, messageBus) {
             return moment(this.progressDoneOn()).format('MMMM Do YYYY') + ' (done)';
           }.bind(this)
         });
+
+        /** 
+         * Indicates weither task properties block
+         * is collapsed to short view (starting piece of description) 
+         * or expanded to full view
+         */
+        this.expanded = ko.observable(false);
+
+        /**
+         * Indicates weither current task properties container
+         * fully fits its contents (no overflows)
+         * Note: disregarding collapse/expand state
+         */
+        this.fits = ko.observable(true);
+
+        /**
+         * Current height of task properties container
+         */
+        this.height = ko.observable();
+
+        /**
+         * Height of task properties container in collapsed state
+         */
+        this.collapsedHeight = ko.observable();
+
+        /**
+         * Indicates weither expand/collapse animation is in progress
+         */
+        this.expandAnimationInProgress = ko.observable(false);
+
+        /**
+         * Indicates weither current task properties container
+         * fully fits its content, if container is collapsed
+         */
+        this.fitsInCollapsed = ko.computed({
+            read: function() {
+
+                // do not recompute while expand/collapse animation is in progress
+                if (this.expandAnimationInProgress() && 
+                    this.fitsInCollapsed !== undefined) {
+                    return this.fitsInCollapsed.peek();
+                }
+
+                if (this.expanded()) {
+                    // expanded
+
+                    // ensure collapsed height was cached
+                    if (this.collapsedHeight() === undefined) {
+                        throw Error('Height of collapsed task block was not cached');
+                    }
+                    
+                    return this.height() <= this.collapsedHeight();
+
+                } else {
+                    // collapsed
+                    
+                    // cache height of container in collapsed state.
+                    //
+                    // Why cache it?
+                    // This is cheapest way to size container with current content,
+                    // and hide 'collapse' button if content already fits.
+                    // Eg. situation:
+                    // We edit task description, adding ton of text, hit save,
+                    // and want to see full text to check result and 'collapse' button.
+                    // BUT in case we instead clean the description, hit save,
+                    // and description perfectly fits into collapsed size, we dont
+                    // really want to see 'collapse' button (even in expanded state). 
+                    // So we need to check weither it already fits into collapsed view.
+                    // And if yes - we can safely hide 'collapse' button.
+                    //
+                    // Task container is collapsed from the start, so it should work.
+                    // Other solution is to append clonned invisible DOM node 
+                    // in collapsed state and check resulting size (slow).
+                    // Or quickly set collapsed state, check size and expand back (hack).
+                    this.collapsedHeight(this.height());
+                    
+                    return this.fits();
+                }
+            }.bind(this)
+        });
     }
     
     /**
@@ -70,6 +150,10 @@ define(['ko', 'moment', 'lib/messageBus'], function(ko, moment, messageBus) {
      */
     TaskViewModel.prototype.toggleEditMode = function() {
         this.inEditMode(!this.inEditMode());
+
+        if (this.inEditMode()) {
+            this.expand();
+        }
     };
     
     TaskViewModel.prototype.save = function() {
@@ -107,6 +191,22 @@ define(['ko', 'moment', 'lib/messageBus'], function(ko, moment, messageBus) {
     TaskViewModel.prototype.toggleRemoveMode = function () {
         this.inRemoveMode(!this.inRemoveMode());
     };
-    
+
+    /**
+     * Collapses task description to short view.
+     */
+    TaskViewModel.prototype.collapse = function() {
+        this.expanded(false);
+        this.expandAnimationInProgress(true);
+    }
+
+    /**
+     * Expands task description to full view.
+     */
+    TaskViewModel.prototype.expand = function() {
+        this.expanded(true);
+        this.expandAnimationInProgress(true);
+    }
+
     return TaskViewModel;
 });

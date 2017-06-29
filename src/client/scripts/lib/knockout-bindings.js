@@ -1,4 +1,5 @@
-define(['ko', 'Sortable', 'lib/helpers'], function (ko, Sortable, helpers) {
+define(['ko', 'lib/helpers', 'Sortable', 'ResizeSensor'], 
+function (ko, helpers, Sortable, ResizeSensor) {
 
     /**
      * Sets background color to the element 
@@ -310,6 +311,89 @@ define(['ko', 'Sortable', 'lib/helpers'], function (ko, Sortable, helpers) {
                     $element.html(unwrapped);
                 }
             }
+        }
+    };
+
+    /**
+     * Detects weither target element`s content fits into element`s height
+     * (no vertical overflow happens)
+     */
+    ko.bindingHandlers.contentFits = {
+        init(element, valueAccessor) {
+            let observable = valueAccessor();
+
+            if (!ko.isObservable(observable)) 
+                throw new Error('Invalid target observable');
+            
+            // throttle observable change notifications,
+            // since transition animation can generate bunch
+            // of resize events
+            observable = observable.extend({
+                rateLimit: { 
+                    timeout: 100, 
+                    method: 'notifyWhenChangesStop'
+                }
+            });
+
+            // currently only way to subsribe to element resize 
+            // event is ResizeSensor-hack, which creates invisible
+            // absolutely positioned element subscribed to scroll event.
+            // when target block resized, ResizeSensor-block changes
+            // scroll position over its inner child block
+            new ResizeSensor(element, function() {
+                const offsetHeight = parseInt(element.offsetHeight);
+                const scrollHeight = parseInt(element.scrollHeight);
+
+                const fits = offsetHeight >= scrollHeight;
+                observable(fits);
+            });
+        }
+    };
+
+    /**
+     * Sets current element height to observable
+     */
+    ko.bindingHandlers.height = {
+        init(element, valueAccessor) {
+            let observable = valueAccessor();
+
+            if (!ko.isObservable(observable)) 
+                throw new Error('Invalid target observable');
+
+            // throttle observable change notifications,
+            // since transition animation can generate bunch
+            // of resize events
+            observable = observable.extend({
+                rateLimit: { 
+                    timeout: 100, 
+                    method: 'notifyWhenChangesStop'
+                }
+            });
+
+             new ResizeSensor(element, function() {
+                const offsetHeight = parseInt(element.offsetHeight);
+                observable(offsetHeight);
+            });
+        }
+    };
+
+    /**
+     * Detects weither CCS transition animation 
+     * is currently in progress on target element
+     * NOTE: detects only animation end event, since there is
+     * no animation start event supported by browsers now.
+     * Manually set observable value to 'true' when needed.
+     */
+    ko.bindingHandlers.animationInProgress = {
+        init(element, valueAccessor) {
+            let observable = valueAccessor();
+
+            if (!ko.isObservable(observable)) 
+                throw new Error('Invalid target observable');
+            
+            element.addEventListener('transitionend', function() {
+                observable(false);
+            });
         }
     };
 });

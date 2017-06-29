@@ -10,7 +10,8 @@ var require = {
         'unobtrusive-knockout': 'lib/vendor/jquery.unobtrusive-knockout',
         'Sortable': 'lib/vendor/Sortable',
         'co': 'lib/vendor/co',
-        'moment': 'lib/vendor/moment'
+        'moment': 'lib/vendor/moment',
+        'ResizeSensor': 'lib/vendor/ResizeSensor'
     },
     shim: {
         'jquery': {
