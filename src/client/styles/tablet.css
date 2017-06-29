@@ -193,7 +193,7 @@
         transition-timing-function: ease-out;
     }
     .task-properties.expanded {
-        max-height: 1000px;
+        max-height: 100000px;
     }
     
     .task-properties-project-name {
