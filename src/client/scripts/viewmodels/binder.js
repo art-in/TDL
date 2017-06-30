@@ -88,12 +88,12 @@ define(['jquery',
             $('.task-edit-cancel-button').dataBind({ click: 'task.toggleEditMode',
                                                      visible: 'task.inEditMode' });
             $('.task-properties').dataBind({ style: { "'background-color'": 'task.projectColor' },
-                                             css: {"'expanded'": 'task.expanded'},
                                              // observe properties block and not description block,
                                              // because resize sensor will not work inside contenteditable div
                                              contentFits: "task.fits",
                                              height: 'task.height',
-                                             animationInProgress: 'task.expandAnimationInProgress' });
+                                             animationInProgress: 'task.expandAnimationInProgress',
+                                             scrollHeightToMaxHeight: 'task.expanded' });
             $('.task-properties-project-name').dataBind({ visible: 'task.projectName',
                                                html: 'task.projectName' });
             $('.task-properties-description').dataBind({ editableHTML: 'task.description',

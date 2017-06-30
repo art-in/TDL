@@ -396,4 +396,32 @@ function (ko, helpers, Sortable, ResizeSensor) {
             });
         }
     };
+
+    /**
+     * Sets value of element scroll height
+     * (height of contents without overflow)
+     * to its max-height inline style property.
+     * 
+     * Note: useful for CSS transitions (expand/collapse).
+     * - '0px to 100%' will not be animated (fixed measures only)
+     * - '0px to 100000px' will kill animation timing (range too big)
+     * - CSS has no ability to set value of one property to another
+     * So solution is to set right max-height value with script.
+     */
+    ko.bindingHandlers.scrollHeightToMaxHeight = {
+        update(element, valueAccessor) {
+            const observable = valueAccessor();
+
+            if (!ko.isObservable(observable)) 
+                throw new Error('Invalid target observable');
+
+            const set = observable();
+
+            if (set) {
+                element.style.maxHeight = element.scrollHeight + 'px';
+            } else {
+                element.style.maxHeight = '';
+            }
+        }
+    };
 });

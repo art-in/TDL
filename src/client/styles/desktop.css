@@ -194,14 +194,10 @@
         overflow: hidden;
         position: relative;
         max-height: 55px;
-        transition: max-height 0.5s;
+        transition: max-height 0.3s;
         transition-timing-function: ease-out;
     }
 
-    .task-properties.expanded {
-        max-height: 100000px;
-    }
-    
     .task-properties-project-name {
         font-size: 12px;
         color: gray;
