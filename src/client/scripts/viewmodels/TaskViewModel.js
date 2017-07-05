@@ -153,8 +153,6 @@ define(['ko', 'moment', 'lib/messageBus'], function(ko, moment, messageBus) {
 
         if (this.inEditMode()) {
             this.expand();
-        } else {
-            this.collapse();
         }
     };
     
