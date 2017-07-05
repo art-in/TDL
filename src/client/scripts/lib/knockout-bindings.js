@@ -370,7 +370,7 @@ function (ko, helpers, Sortable, ResizeSensor) {
                 }
             });
 
-             new ResizeSensor(element, function() {
+            new ResizeSensor(element, function() {
                 const offsetHeight = parseInt(element.offsetHeight);
                 observable(offsetHeight);
             });
@@ -398,30 +398,57 @@ function (ko, helpers, Sortable, ResizeSensor) {
     };
 
     /**
-     * Sets value of element scroll height
-     * (height of contents without overflow)
-     * to its max-height inline style property.
+     * Expands element's height to fit its contents without oveflows.
      * 
-     * Note: useful for CSS transitions (expand/collapse).
-     * - '0px to 100%' will not be animated (fixed measures only)
+     * Sets value of element scroll height (contents height) 
+     * to its max-height inline.
+     * 
+     * Note: useful for CSS transition animations (expand/collapse).
+     * Why js and not css solution?
+     * Because there's no CSS solution.
      * - '0px to 100000px' will kill animation timing (range too big)
+     * - '0px to 100%' will depend on parent's height, not child contents
+     * - '0px to fit-content' wont animate
      * - CSS has no ability to set value of one property to another
+     *   (scrollHeight to maxHeight)
      * So solution is to set right max-height value with script.
      */
     ko.bindingHandlers.scrollHeightToMaxHeight = {
-        update(element, valueAccessor) {
+        init(element, valueAccessor) {
             const observable = valueAccessor();
+            const setMaxHeight = ko.bindingHandlers.scrollHeightToMaxHeight.setMaxHeight;
 
             if (!ko.isObservable(observable)) 
                 throw new Error('Invalid target observable');
+            
+            // set handlers to dynamically change element height
+            // in response to its contents height change
 
+            // content height can change because of parent block resize (from outside)
+            // eg. setting task edit mode will expand buttons block and
+            // and narrow task description block. which can change content
+            // height and lead to overflow
+            new ResizeSensor(element, function onResize() {
+                const set = observable();
+                setMaxHeight(element, set);
+            });
+
+            // content height can change because of content change (from inside)
+            // eg. when editing task description, description block contents
+            // can obviously change its height
+            new MutationObserver(function() {
+                const set = observable();
+                setMaxHeight(element, set);
+            }).observe(element, {childList: true, subtree: true, characterData: true});
+        },
+        update(element, valueAccessor) {
+            const observable = valueAccessor();
             const set = observable();
-
-            if (set) {
-                element.style.maxHeight = element.scrollHeight + 'px';
-            } else {
-                element.style.maxHeight = '';
-            }
+            const setMaxHeight = ko.bindingHandlers.scrollHeightToMaxHeight.setMaxHeight;
+            setMaxHeight(element, set);
+        },
+        setMaxHeight(element, set) {
+            element.style.maxHeight = set ? element.scrollHeight + 'px' : '';
         }
     };
 });
